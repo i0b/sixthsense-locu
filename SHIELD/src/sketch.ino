@@ -1,5 +1,20 @@
+#define __DEBUG_SOFTPWM__ 1
+
+#include <SoftPWM.h>
+
+SOFTPWM_DEFINE_CHANNEL( 0, DDRD, PORTD, PORTD4 );
+SOFTPWM_DEFINE_CHANNEL( 1, DDRD, PORTD, PORTD5 );
+SOFTPWM_DEFINE_CHANNEL( 2, DDRD, PORTD, PORTD6 );
+SOFTPWM_DEFINE_CHANNEL( 3, DDRD, PORTD, PORTD7 );
+
+SOFTPWM_DEFINE_OBJECT_WITH_BRIGHTNESS_LEVELS( 4, 100 );
+SOFTPWM_DEFINE_EXTERN_OBJECT_WITH_BRIGHTNESS_LEVELS( 4, 100);
+
+
+
 #include <SPI.h>
 #include "../lib/bluetooth/RBL_nRF8001.h"
+#include "../lib/softpwm/SoftPWM.h"
 
 int DELAY_ON;
 int DELAY_OFF;
@@ -17,6 +32,8 @@ byte PWM_B;
 byte DIR_A;
 byte DIR_B;
 
+byte VIBRATION_VAL;
+
 
 void off() {
   MODE = 'o';
@@ -31,8 +48,8 @@ void off() {
 
 void command(char c) {
     if (c == 'b') {
-    MODE = 'b';
-    Serial.write("set mode: heartbeat\n");
+      MODE = 'b';
+      Serial.write("set mode: heartbeat\n");
     }
     
     else if (c == 'h') {
@@ -42,7 +59,7 @@ void command(char c) {
       digitalWrite(DIR_A, HIGH);
       digitalWrite(DIR_B, HIGH);
       
-    Serial.write("H-bridge: heat\n");
+      Serial.write("H-bridge: heat\n");
     }
     
     else if (c == 'c') {
@@ -52,44 +69,82 @@ void command(char c) {
       digitalWrite(DIR_A, LOW);
       digitalWrite(DIR_B, LOW);
       
-    Serial.write("H-bridge: cool\n");
+      Serial.write("H-bridge: cool\n");
     }
     
     else if (c == 's') {
-    DELAY_ON = 30;
-    DELAY_OFF = 90;
-    DELAY_PAUSE = 900;
-    Serial.write("slow beat\n");
+      DELAY_ON = 30;
+      DELAY_OFF = 90;
+      DELAY_PAUSE = 900;
+      Serial.write("slow beat\n");
     } 
     else if (c == 'f') {
-    DELAY_ON = 30;
-    DELAY_OFF = 70;
-    DELAY_PAUSE = 700;
-    Serial.write("fast beat\n");
+      DELAY_ON = 30;
+      DELAY_OFF = 70;
+      DELAY_PAUSE = 700;
+      Serial.write("fast beat\n");
     }
+    else if (c == 'v') {
+      MODE = 'v';
+      Serial.write("set mode: vibration\n");
+    }
+
     else if (c == '1') {
-    OUTPIN[0]++;
-      OUTPIN[0] %= 2;
-    Serial.write("toggle output: 1\n");
+      //OUTPIN[0]++;
+      //  OUTPIN[0] %= 2;
+      //Serial.write("toggle output: 1\n");
+      VIBRATION_VAL = 1;
+      Serial.write("set vibration value: 1\n");
     }
     else if (c == '2') {
-    OUTPIN[1]++;
-      OUTPIN[1] %= 2;
-    Serial.write("toggle output: 2\n");
+    //    OUTPIN[1]++;
+    //      OUTPIN[1] %= 2;
+    //    Serial.write("toggle output: 2\n");
+      VIBRATION_VAL = 2;
+      Serial.write("set vibration value: 2\n");
     }
     else if (c == '3') {
-    OUTPIN[2]++;
-      OUTPIN[2] %= 2;
-    Serial.write("toggle output: 3\n");
+    //    OUTPIN[2]++;
+    //      OUTPIN[2] %= 2;
+    //    Serial.write("toggle output: 3\n");
+      VIBRATION_VAL = 3;
+      Serial.write("set vibration value: 3\n");
     }
     else if (c == '4') {
-    OUTPIN[3]++;
-      OUTPIN[3] %= 2;
-    Serial.write("toggle output: 4\n");
+      //    OUTPIN[3]++;
+      //      OUTPIN[3] %= 2;
+      //    Serial.write("toggle output: 4\n");
+      VIBRATION_VAL = 4;
+      Serial.write("set vibration value: 4\n");
     }
+    else if (c == '5') {
+      VIBRATION_VAL = 5;
+      Serial.write("set vibration value: 5\n");
+    }
+    else if (c == '6') {
+      VIBRATION_VAL = 6;
+      Serial.write("set vibration value: 6\n");
+    }
+    else if (c == '7') {
+      VIBRATION_VAL = 7;
+      Serial.write("set vibration value: 7\n");
+    }
+    else if (c == '8') {
+      VIBRATION_VAL = 8;
+      Serial.write("set vibration value: 8\n");
+    }
+    else if (c == '9') {
+      VIBRATION_VAL = 9;
+      Serial.write("set vibration value: 9\n");
+    }
+    else if (c == '0') {
+      VIBRATION_VAL = 0;
+      Serial.write("set vibration value: 0\n");
+    }
+
     else if (c == 'r') {
-    MODE = 'r';
-    Serial.write("set mode: rotate\n");
+      MODE = 'r';
+      Serial.write("set mode: rotate\n");
     }
     else if (c == 'd') {
       DIR++;
@@ -105,7 +160,8 @@ void command(char c) {
     Serial.write(buf);
     }
     else if (c == '-') {
-      ROTATION_ON_DELAY -= 20;
+      if ( ROTATION_ON_DELAY >= 20 )
+        ROTATION_ON_DELAY -= 20;
       
       char buf[50];
       snprintf(buf, sizeof(buf), "set speed to: %d\n", ROTATION_ON_DELAY);
@@ -171,6 +227,19 @@ void rotate() {
   }
 }
 
+void vibrate ()
+{
+  uint8_t val;
+
+  for (uint8_t i = 0;i < SoftPWM.size();++i)
+  {
+    val = SoftPWM.brightnessLevels()/10;
+
+    while (micros());
+    SoftPWM.set( i, val );
+  }
+}
+
 void setup()
 {
   // Default pins set to 9 and 8 for REQN and RDYN
@@ -214,15 +283,22 @@ void setup()
   pinMode(DIR_A, OUTPUT);
   pinMode(DIR_B, OUTPUT);
   
-  
+  /* begin with 60hz pwm frequency */
+  SoftPWM.begin( 60 );
+
+  /* print interrupt load for diagnostic purpose */
+  SoftPWM.printInterruptLoad();
+ 
+ 
   // set outputs off
   off();
   
   // init serial debug
   Serial.begin(57600);
+
 }
 
-
+/*
 void loop()
 {
   if (MODE == 'b')
@@ -231,6 +307,8 @@ void loop()
   else if (MODE == 'r')
     rotate();
     
+  else if (MODE == 'v')
+    vibrate();
   
   // Bluetooth
   // if new RX data available
@@ -243,6 +321,35 @@ void loop()
   }
   
   ble_do_events();
+}
+*/
+static volatile uint8_t v = 0;
+void loop()
+{
+  long nextMillis = 0;
+
+  for (uint8_t i = 0;i < SoftPWM.size();++i)
+  {
+    Serial.print( micros() );
+    Serial.print( " loop(): " );
+    Serial.print( i );
+    Serial.println();
+
+    unsigned long const WAIT = 1000000 / SoftPWM.brightnessLevels() / 2;
+    unsigned long nextMicros = 0;
+    for (int v = 0;v <= SoftPWM.brightnessLevels() - 1; ++v)
+    {
+      while (micros() < nextMicros);
+      nextMicros = micros() + WAIT;
+      SoftPWM.set( i, v );
+    }
+    for (int v = SoftPWM.brightnessLevels() - 1; v >= 0; --v)
+    {
+      while (micros() < nextMicros);
+      nextMicros = micros() + WAIT;
+      SoftPWM.set( i, v );
+    }
+  }
 }
 
 
