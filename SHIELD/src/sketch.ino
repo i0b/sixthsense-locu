@@ -1,20 +1,6 @@
-#define __DEBUG_SOFTPWM__ 1
-
-#include <SoftPWM.h>
-
-SOFTPWM_DEFINE_CHANNEL( 0, DDRD, PORTD, PORTD4 );
-SOFTPWM_DEFINE_CHANNEL( 1, DDRD, PORTD, PORTD5 );
-SOFTPWM_DEFINE_CHANNEL( 2, DDRD, PORTD, PORTD6 );
-SOFTPWM_DEFINE_CHANNEL( 3, DDRD, PORTD, PORTD7 );
-
-SOFTPWM_DEFINE_OBJECT_WITH_BRIGHTNESS_LEVELS( 4, 100 );
-SOFTPWM_DEFINE_EXTERN_OBJECT_WITH_BRIGHTNESS_LEVELS( 4, 100);
-
-
-
 #include <SPI.h>
+#include <SoftPWM.h>
 #include "../lib/bluetooth/RBL_nRF8001.h"
-#include "../lib/softpwm/SoftPWM.h"
 
 int DELAY_ON;
 int DELAY_OFF;
@@ -37,10 +23,10 @@ byte VIBRATION_VAL;
 
 void off() {
   MODE = 'o';
-  digitalWrite(4, LOW);
-  digitalWrite(5, LOW);
-  digitalWrite(6, LOW);
-  digitalWrite(7, LOW);
+  SoftPWMSetPercent(4, 0);
+  SoftPWMSetPercent(5, 0);
+  SoftPWMSetPercent(6, 0);
+  SoftPWMSetPercent(7, 0);
   
   analogWrite(PWM_A, 0);
   analogWrite(PWM_B, 0);
@@ -73,14 +59,10 @@ void command(char c) {
     }
     
     else if (c == 's') {
-      DELAY_ON = 30;
-      DELAY_OFF = 90;
       DELAY_PAUSE = 900;
       Serial.write("slow beat\n");
     } 
     else if (c == 'f') {
-      DELAY_ON = 30;
-      DELAY_OFF = 70;
       DELAY_PAUSE = 700;
       Serial.write("fast beat\n");
     }
@@ -167,6 +149,81 @@ void command(char c) {
       snprintf(buf, sizeof(buf), "set speed to: %d\n", ROTATION_ON_DELAY);
     Serial.write(buf);
     }
+    else if (c == '>') {
+      DELAY_PAUSE += 20;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+    else if (c == '<') {
+      if ( DELAY_PAUSE >= 20 )
+        DELAY_PAUSE -= 20;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+
+// BEGIN: hack for presentation
+    else if (c == 'A') {
+      if ( DELAY_PAUSE >= 20 )
+        DELAY_PAUSE -= 20;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+    else if (c == 'B') {
+      if ( DELAY_PAUSE >= 50 )
+        DELAY_PAUSE -= 50;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+    else if (c == 'C') {
+      if ( DELAY_PAUSE >= 100 )
+        DELAY_PAUSE -= 100;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+
+
+    else if (c == 'R') {
+      DELAY_PAUSE = 800;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+
+
+    else if (c == 'X') {
+      DELAY_PAUSE += 100;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+    else if (c == 'Y') {
+      DELAY_PAUSE += 50;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+    else if (c == 'Z') {
+      DELAY_PAUSE += 20;
+      
+      char buf[50];
+      snprintf(buf, sizeof(buf), "set interval to: %d\n", DELAY_PAUSE);
+    Serial.write(buf);
+    }
+// END: hack for presentation
+
     else if (c == 'o') {
       off();
   
@@ -176,29 +233,28 @@ void command(char c) {
 
 void heartbeat() {
   byte motor;
-  
+
   for ( motor = 0; motor < 4; motor++ )
-    if ( OUTPIN[motor] )
-      digitalWrite(motor+4, HIGH);
+    //if ( OUTPIN[motor] )
+      SoftPWMSetPercent(motor+4, VIBRATION_VAL*10);
   
   delay(DELAY_ON);
 
   for ( motor = 0; motor < 4; motor++ )
-    if ( OUTPIN[motor] )
-      digitalWrite(motor+4, LOW);
+    //if ( OUTPIN[motor] )
+      SoftPWMSetPercent(motor+4, 0);
       
   delay(DELAY_OFF);
-
+  
   for ( motor = 0; motor < 4; motor++ )
-    if ( OUTPIN[motor] )
-      digitalWrite(motor+4, HIGH);
+    //if ( OUTPIN[motor] )
+      SoftPWMSetPercent(motor+4, VIBRATION_VAL*10);
 
   delay(DELAY_ON);
       
   for ( motor = 0; motor < 4; motor++ )
-    if ( OUTPIN[motor] )
-      digitalWrite(motor+4, LOW);
-  
+    //if ( OUTPIN[motor] )
+      SoftPWMSetPercent(motor+4, 0);
   
   delay(DELAY_PAUSE);
 }
@@ -210,9 +266,9 @@ void rotate() {
   {
     for ( motor = 0; motor < 4; motor++ )
     {
-      digitalWrite(motor+4, HIGH);
+      SoftPWMSetPercent(motor+4, VIBRATION_VAL*10);
       delay(ROTATION_ON_DELAY);
-      digitalWrite(motor+4, LOW);
+      SoftPWMSetPercent(motor+4, 0);
     }
   }
   
@@ -220,24 +276,19 @@ void rotate() {
   {
     for ( motor = 0; motor < 4; motor++ )
     {
-      digitalWrite(7-motor, HIGH);
+      SoftPWMSetPercent(7-motor, VIBRATION_VAL*10);
       delay(ROTATION_ON_DELAY);
-      digitalWrite(7-motor, LOW);
+      SoftPWMSetPercent(7-motor, 0);
     }
   }
 }
 
 void vibrate ()
 {
-  uint8_t val;
+  byte motor;
 
-  for (uint8_t i = 0;i < SoftPWM.size();++i)
-  {
-    val = SoftPWM.brightnessLevels()/10;
-
-    while (micros());
-    SoftPWM.set( i, val );
-  }
+  for ( motor = 0; motor < 4; motor++ )
+    SoftPWMSetPercent(motor+4, VIBRATION_VAL*10);
 }
 
 void setup()
@@ -254,10 +305,15 @@ void setup()
   
   
   // init darlington array
-  pinMode(4, OUTPUT);
-  pinMode(5, OUTPUT);
-  pinMode(6, OUTPUT);
-  pinMode(7, OUTPUT);
+//  pinMode(4, OUTPUT);
+//  pinMode(5, OUTPUT);
+//  pinMode(6, OUTPUT);
+//  pinMode(7, OUTPUT);
+
+  SoftPWMSet(4, 0);
+  SoftPWMSet(5, 0);
+  SoftPWMSet(6, 0);
+  SoftPWMSet(7, 0);
   
   byte motor;
   for ( motor = 0; motor < 4; motor++ )
@@ -268,9 +324,9 @@ void setup()
   ROTATION_ON_DELAY = 100;
   
   // init heartbeat values
-  DELAY_ON = 0;
-  DELAY_OFF = 0;
-  DELAY_PAUSE = 1000;
+  DELAY_ON = 100;
+  DELAY_OFF = 70;
+  DELAY_PAUSE = 800;
   
   // init H-bridge
   PWM_A =  3;
@@ -282,23 +338,17 @@ void setup()
   pinMode(PWM_B, OUTPUT);
   pinMode(DIR_A, OUTPUT);
   pinMode(DIR_B, OUTPUT);
-  
-  /* begin with 60hz pwm frequency */
-  SoftPWM.begin( 60 );
 
-  /* print interrupt load for diagnostic purpose */
-  SoftPWM.printInterruptLoad();
- 
+  // init software pwm module
+  SoftPWMBegin();
  
   // set outputs off
   off();
   
   // init serial debug
   Serial.begin(57600);
-
 }
 
-/*
 void loop()
 {
   if (MODE == 'b')
@@ -317,41 +367,15 @@ void loop()
     while  ( ble_available() ) {
       char c = (char)ble_read();
       command(c);
+    
+      //char buf[50];
+      //snprintf(buf, sizeof(buf), "Received command: %c\n", c);
+      //Serial.write(buf);
     }
   }
   
   ble_do_events();
 }
-*/
-static volatile uint8_t v = 0;
-void loop()
-{
-  long nextMillis = 0;
-
-  for (uint8_t i = 0;i < SoftPWM.size();++i)
-  {
-    Serial.print( micros() );
-    Serial.print( " loop(): " );
-    Serial.print( i );
-    Serial.println();
-
-    unsigned long const WAIT = 1000000 / SoftPWM.brightnessLevels() / 2;
-    unsigned long nextMicros = 0;
-    for (int v = 0;v <= SoftPWM.brightnessLevels() - 1; ++v)
-    {
-      while (micros() < nextMicros);
-      nextMicros = micros() + WAIT;
-      SoftPWM.set( i, v );
-    }
-    for (int v = SoftPWM.brightnessLevels() - 1; v >= 0; --v)
-    {
-      while (micros() < nextMicros);
-      nextMicros = micros() + WAIT;
-      SoftPWM.set( i, v );
-    }
-  }
-}
-
 
 void serialEvent() {
   while (Serial.available()) {
