@@ -1,12 +1,14 @@
 #include "six-execute.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <SPI.h>
 
 #define MAJOR 0
 #define MINOR 1
 
-char serial_buf[50];
+char serial_buf[80];
 
 char* parse_next ( char* packet_segment, size_t* segment_len  )
 {
@@ -22,7 +24,7 @@ char* parse_next ( char* packet_segment, size_t* segment_len  )
 
     *space = '\0';
     snprintf( serial_buf, sizeof(serial_buf), "read: %s\n", packet_segment, *segment_len );
-    //Serial.write( serial_buf );
+    Serial.write( serial_buf );
 
     return space + 1;
 }
@@ -100,27 +102,11 @@ int parse_command ( char* raw_packet, size_t packet_len, environment_t* env )
     version_match_pos = strstr ( raw_packet, version );
   
   snprintf( serial_buf, sizeof(serial_buf), "received version: %s, internal version: %s\n", raw_packet, version );
-  //Serial.write( serial_buf );
+  Serial.write( serial_buf );
 
   if ( version_match_pos != raw_packet )
     return -1;
  
   return 0;
 }
-/*
-int create_request_packet ( six_packet_t* packet, byte min, byte maj, byte uuid, byte parameter_no, int val ) { return 0; }
-int create_reply_packet ( six_packet_t* packet, byte min, byte maj, unsigned int status, char* body, size_t body_len ) { return 0; }
 
-
-int send_packet ( six_packet_t* packet )
-{
-  char header[50];
-  snprintf( header, sizeof(header), "SIX\/%d.%d %d\r\n%s", packet->MAJOR, packet->MINOR );
-  //Serial.write( header );
-
-  //Serial.write( packet->body );
-
-  return 0; 
-}
-
-*/
