@@ -1,5 +1,6 @@
 #include <SPI.h>
-#include "../lib/six.h"
+//#include "../lib/six/six.h"
+#include "six/six.h"
 #include "../lib/bluetooth/RBL_nRF8001.h"
 
 void setup()
@@ -9,6 +10,9 @@ void setup()
   
   // init serial debug
   Serial.begin(57600);
+
+  environment_t env;
+  parse_command ( "GETV SIX/0.1", (size_t)13, &env );
 }
 
 

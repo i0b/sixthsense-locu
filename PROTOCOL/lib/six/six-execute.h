@@ -1,11 +1,11 @@
 #ifndef SIX_EXECUTE_H
 #define SIX_EXECUTE_H
 
-typedef struct environment
+typedef struct
 {
-  enum MODE {HEARTBEAT, ROTATION};
+  enum MODE {FADE, HEARTBEAT, ROTATION};
   int HEARTBEAT_FREQ;
   int ROTATION_SPEED;
-};
+} environment_t;
 
 #endif
