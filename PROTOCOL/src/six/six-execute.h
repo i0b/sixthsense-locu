@@ -3,7 +3,9 @@
 
 typedef struct
 {
-  enum MODE {FADE, HEARTBEAT, ROTATION};
+  unsigned int MAJOR;
+  unsigned int MINOR;
+  enum { FADE, HEARTBEAT, ROTATION } MODE;
   int HEARTBEAT_FREQ;
   int ROTATION_SPEED;
 } environment_t;
