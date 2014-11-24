@@ -1,38 +1,28 @@
-sixthsense-locu
-===============
+# SixthSense: lower-order-control-unit repository
 
-SixthSense: lower-order-control-unit repository
-
-----------
-
-BUILD
+### BUILD
   ino build
 
-UPLOAD
+### UPLOAD
   ino upload
 
-SERIAL
+### SERIAL
   ino serial
 
-----------
 
-3rd party software used:
-  ino
-    source: http://inotool.org
-    license: MIT
+## 3rd party software used
+  ino      source:  http://inotool.org
+           license: MIT
 
-3rd party libraries used:
 
-  Bluetooth
-  ---------
+## 3rd party libraries used
 
-  RedBearLab/nRF8001
-    version date: 2014-05-09
-    source: https://github.com/RedBearLab/nRF8001
+###  Bluetooth
 
-  ble-sdk-arduino
-    version: 0.9.0 beta
-    source: https://github.com/NordicSemiconductor/ble-sdk-arduinoo
+  RedBearLab/nRF8001    version date:  2014-05-09
+                        source:        https://github.com/RedBearLab/nRF8001
 
-  see also:
-    https://github.com/RedBearLab/Release
+  ble-sdk-arduino       version:       0.9.0 beta
+                        source:        https://github.com/NordicSemiconductor/ble-sdk-arduinoo
+
+  see also: https://github.com/RedBearLab/Release
