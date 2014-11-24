@@ -1,24 +1,25 @@
-# SixthSense: lower-order-control-unit repository
+# SixthSense: lower-order-control-unit
 
-### BUILD
+## Commands
+
+### build project
     ino build
 
-### UPLOAD
+### upload to device
     ino upload
 
-### SERIAL
+### connect to device
     ino serial
 
 
 ## 3rd party software used
-    ino      source:  http://inotool.org
-             license: MIT
+    ino    source:  http://inotool.org
+           license: MIT
 
 
 ## 3rd party libraries used
 
-###  Bluetooth
-
+### Bluetooth
     RedBearLab/nRF8001    version date:  2014-05-09
                           source:        https://github.com/RedBearLab/nRF8001
 
@@ -26,3 +27,7 @@
                           source:        https://github.com/NordicSemiconductor/ble-sdk-arduinoo
 
     see also: https://github.com/RedBearLab/Release
+
+### SoftPWM
+    SoftPWM Library        version: 0005
+                           source: https://code.google.com/p/rogue-code/wiki/SoftPWMLibraryDocumentation
