@@ -306,6 +306,13 @@ void loop()
       if ( c == '\n' ) {
         if ( NEWLINE ) {
           if ( append( '\0' ) == 0 ) {
+            NEWLINE = 0;
+            PACKET_LEN = 0;
+            
+            char buf[50];
+            snprintf(buf, sizeof(buf), "Received package: %s\r\n", RAW_PACKET);
+            Serial.write(buf);
+
             if ( parse_command ( RAW_PACKET, &PACKET_LEN, &REQ_PACKET ) == 0 ) {
               Serial.println("VALIDE package received");
               if ( eval_command ( &REQ_PACKET, &ENV ) == 0 ) {

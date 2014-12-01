@@ -1,6 +1,6 @@
-# SixthSense: lower-order-control-unit
+# SixthSense:
+# lower-order-control-unit
 
-## Commands
 
 ### build project
     ino build

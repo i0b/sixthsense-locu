@@ -40,7 +40,7 @@ int parse_command ( char* raw_packet, size_t* packet_len, six_request_packet_t* 
     return -1;
 
   // commands all consist of 4 characters
-  if ( command_len != 4 )
+  if ( command_len != 2 )
     return -1;
 
   // evaluate command string
@@ -64,13 +64,13 @@ int parse_command ( char* raw_packet, size_t* packet_len, six_request_packet_t* 
     uint8_t uuid_int = (uint8_t) atoi(uuid);
     packet->COMMAND.UUID = uuid_int;
 
-    if ( strncasecmp ( "GETV", command, command_len ) == 0 ) {
+    if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
       packet->COMMAND.INSTRUCTION = command_t::GETV;
     }
-    else if ( strncasecmp ( "GETM", command, command_len ) == 0 ) {
+    else if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
       packet->COMMAND.INSTRUCTION = command_t::GETM;
     }
-    else if ( strncasecmp ( "GETP", command, command_len ) == 0 ) {
+    else if ( strncasecmp ( "GP", command, command_len ) == 0 ) {
       packet->COMMAND.INSTRUCTION = command_t::GETP;
     }
 
@@ -89,13 +89,13 @@ int parse_command ( char* raw_packet, size_t* packet_len, six_request_packet_t* 
       packet->COMMAND.VALUE = value;
       packet->COMMAND.VALUE_LEN = value_len;
 
-      if ( strncasecmp ( "SETV", command, command_len ) == 0 ) {
+      if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
         packet->COMMAND.INSTRUCTION = command_t::SETV;
       }
-      else if ( strncasecmp ( "SETM", command, command_len ) == 0 ) {
+      else if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
         packet->COMMAND.INSTRUCTION = command_t::SETM;
       }
-      else if ( strncasecmp ( "SETP", command, command_len ) == 0 ) {
+      else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {
         packet->COMMAND.INSTRUCTION = command_t::SETP;
       }
     }
@@ -168,3 +168,12 @@ int eval_command ( six_request_packet_t* packet, environment_t* env )
   return -1;
 }
 
+int create_reply_packet ( six_response_packet_t* packet, uint8_t min, uint8_t maj, uint8_t status, char* body, size_t body_len )
+{
+  return 0;
+}
+
+int send_reqply_packet ( six_response_packet_t* packet )
+{
+  return 0;
+}
