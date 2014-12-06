@@ -17,15 +17,34 @@ namespace execute {
       //executor.actuator = &(acutators [ actuator ]);
       executor [ uuid ].actuator = actuator::actuators [ uuid ];
 
+      Serial.print ( "Executor " );
+      Serial.print ( uuid );
+      Serial.print ( ": initializing..." );
+
+      Serial.print ( "  Setting pins [ " );
+
       for ( uint8_t pin = 0; pin < actuator::actuators [ uuid ].number_pins; pin++ ) {
         pinMode ( actuator::actuators [ uuid ].pins [ pin ], OUTPUT );
-        
+
+        Serial.print ( pin );
+        Serial.print ( " " );
       }
 
-      executor [ uuid ].function = &off;
+      Serial.print ( "]" );
+
+      //executor [ uuid ].function = &off;
     }
 
-    // TODO setup interrupt service to timer_isr with interval: 10 ms
+    noInterrupts();           // disable all interrupts
+    TCCR1A = 0;
+    TCCR1B = 0;
+    TCNT1  = 0;
+
+    OCR1A = 625;              // compare match register 16MHz/256/100Hz
+    TCCR1B |= (1 << WGM12);   // CTC mode
+    TCCR1B |= (1 << CS12);    // 256 prescaler 
+    TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
+    interrupts();             // enable all interrupts
 
     return 0;
   }

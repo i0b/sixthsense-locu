@@ -35,6 +35,7 @@ namespace execute {
 
   // helper function
   int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
+  void timer_isr ();
 }
 
 #endif
