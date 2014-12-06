@@ -1,5 +1,7 @@
 #include <SPI.h>
 #include <six.h>
+#include "../lib/six/actuator.h"
+#include "../lib/six/execute.h"
 #include "../lib/bluetooth/RBL_nRF8001.h"
 
 #define VIBRATION_RING_UUID 1
@@ -7,10 +9,10 @@
 char RAW_PACKET[100];
 size_t PACKET_LEN;
 bool NEWLINE;
-six_request_packet_t REQ_PACKET;
+six::request_packet_t REQ_PACKET;
 
 void off() {
-  for ( uint8_t uuid = 0; uuid < actuator::NUM_ACTUATORS; uuid++ ) {
+  for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
     execute::set_mode ( uuid, execute::OFF );
   }
 }
@@ -99,7 +101,7 @@ void setup () {
   // init. and start BLE library.
   ble_begin ();
 
-  executor::init_executor();
+  execute::init_executor();
   
  
   // set environment 
@@ -142,9 +144,9 @@ void loop()
             Serial.print ( "Received package: " );
             Serial.println ( RAW_PACKET );
 
-            if ( parse_command ( RAW_PACKET, &PACKET_LEN, &REQ_PACKET ) == 0 ) {
+            if ( six::parse_command ( RAW_PACKET, &PACKET_LEN, &REQ_PACKET ) == 0 ) {
               Serial.println("VALIDE package received");
-              if ( eval_command ( &REQ_PACKET ) == 0 ) {
+              if ( six::eval_command ( &REQ_PACKET ) == 0 ) {
                 Serial.println("OK new settings applied");
               }
               else {

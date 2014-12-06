@@ -3,9 +3,12 @@
 
 #define MAX_VAL_PINS 8
 
+#include <stddef.h>
+#include <stdint.h>
+
 namespace actuator {
 
-  typedef enum { VIBRATION, VIBRATION-RING, ELECTRICAL, TEMPERATURE } actuator_type;
+  typedef enum { VIBRATION_ARRAY, VIBRATION_RING, ELECTRICAL, TEMPERATURE } actuator_type;
 
   typedef struct {
     uint8_t number_pins;
@@ -13,7 +16,12 @@ namespace actuator {
     actuator_type type;
   } actuator_t;
 
-  uint8_t NUMBER_ACTUATORS
+
+  // actuator array
+  extern const actuator_t actuators[];
+
+  // total number of actuators
+  extern const uint8_t NUMBER_ACTUATORS;
 
 }
 
