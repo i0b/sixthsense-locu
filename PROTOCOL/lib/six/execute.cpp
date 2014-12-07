@@ -14,8 +14,7 @@ namespace execute {
 
   int init_executor () {
     for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
-      //executor.actuator = &(acutators [ actuator ]);
-      executor [ uuid ].actuator = actuator::actuators [ uuid ];
+      executor [ uuid ].actuator = &(actuator::actuators [ uuid ]);
 
       Serial.print ( "Executor " );
       Serial.print ( uuid );
@@ -23,16 +22,16 @@ namespace execute {
 
       Serial.print ( "  Setting pins [ " );
 
-      for ( uint8_t pin = 0; pin < actuator::actuators [ uuid ].number_pins; pin++ ) {
+      for ( int8_t pin = 0; pin < actuator::actuators [ uuid ].number_pins; pin++ ) {
         pinMode ( actuator::actuators [ uuid ].pins [ pin ], OUTPUT );
 
-        Serial.print ( pin );
+        Serial.print ( actuator::actuators [ uuid ].pins [ pin ], DEC );
         Serial.print ( " " );
       }
 
-      Serial.print ( "]" );
+      Serial.println ( "]" );
 
-      //executor [ uuid ].function = &off;
+      executor [ uuid ].function = &off;
     }
 
     noInterrupts();           // disable all interrupts
@@ -46,6 +45,7 @@ namespace execute {
     TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
     interrupts();             // enable all interrupts
 
+    Serial.println ( "six initialized." );
     return 0;
   }
 
@@ -53,7 +53,7 @@ namespace execute {
     TIMER_VALUE++;
 
     for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
-      executor [ uuid ].function ( TIMER_VALUE, executor [ uuid ].actuator, executor [ uuid ].parameter );
+      executor [ uuid ].function ( TIMER_VALUE, *executor [ uuid ].actuator, executor [ uuid ].parameter );
     }
   }
 
@@ -80,9 +80,9 @@ namespace execute {
       case execute::VIBRATION :
         executor [ uuid ].function = &vibrate; 
 
-        if ( executor [ uuid ].actuator.type == actuator::VIBRATION_RING ) {
+        if ( executor [ uuid ].actuator->type == actuator::VIBRATION_RING ) {
           // enable all vibrators
-          set_enabled_vibrators ( executor [ uuid ].actuator, 0xFF );
+          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
         }
         
         break;
@@ -90,9 +90,9 @@ namespace execute {
       case execute::HEARTBEAT :
         executor [ uuid ].function = &heartbeat;
         
-        if ( executor [ uuid ].actuator.type == actuator::VIBRATION_RING ) {
+        if ( executor [ uuid ].actuator->type == actuator::VIBRATION_RING ) {
           // enable all vibrators
-          set_enabled_vibrators ( executor [ uuid ].actuator, 0xFF );
+          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
         }
         
         break;
@@ -100,7 +100,7 @@ namespace execute {
       case execute::ROTATION :
         executor [ uuid ].function = &rotate;
         // only one motor vibrating at the same time
-        set_enabled_vibrators ( executor [ uuid ].actuator, 0x01 );
+        set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
 
         break;
     }
@@ -232,16 +232,34 @@ namespace execute {
       digitalWrite ( actuator.pins [ 3 ], LOW );
     }
 
-    else {
-      return;
+    else if ( actuator.type == actuator::VIBRATION_ARRAY ) {
+      uint8_t active_pin = timer_value % actuator.number_pins;
+      uint8_t inactive_pin = (active_pin - 1) % actuator.number_pins; 
+
+      digitalWrite ( actuator.pins [ inactive_pin ], LOW  );
+      digitalWrite ( actuator.pins [   active_pin ], HIGH );
     }
-    
   }
 
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
 
     if ( actuator.type == actuator::VIBRATION_RING ) {
       analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+    }
+
+    if ( actuator.type == actuator::VIBRATION_ARRAY ) {
+
+      byte value;
+      if ( parameter [ 0 ] == 0 ) {
+        value = 0;
+      }
+      else {
+        value = 1;
+      }
+
+      for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+        digitalWrite ( actuator.pins [ pin ], value );
+      }
     }
 
   }

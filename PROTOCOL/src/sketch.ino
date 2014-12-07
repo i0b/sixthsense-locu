@@ -4,7 +4,8 @@
 #include "../lib/six/execute.h"
 #include "../lib/bluetooth/RBL_nRF8001.h"
 
-#define VIBRATION_RING_UUID 1
+#define VIBRATION_ARRAY_UUID 0
+#define VIBRATION_RING_UUID  2
 
 char RAW_PACKET[100];
 size_t PACKET_LEN;
@@ -20,32 +21,32 @@ void off() {
 void command(char c) {
 // HACK
     if (c == 'b') {
-      execute::set_mode ( VIBRATION_RING_UUID, execute::HEARTBEAT );
+      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::HEARTBEAT );
       Serial.println("set mode: heartbeat");
     }
     else if (c == 's') {
-      execute::set_parameter ( VIBRATION_RING_UUID, 800 );
+      execute::set_parameter ( VIBRATION_ARRAY_UUID, 800 );
       Serial.println("slow beat");
     } 
     else if (c == 'f') {
-      execute::set_parameter ( VIBRATION_RING_UUID, 600 );
+      execute::set_parameter ( VIBRATION_ARRAY_UUID, 600 );
       Serial.println("fast beat");
     }
     else if (c == 'v') {
-      execute::set_mode ( VIBRATION_RING_UUID, execute::VIBRATION );
+      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::VIBRATION );
       Serial.println("set mode: vibration");
     }
     else if (c == 'r') {
-      execute::set_mode ( VIBRATION_RING_UUID, execute::ROTATION );
+      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::ROTATION );
       Serial.println("set mode: rotate");
     }
     else if (c == 'o') {
-      execute::set_mode ( VIBRATION_RING_UUID, execute::OFF );
+      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::OFF );
       Serial.println("off");
     }
     else if ( c >= '0' && c <= '9' ) {
       byte value = map ( c, '0', '9', 0, 255 );
-      //execute::set_intensity ( VIBRATION_RING_UUID, value );
+      execute::set_intensity ( VIBRATION_ARRAY_UUID, value );
       Serial.print("set vibration value: ");
       Serial.println(value);
     }
@@ -75,9 +76,7 @@ void setup () {
 }
 
 ISR(TIMER1_COMPA_vect) {         // timer compare interrupt service routine
-/*
   execute::timer_isr();
-*/
 }
 
 // needed for creating RAW_PACKET

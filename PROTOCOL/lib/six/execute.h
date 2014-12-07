@@ -10,16 +10,20 @@
 #include "actuator.h"
 
 namespace execute {
+
   typedef enum { OFF, VIBRATION, HEARTBEAT, ROTATION } execution_mode;
   
   typedef struct {
-    actuator::actuator_t& actuator;
+    actuator::actuator_t* actuator;
 
     void (*function) ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
     // first parameter:  intensity
     // second parameter: function specific parameter
     int parameter[2];
   } function_t;
+
+
+
 
   int init_executor ();
   int set_mode ( uint8_t uuid, execute::execution_mode mode );
@@ -36,6 +40,7 @@ namespace execute {
   // helper function
   int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
   void timer_isr ();
+
 }
 
 #endif

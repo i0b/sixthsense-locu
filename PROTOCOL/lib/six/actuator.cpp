@@ -2,7 +2,16 @@
 
 namespace actuator {
 
-  const actuator_t actuators[] = {
+  actuator_t actuators[] = {
+    {
+      // # pins
+      8,
+      // pins: vibration motor 1 - 8
+      { 30, 31, 32, 33, 34, 35, 36, 37 },
+      // type
+      VIBRATION_ARRAY
+    },
+    
     {
       // # pins
       8,
@@ -32,6 +41,6 @@ namespace actuator {
   };
 
   // calculate the total number of actuators
-  const uint8_t NUMBER_ACTUATORS = sizeof ( actuators ) / sizeof ( actuator_t );
+  uint8_t NUMBER_ACTUATORS = sizeof ( actuators ) / sizeof ( actuator_t );
 
 }

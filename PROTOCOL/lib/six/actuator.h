@@ -18,10 +18,10 @@ namespace actuator {
 
 
   // actuator array
-  extern const actuator_t actuators[];
+  extern actuator_t actuators[];
 
   // total number of actuators
-  extern const uint8_t NUMBER_ACTUATORS;
+  extern uint8_t NUMBER_ACTUATORS;
 
 }
 
