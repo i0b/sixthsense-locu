@@ -1,9 +1,17 @@
 #include "actuator.h"
 
 namespace actuator {
+  
+  const char* TYPE_STRING[] = { FOREACH_TYPE ( GENERATE_STRING ) };
 
-  actuator_t actuators[] = {
+  // PLEASE UPDATE THE NUMBER_ACTUATORS CONSTANT
+  // IN ACTUATOR_H BEFORE ADDING A NEW ACTUATOR
+  //
+
+  actuator_t actuators [ NUMBER_ACTUATORS ] = {
     {
+      // description
+      "8-bit controllable interface: left arm vibrator",
       // # pins
       8,
       // pins: vibration motor 1 - 8
@@ -13,6 +21,8 @@ namespace actuator {
     },
     
     {
+      // description
+      "Darlington array: right arm vibrator band",
       // # pins
       8,
       // pins: vibration motor 1 - 8
@@ -22,6 +32,8 @@ namespace actuator {
     },
 
     {
+      // description
+      "Shift + Darlington: currently not working!",
       // # pins
       4,
       // pins: PWM, DATA, CLOCK, LATCH ENABLE
@@ -31,6 +43,8 @@ namespace actuator {
     },
 
     {
+      // description
+      "H-bridge: controlling peltier on left arm's first elements",
       // # pins
       2,
       // pins: PWM, DIRECTION
@@ -41,6 +55,6 @@ namespace actuator {
   };
 
   // calculate the total number of actuators
-  uint8_t NUMBER_ACTUATORS = sizeof ( actuators ) / sizeof ( actuator_t );
+  // const uint8_t NUMBER_ACTUATORS = sizeof ( actuators ) / sizeof ( actuator_t );
 
 }

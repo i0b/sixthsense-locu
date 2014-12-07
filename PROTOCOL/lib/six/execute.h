@@ -23,6 +23,8 @@ namespace execute {
   } function_t;
 
 
+  extern function_t executor[];
+
 
 
   int init_executor ();

@@ -4,16 +4,15 @@
 #include "execute.h"
 
 namespace execute {
-  //extern const uint8_t actuator::NUMBER_ACTUATORS;
+  //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
 
   uint32_t TIMER_VALUE;
   uint8_t  ROTATION_ACTIVE_VIBRATOR;
 
-  //function_t executor [ actuator::NUMBER_ACTUATORS ];
-  function_t executor [ 3 ];
+  function_t executor [ NUMBER_ACTUATORS ];
 
   int init_executor () {
-    for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
+    for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
       executor [ uuid ].actuator = &(actuator::actuators [ uuid ]);
 
       Serial.print ( "Executor " );
@@ -34,6 +33,9 @@ namespace execute {
       executor [ uuid ].function = &off;
     }
 
+    // Define Timer Interrupt / Timer1 to CTC mode
+    //  finally it will call the interrupt function every 10 ms
+    //
     noInterrupts();           // disable all interrupts
     TCCR1A = 0;
     TCCR1B = 0;
@@ -45,14 +47,14 @@ namespace execute {
     TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
     interrupts();             // enable all interrupts
 
-    Serial.println ( "six initialized." );
+    Serial.println ( "six initialized.\r\n" );
     return 0;
   }
 
   void timer_isr () {
     TIMER_VALUE++;
 
-    for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
+    for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
       executor [ uuid ].function ( TIMER_VALUE, *executor [ uuid ].actuator, executor [ uuid ].parameter );
     }
   }

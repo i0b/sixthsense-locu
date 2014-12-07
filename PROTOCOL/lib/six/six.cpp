@@ -1,5 +1,8 @@
 #include "six.h"
+#include "actuator.h"
 #include "execute.h"
+#include "status.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -86,14 +89,14 @@ namespace six {
 
       packet->COMMAND.UUID = (uint8_t) uuid_int;
 
-      if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
-        packet->COMMAND.INSTRUCTION = command_t::GETV;
+      if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
+        packet->COMMAND.INSTRUCTION = command_t::GET_MODE;
       }
-      else if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
-        packet->COMMAND.INSTRUCTION = command_t::GETM;
+      else if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
+        packet->COMMAND.INSTRUCTION = command_t::GET_INTENSITY;
       }
       else if ( strncasecmp ( "GP", command, command_len ) == 0 ) {
-        packet->COMMAND.INSTRUCTION = command_t::GETP;
+        packet->COMMAND.INSTRUCTION = command_t::GET_PARAMETER;
       }
 
       else
@@ -113,14 +116,14 @@ namespace six {
         packet->COMMAND.VALUE = value;
         packet->COMMAND.VALUE_LEN = value_len;
 
-        if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
-          packet->COMMAND.INSTRUCTION = command_t::SETV;
+        if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
+          packet->COMMAND.INSTRUCTION = command_t::SET_MODE;
         }
-        else if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
-          packet->COMMAND.INSTRUCTION = command_t::SETM;
+        else if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
+          packet->COMMAND.INSTRUCTION = command_t::SET_INTENSITY;
         }
         else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {
-          packet->COMMAND.INSTRUCTION = command_t::SETP;
+          packet->COMMAND.INSTRUCTION = command_t::SET_PARAMETER;
         }
       }
     }
@@ -174,7 +177,7 @@ namespace six {
 
     char serial_buf[80];
 
-    snprintf( serial_buf, sizeof ( serial_buf ), "version: %d.%d\r\n", packet->VERSION_MAJOR, packet->VERSION_MINOR );
+    snprintf( serial_buf, sizeof ( serial_buf ), "version: %d.%d\r\n\r\n", packet->VERSION_MAJOR, packet->VERSION_MINOR );
     Serial.print( serial_buf );
     
     if ( *packet_len != 0 ) {
@@ -185,58 +188,208 @@ namespace six {
     return 0;
   }
 
-  int eval_command ( request_packet_t* packet ) {
+  int eval_command ( request_packet_t* request, response_packet_t* response ) {
 
-    if ( six::VERSION_MAJOR != packet->VERSION_MAJOR || six::VERSION_MINOR != packet->VERSION_MINOR ) {
+    if ( six::VERSION_MAJOR != request->VERSION_MAJOR || six::VERSION_MINOR != request->VERSION_MINOR ) {
        return -1;
     }
 
-    if ( packet->COMMAND.INSTRUCTION == command_t::SETM ) {
+
+
+    // ---------------- LIST ACTUATORS --------------------------
+    if ( request->COMMAND.INSTRUCTION == command_t::LIST ) {
+      /*
+        char* description;
+        uint8_t number_pins;
+        uint8_t pins [ MAX_VAL_PINS ];
+        actuator_type type;
+      */
+
+      strcpy ( response->BODY, "" );
+      response->BODY_LEN = 0;
+
+      for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
+        response->BODY_LEN += snprintf ( response->BODY + strlen ( response->BODY ), 
+            REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+            
+            "uuid: %d\r\n"
+            "description: %s\r\n"
+            "number pins: %d\r\n"
+            "pins: [",
+            uuid,
+            execute::executor [ uuid ].actuator->description,
+            execute::executor [ uuid ].actuator->number_pins
+          );
+
+        
+        for ( uint8_t pin = 0; pin < execute::executor [ uuid ].actuator->number_pins; pin++ ) {
+          response->BODY_LEN += snprintf ( response->BODY + strlen ( response->BODY ), 
+              REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+              " %d",
+              execute::executor [ uuid ].actuator->pins [ pin ]
+            );
+        }
+        
+        response->BODY_LEN += snprintf ( response->BODY + strlen ( response->BODY ), 
+            REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+            
+            "]\r\n"
+            "actuator type: %s\r\n"
+            "\r\n",
+            actuator::TYPE_STRING [ execute::executor [ uuid ].actuator->type ]
+          );
+      }
+
+      response->BODY_LEN += snprintf ( response->BODY + strlen ( response->BODY ), 
+          REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+          "\r\n" );
+
+      response->BODY_LEN = strlen ( response->BODY );
+
+
+      response->status = status::status_description [ status::SIX_OK ];
+
+      // TODO find the right place for this
+      if ( response->status.status != status::SIX_OK ) {
+        return -1;
+      }
+      
+      response->VERSION_MAJOR = six::VERSION_MAJOR;
+      response->VERSION_MINOR = six::VERSION_MINOR;
+
+      // TODO find the right place for this
+      send_response_packet ( response );
+
+    }
+
+
+    // ---------------- GET INTENSITY ---------------------------
+    else if ( request->COMMAND.INSTRUCTION == command_t::GET_INTENSITY ) {
+      strcpy ( response->BODY, "" );
+      response->BODY_LEN = 0;
+
+      response->BODY_LEN += snprintf ( 
+          response->BODY + strlen ( response->BODY ), 
+          REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+          "intensity: %d\r\n\r\n",
+          execute::executor [ request->COMMAND.UUID ].parameter [ 0 ]
+        );
+        
+
+      response->BODY_LEN = strlen ( response->BODY );
+
+      response->status = status::status_description [ status::SIX_OK ];
+
+      // TODO find the right place for this
+      if ( response->status.status != status::SIX_OK ) {
+        return -1;
+      }
+      
+      response->VERSION_MAJOR = six::VERSION_MAJOR;
+      response->VERSION_MINOR = six::VERSION_MINOR;
+
+      // TODO find the right place for this
+      send_response_packet ( response );
+    }
+
+    // TODO NOT COPY-PASTE!!
+    // ---------------- GET PARAMETER ---------------------------
+    else if ( request->COMMAND.INSTRUCTION == command_t::GET_PARAMETER ) {
+      strcpy ( response->BODY, "" );
+      response->BODY_LEN = 0;
+
+      response->BODY_LEN += snprintf ( 
+          response->BODY + strlen ( response->BODY ), 
+          REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
+          "parameter: %d\r\n\r\n",
+          execute::executor [ request->COMMAND.UUID ].parameter [ 1 ]
+        );
+        
+
+      response->BODY_LEN = strlen ( response->BODY );
+
+      response->status = status::status_description [ status::SIX_OK ];
+
+      // TODO find the right place for this
+      if ( response->status.status != status::SIX_OK ) {
+        return -1;
+      }
+      
+      response->VERSION_MAJOR = six::VERSION_MAJOR;
+      response->VERSION_MINOR = six::VERSION_MINOR;
+
+      // TODO find the right place for this
+      send_response_packet ( response );
+    }
+
+
+
+    // -------------------- SET MODE ----------------------------
+    else if ( request->COMMAND.INSTRUCTION == command_t::SET_MODE ) {
       execute::execution_mode mode = execute::OFF;
 
-      if ( strncasecmp ( "BEAT", packet->COMMAND.VALUE, packet->COMMAND.VALUE_LEN ) == 0 ) {
+      if ( strncasecmp ( "BEAT", request->COMMAND.VALUE, request->COMMAND.VALUE_LEN ) == 0 ) {
         mode = execute::HEARTBEAT;
       }
-      else if ( strncasecmp ( "ROT", packet->COMMAND.VALUE, packet->COMMAND.VALUE_LEN ) == 0 ) {
+      else if ( strncasecmp ( "ROT", request->COMMAND.VALUE, request->COMMAND.VALUE_LEN ) == 0 ) {
         mode = execute::ROTATION;
       }
-      else if ( strncasecmp ( "VIB", packet->COMMAND.VALUE, packet->COMMAND.VALUE_LEN ) == 0 ) {
+      else if ( strncasecmp ( "VIB", request->COMMAND.VALUE, request->COMMAND.VALUE_LEN ) == 0 ) {
         mode = execute::VIBRATION;
       }
-      else if ( strncasecmp ( "OFF", packet->COMMAND.VALUE, packet->COMMAND.VALUE_LEN ) == 0 ) {
+      else if ( strncasecmp ( "OFF", request->COMMAND.VALUE, request->COMMAND.VALUE_LEN ) == 0 ) {
         mode = execute::OFF;
       }
       else {
         return -1;
       }
       
-      execute::set_mode ( packet->COMMAND.UUID, mode );
+      execute::set_mode ( request->COMMAND.UUID, mode );
 
       return 0;
     }
     
-    else if ( packet->COMMAND.INSTRUCTION == command_t::SETV ) {
-      int intensity = atoi ( packet->COMMAND.VALUE );
+    else if ( request->COMMAND.INSTRUCTION == command_t::SET_INTENSITY ) {
+      int intensity = atoi ( request->COMMAND.VALUE );
       //TODO check if parameter valide
-      execute::set_intensity ( packet->COMMAND.UUID, intensity );
+      execute::set_intensity ( request->COMMAND.UUID, intensity );
 
       return 0;
     }
 
-    else if ( packet->COMMAND.INSTRUCTION == command_t::SETP ) {
-      int parameter = atoi ( packet->COMMAND.VALUE );
+    else if ( request->COMMAND.INSTRUCTION == command_t::SET_PARAMETER ) {
+      int parameter = atoi ( request->COMMAND.VALUE );
       //TODO check if parameter valide
-      execute::set_parameter ( packet->COMMAND.UUID, parameter );
+      execute::set_parameter ( request->COMMAND.UUID, parameter );
 
       return 0;
     }
   }
 
-  int create_reply_packet ( response_packet_t* packet, uint8_t min, uint8_t maj, uint8_t status, char* body, size_t body_len ) {
+  int create_response_packet ( response_packet_t* packet, uint8_t min, uint8_t maj, uint8_t status, char* body, size_t body_len ) {
+    //, size_t body_len ) {
     return 0;
   }
 
-  int send_reqply_packet ( response_packet_t* packet ) {
+  int send_response_packet ( response_packet_t* packet ) {
+    Serial.print ( packet->status.CODE );
+    Serial.print ( " " );
+    Serial.print ( packet->status.DESCRIPTION );
+    Serial.print ( " " );
+    Serial.print ( "SIX/" );
+    Serial.print ( packet->VERSION_MAJOR );
+    Serial.print ( "." );
+    Serial.print ( packet->VERSION_MINOR );
+    Serial.print ( "\r\n" );
+    Serial.print ( "\r\n" );
+
+    Serial.print ( packet->BODY );
+    Serial.print ( "\r\n" );
+
+
+    Serial.print ( "\r\n" );
+    Serial.print ( "\r\n" );
+
     return 0;
   }
 }

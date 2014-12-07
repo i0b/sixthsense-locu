@@ -7,13 +7,14 @@
 #define VIBRATION_ARRAY_UUID 0
 #define VIBRATION_RING_UUID  2
 
-char RAW_PACKET[100];
+char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
 bool NEWLINE;
-six::request_packet_t REQ_PACKET;
+six::request_packet_t  REQUEST_PACKET;
+six::response_packet_t RESPONSE_PACKET;
 
 void off() {
-  for ( uint8_t uuid = 0; uuid < actuator::NUMBER_ACTUATORS; uuid++ ) {
+  for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
     execute::set_mode ( uuid, execute::OFF );
   }
 }
@@ -50,6 +51,33 @@ void command(char c) {
       Serial.print("set vibration value: ");
       Serial.println(value);
     }
+    else if (c == 'l') {
+      char* request = "LIST SIX/0.1";
+      strcpy ( PACKET_DATA, request );
+      PACKET_DATA [ strlen ( request ) ] = '\0';
+      PACKET_LEN = strlen ( request ) + 1;
+
+      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
+      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+    }
+    else if (c == 'i') {
+      char* request = "GV 0 SIX/0.1";
+      strcpy ( PACKET_DATA, request );
+      PACKET_DATA [ strlen ( request ) ] = '\0';
+      PACKET_LEN = strlen ( request ) + 1;
+
+      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
+      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+    }
+    else if (c == 'p') {
+      char* request = "GP 0 SIX/0.1";
+      strcpy ( PACKET_DATA, request );
+      PACKET_DATA [ strlen ( request ) ] = '\0';
+      PACKET_LEN = strlen ( request ) + 1;
+
+      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
+      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+    }
 // HACK END
 }
 
@@ -71,6 +99,7 @@ void setup () {
   // set environment 
   NEWLINE = 0;
   PACKET_LEN = 0;
+  RESPONSE_PACKET.BODY = PACKET_DATA;
   
   // init serial debug
 }
@@ -79,10 +108,10 @@ ISR(TIMER1_COMPA_vect) {         // timer compare interrupt service routine
   execute::timer_isr();
 }
 
-// needed for creating RAW_PACKET
+// needed for creating PACKET_DATA
 int append ( char c ) {
-  if ( PACKET_LEN < sizeof ( RAW_PACKET ) ) {
-    RAW_PACKET[PACKET_LEN] = c;
+  if ( PACKET_LEN < REQUEST_RESPONSE_PACKET_LEN ) {
+    PACKET_DATA [ PACKET_LEN ] = c;
     PACKET_LEN++;
 
     return 0;
@@ -96,6 +125,7 @@ int append ( char c ) {
 void loop()
 {
 /*
+TODO REPLACE REQ_PACKET, EVAL_COMMAND
   // Bluetooth
   // if new RX data available
   if ( ble_available() )
@@ -110,11 +140,11 @@ void loop()
             PACKET_LEN = 0;
             
             Serial.print ( "Received package: " );
-            Serial.println ( RAW_PACKET );
+            Serial.println ( PACKET_DATA );
 
-            if ( six::parse_command ( RAW_PACKET, &PACKET_LEN, &REQ_PACKET ) == 0 ) {
+            if ( six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET ) == 0 ) {
               Serial.println("VALIDE package received");
-              if ( six::eval_command ( &REQ_PACKET ) == 0 ) {
+              if ( six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET ) == 0 ) {
                 Serial.println("OK new settings applied");
               }
               else {
