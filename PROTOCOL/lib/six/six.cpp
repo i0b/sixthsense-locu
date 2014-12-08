@@ -16,31 +16,11 @@ namespace six {
   const uint8_t VERSION_MAJOR = 0;
   const uint8_t VERSION_MINOR = 1;
 
-  // returns new position of inside the packet after the space
-  char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  ) {
-      char* space = strchr ( packet_segment, ' ' );
-     
-      if ( space == NULL ) {
-       return 0;
-      }
+  typedef enum { EMPTY, INT, STRING } value_t;
+  char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  );
+  int set_packet_body ( response_packet_t* packet, value_t type, const char* value_information, const char* char_value, int int_value );
+  int create_response_packet ( response_packet_t* packet, status::status_type status );
 
-      else {
-       *segment_len = space - packet_segment;
-      }
-
-      if ( *segment_len < 1 ) {
-        return 0;
-      }
-
-      *space = '\0';
-
-      // output example: "protocol: six/0.1"
-      Serial.print ( segment_type );
-      Serial.print ( ": " );
-      Serial.println ( packet_segment );
-
-      return space + 1;
-  }
 
   int parse_command ( char* raw_packet, size_t* packet_len, request_packet_t* packet ) {
 
@@ -188,6 +168,10 @@ namespace six {
     return 0;
   }
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//
   int eval_command ( request_packet_t* request, response_packet_t* response ) {
 
     if ( six::VERSION_MAJOR != request->VERSION_MAJOR || six::VERSION_MINOR != request->VERSION_MINOR ) {
@@ -259,67 +243,46 @@ namespace six {
 
       // TODO find the right place for this
       send_response_packet ( response );
+    }
+
+    // ------------------ GET MODE ------------------------------
+    else if ( request->COMMAND.INSTRUCTION == command_t::GET_MODE ) {
+      
+      if ( set_packet_body ( response, STRING, "mode", 
+           execute::EXECUTION_MODE_STRING [ execute::executor [ request->COMMAND.UUID ].mode ], 0 ) == 0 ) {
+
+        create_response_packet ( response, status::SIX_OK );
+
+        send_response_packet ( response );
+      }
 
     }
 
-
     // ---------------- GET INTENSITY ---------------------------
     else if ( request->COMMAND.INSTRUCTION == command_t::GET_INTENSITY ) {
-      strcpy ( response->BODY, "" );
-      response->BODY_LEN = 0;
 
-      response->BODY_LEN += snprintf ( 
-          response->BODY + strlen ( response->BODY ), 
-          REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
-          "intensity: %d\r\n\r\n",
-          execute::executor [ request->COMMAND.UUID ].parameter [ 0 ]
-        );
-        
+      if ( set_packet_body ( response, INT, "intensity", NULL, 
+            execute::executor [ request->COMMAND.UUID ].parameter [ 0 ] ) == 0 ) {
 
-      response->BODY_LEN = strlen ( response->BODY );
+        create_response_packet ( response, status::SIX_OK );
 
-      response->status = status::status_description [ status::SIX_OK ];
-
-      // TODO find the right place for this
-      if ( response->status.status != status::SIX_OK ) {
-        return -1;
+        send_response_packet ( response );
       }
-      
-      response->VERSION_MAJOR = six::VERSION_MAJOR;
-      response->VERSION_MINOR = six::VERSION_MINOR;
 
-      // TODO find the right place for this
-      send_response_packet ( response );
     }
 
     // TODO NOT COPY-PASTE!!
     // ---------------- GET PARAMETER ---------------------------
     else if ( request->COMMAND.INSTRUCTION == command_t::GET_PARAMETER ) {
-      strcpy ( response->BODY, "" );
-      response->BODY_LEN = 0;
-
-      response->BODY_LEN += snprintf ( 
-          response->BODY + strlen ( response->BODY ), 
-          REQUEST_RESPONSE_PACKET_LEN - response->BODY_LEN, 
-          "parameter: %d\r\n\r\n",
-          execute::executor [ request->COMMAND.UUID ].parameter [ 1 ]
-        );
-        
-
-      response->BODY_LEN = strlen ( response->BODY );
-
-      response->status = status::status_description [ status::SIX_OK ];
-
-      // TODO find the right place for this
-      if ( response->status.status != status::SIX_OK ) {
-        return -1;
-      }
       
-      response->VERSION_MAJOR = six::VERSION_MAJOR;
-      response->VERSION_MINOR = six::VERSION_MINOR;
+      if ( set_packet_body ( response, INT, "parameter", NULL, 
+            execute::executor [ request->COMMAND.UUID ].parameter [ 1 ] ) == 0 ) {
 
-      // TODO find the right place for this
-      send_response_packet ( response );
+        create_response_packet ( response, status::SIX_OK );
+
+        send_response_packet ( response );
+      }
+
     }
 
 
@@ -346,31 +309,45 @@ namespace six {
       
       execute::set_mode ( request->COMMAND.UUID, mode );
 
+
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_OK );
+      send_response_packet ( response );
+
       return 0;
     }
     
+    // -------------------- SET INTENSITY -----------------------
     else if ( request->COMMAND.INSTRUCTION == command_t::SET_INTENSITY ) {
       int intensity = atoi ( request->COMMAND.VALUE );
       //TODO check if parameter valide
       execute::set_intensity ( request->COMMAND.UUID, intensity );
 
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_OK );
+      send_response_packet ( response );
+
       return 0;
     }
 
+    // -------------------- SET PARAMETER -----------------------
     else if ( request->COMMAND.INSTRUCTION == command_t::SET_PARAMETER ) {
       int parameter = atoi ( request->COMMAND.VALUE );
       //TODO check if parameter valide
       execute::set_parameter ( request->COMMAND.UUID, parameter );
 
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_OK );
+      send_response_packet ( response );
+
       return 0;
     }
   }
 
-  int create_response_packet ( response_packet_t* packet, uint8_t min, uint8_t maj, uint8_t status, char* body, size_t body_len ) {
-    //, size_t body_len ) {
-    return 0;
-  }
 
+// ---------------------------------------------------------------------------------------------------------------------
+//
+//
   int send_response_packet ( response_packet_t* packet ) {
     Serial.print ( packet->status.CODE );
     Serial.print ( " " );
@@ -392,4 +369,85 @@ namespace six {
 
     return 0;
   }
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
+  
+  // returns new position of inside the packet after the space
+  char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  ) {
+      char* space = strchr ( packet_segment, ' ' );
+     
+      if ( space == NULL ) {
+       return 0;
+      }
+
+      else {
+       *segment_len = space - packet_segment;
+      }
+
+      if ( *segment_len < 1 ) {
+        return 0;
+      }
+
+      *space = '\0';
+
+      // output example: "protocol: six/0.1"
+      Serial.print ( segment_type );
+      Serial.print ( ": " );
+      Serial.println ( packet_segment );
+
+      return space + 1;
+  }
+
+  int create_response_packet ( response_packet_t* packet, status::status_type status ) {
+
+    packet->VERSION_MAJOR = six::VERSION_MAJOR;
+    packet->VERSION_MINOR = six::VERSION_MINOR;
+    //, size_t body_len ) {
+    packet->status = status::status_description [ status ];
+
+    // TODO find the right place for this
+    //if ( packet->status.status != status::SIX_OK ) {
+    //  return -1;
+    //}
+
+    return 0;
+  }
+
+  int set_packet_body ( response_packet_t* packet, value_t type, const char* value_information, const char* char_value, int int_value ) {
+
+    strcpy ( packet->BODY, "" );
+    packet->BODY_LEN = 0;
+    
+    if ( type == EMPTY ) {
+      return 0;
+    }
+
+    else if ( type == INT ) {
+      packet->BODY_LEN += snprintf (
+          packet->BODY + strlen ( packet->BODY ),
+          REQUEST_RESPONSE_PACKET_LEN - packet->BODY_LEN,
+          "%s: %d\r\n\r\n",
+          value_information,
+          int_value
+        );
+    }
+    
+    else if ( type == STRING ) {
+      packet->BODY_LEN += snprintf (
+          packet->BODY + strlen ( packet->BODY ),
+          REQUEST_RESPONSE_PACKET_LEN - packet->BODY_LEN,
+          "%s: %s\r\n\r\n",
+          value_information,
+          char_value
+        );
+    }
+
+    packet->BODY_LEN = strlen ( packet->BODY );
+
+    return 0;
+  }
+
 }

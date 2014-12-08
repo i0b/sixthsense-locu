@@ -6,15 +6,22 @@
 
 #include <stddef.h>
 #include <stdint.h>
-
 #include "actuator.h"
 
-namespace execute {
+#define FOREACH_MODE(EXECUTION_MODE)  \
+        EXECUTION_MODE(OFF)           \
+        EXECUTION_MODE(VIBRATION)     \
+        EXECUTION_MODE(HEARTBEAT)     \
+        EXECUTION_MODE(ROTATION)      \
 
-  typedef enum { OFF, VIBRATION, HEARTBEAT, ROTATION } execution_mode;
+namespace execute {
+  //typedef enum { OFF, VIBRATION, HEARTBEAT, ROTATION } execution_mode;
+  typedef enum { FOREACH_MODE ( GENERATE_ENUM ) } execution_mode;
   
   typedef struct {
     actuator::actuator_t* actuator;
+
+    execution_mode mode;
 
     void (*function) ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
     // first parameter:  intensity
@@ -24,7 +31,8 @@ namespace execute {
 
 
   extern function_t executor[];
-
+  
+  extern const char* EXECUTION_MODE_STRING[];
 
 
   int init_executor ();

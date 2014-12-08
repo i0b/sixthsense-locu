@@ -10,6 +10,7 @@ namespace status {
   typedef enum {
     SIX_OK,
     SIX_NOT_FOUND,
+    SIX_SERVER_ERROR,
     SIX_ERROR_PARSING
   } status_type;
 

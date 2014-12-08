@@ -1,11 +1,7 @@
 #include <SPI.h>
 #include <six.h>
-#include "../lib/six/actuator.h"
-#include "../lib/six/execute.h"
-#include "../lib/bluetooth/RBL_nRF8001.h"
-
-#define VIBRATION_ARRAY_UUID 0
-#define VIBRATION_RING_UUID  2
+#include <execute.h>
+#include <RBL_nRF8001.h>
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
@@ -13,77 +9,60 @@ bool NEWLINE;
 six::request_packet_t  REQUEST_PACKET;
 six::response_packet_t RESPONSE_PACKET;
 
-void off() {
-  for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
-    execute::set_mode ( uuid, execute::OFF );
-  }
+void execute_command ( char* command ) {
+  strcpy ( PACKET_DATA, command );
+  PACKET_DATA [ strlen ( command ) ] = '\0';
+  PACKET_LEN = strlen ( command ) + 1;
+
+  six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
+  six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
 }
 
 void command(char c) {
 // HACK
     if (c == 'b') {
-      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::HEARTBEAT );
-      Serial.println("set mode: heartbeat");
+      execute_command ( "SM 0 BEAT SIX/0.1" );
     }
     else if (c == 's') {
-      execute::set_parameter ( VIBRATION_ARRAY_UUID, 800 );
-      Serial.println("slow beat");
+      execute_command ( "SP 0 800 SIX/0.1" );
     } 
     else if (c == 'f') {
-      execute::set_parameter ( VIBRATION_ARRAY_UUID, 600 );
-      Serial.println("fast beat");
+      execute_command ( "SP 0 600 SIX/0.1" );
     }
     else if (c == 'v') {
-      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::VIBRATION );
-      Serial.println("set mode: vibration");
+      execute_command ( "SM 0 VIB SIX/0.1" );
     }
     else if (c == 'r') {
-      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::ROTATION );
-      Serial.println("set mode: rotate");
+      execute_command ( "SM 0 ROT SIX/0.1" );
     }
     else if (c == 'o') {
-      execute::set_mode ( VIBRATION_ARRAY_UUID, execute::OFF );
-      Serial.println("off");
+      execute_command ( "SM 0 OFF SIX/0.1" );
     }
     else if ( c >= '0' && c <= '9' ) {
       byte value = map ( c, '0', '9', 0, 255 );
-      execute::set_intensity ( VIBRATION_ARRAY_UUID, value );
-      Serial.print("set vibration value: ");
-      Serial.println(value);
+      char command[20];
+      snprintf ( command, 20, "SV 0 %d SIX/0.1", value );
+      
+      execute_command ( command );
     }
     else if (c == 'l') {
-      char* request = "LIST SIX/0.1";
-      strcpy ( PACKET_DATA, request );
-      PACKET_DATA [ strlen ( request ) ] = '\0';
-      PACKET_LEN = strlen ( request ) + 1;
-
-      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
-      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+      execute_command ( "LIST SIX/0.1" );
+    }
+    else if (c == 'm') {
+      execute_command ( "GM 0 SIX/0.1" );
     }
     else if (c == 'i') {
-      char* request = "GV 0 SIX/0.1";
-      strcpy ( PACKET_DATA, request );
-      PACKET_DATA [ strlen ( request ) ] = '\0';
-      PACKET_LEN = strlen ( request ) + 1;
-
-      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
-      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+      execute_command ( "GV 0 SIX/0.1" );
     }
     else if (c == 'p') {
-      char* request = "GP 0 SIX/0.1";
-      strcpy ( PACKET_DATA, request );
-      PACKET_DATA [ strlen ( request ) ] = '\0';
-      PACKET_LEN = strlen ( request ) + 1;
-
-      six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
-      six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+      execute_command ( "GP 0 SIX/0.1" );
     }
 // HACK END
 }
 
 void setup () {
   Serial.begin(57600);
-  delay(500);
+  delay(200);
   // Default pins set to 9 and 8 for REQN and RDYN
   // Set your REQN and RDYN here before ble_begin() if you need
   //ble_set_pins(3, 2);

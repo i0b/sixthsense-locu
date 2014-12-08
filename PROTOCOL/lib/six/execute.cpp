@@ -4,6 +4,9 @@
 #include "execute.h"
 
 namespace execute {
+
+  const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
+
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
 
   uint32_t TIMER_VALUE;
@@ -76,10 +79,12 @@ namespace execute {
     switch ( mode ) {
 
       case execute::OFF :
+        executor [ uuid ].mode = execute::OFF;
         executor [ uuid ].function = &off;
         break;
 
       case execute::VIBRATION :
+        executor [ uuid ].mode = execute::VIBRATION;
         executor [ uuid ].function = &vibrate; 
 
         if ( executor [ uuid ].actuator->type == actuator::VIBRATION_RING ) {
@@ -90,6 +95,7 @@ namespace execute {
         break;
 
       case execute::HEARTBEAT :
+        executor [ uuid ].mode = execute::HEARTBEAT;
         executor [ uuid ].function = &heartbeat;
         
         if ( executor [ uuid ].actuator->type == actuator::VIBRATION_RING ) {
@@ -100,6 +106,7 @@ namespace execute {
         break;
 
       case execute::ROTATION :
+        executor [ uuid ].mode = execute::ROTATION;
         executor [ uuid ].function = &rotate;
         // only one motor vibrating at the same time
         set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
