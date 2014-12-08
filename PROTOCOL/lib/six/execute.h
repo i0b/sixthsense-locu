@@ -41,14 +41,7 @@ namespace execute {
   int set_parameter ( uint8_t uuid, int parameter );
 
 
-  // executeable functions
-  void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
-  void heartbeat ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
-  void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
-  void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
-
   // helper function
-  int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
   void timer_isr ();
 
 }

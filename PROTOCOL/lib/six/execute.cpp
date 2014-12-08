@@ -5,6 +5,13 @@
 
 namespace execute {
 
+  // executeable functions
+  void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  void heartbeat ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
+
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
 
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );

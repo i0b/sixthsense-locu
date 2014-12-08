@@ -5,7 +5,9 @@
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
+
 bool NEWLINE;
+
 six::request_packet_t  REQUEST_PACKET;
 six::response_packet_t RESPONSE_PACKET;
 
@@ -78,7 +80,7 @@ void setup () {
   // set environment 
   NEWLINE = 0;
   PACKET_LEN = 0;
-  RESPONSE_PACKET.BODY = PACKET_DATA;
+  RESPONSE_PACKET.body = PACKET_DATA;
   
   // init serial debug
 }

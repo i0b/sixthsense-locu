@@ -11,29 +11,31 @@ namespace six {
 
   extern const uint8_t VERSION_MAJOR;
   extern const uint8_t VERSION_MINOR;
+    
+  typedef enum { LIST, INSTRUCTIONS, GET_MODE, GET_INTENSITY, GET_PARAMETER, SET_MODE, SET_INTENSITY, SET_PARAMETER } instruction_t;
 
   typedef struct {
-    enum { LIST, GET_MODE, GET_INTENSITY, GET_PARAMETER, SET_MODE, SET_INTENSITY, SET_PARAMETER } INSTRUCTION;
-    uint8_t UUID;
-    char* VALUE;
-    size_t VALUE_LEN;
+    instruction_t instruction;
+    uint8_t uuid;
+    char* value;
+    size_t value_len;
   } command_t;
 
   typedef struct {
-    uint8_t VERSION_MAJOR;
-    uint8_t VERSION_MINOR;
+    uint8_t version_major;
+    uint8_t version_minor;
 
     status::status_t status;
     
-    char* BODY;
-    size_t BODY_LEN;
+    char* body;
+    size_t body_len;
   } response_packet_t;
 
   typedef struct {
-    uint8_t VERSION_MAJOR;
-    uint8_t VERSION_MINOR;
+    uint8_t version_major;
+    uint8_t version_minor;
 
-    command_t COMMAND;
+    command_t command;
   } request_packet_t;
 
 
