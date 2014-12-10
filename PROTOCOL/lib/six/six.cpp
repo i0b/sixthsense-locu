@@ -12,17 +12,24 @@
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
+#ifndef GENERATE
+#define GERERATE
+
+#endif
+
 namespace six {
   const uint8_t version_major = 0;
   const uint8_t version_minor = 1;
 
   typedef enum { EMPTY, INT, STRING } value_t;
+  const char* INSTRUCTIONS_STRING[] = { FOREACH_INSTRUCTION ( GENERATE_STRING ) };
+
   char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  );
   int set_packet_body ( response_packet_t* packet, value_t type, const char* value_information, const char* char_value, int int_value );
   int create_response_packet ( response_packet_t* packet, status::status_type status );
 
 
-  int parse_command ( char* raw_packet, size_t* packet_len, request_packet_t* packet ) {
+  int parse_command ( char* raw_packet, size_t* packet_len, request_packet_t* request, response_packet_t* response ) {
 
     // parse command - example GETV
     char* command = raw_packet;
@@ -31,6 +38,7 @@ namespace six {
     raw_packet = parse_next ( raw_packet, &command_len, "command" );
 
     if ( raw_packet == 0 ) {
+      response->status.status = status::SIX_ERROR_PARSING;
       return -1;
     }
     
@@ -44,7 +52,7 @@ namespace six {
     // evaluate command string
      
     if ( strncasecmp ( "LIST", command, command_len ) == 0 ) {
-      packet->command.instruction = six::LIST;
+      request->command.instruction = six::LIST;
     }
 
     else {
@@ -55,6 +63,7 @@ namespace six {
       raw_packet = parse_next ( raw_packet, &uuid_len, "uuid" );
 
       if ( raw_packet == 0 ) {
+        response->status.status = status::SIX_ERROR_PARSING;
         return -1;
       }
     
@@ -64,19 +73,20 @@ namespace six {
       int uuid_int = atoi ( uuid );
 
       if ( uuid_int < 0 || uuid_int > 255 ) {
+        response->status.status = status::SIX_ERROR_PARSING;
         return -1;
       }
 
-      packet->command.uuid = (uint8_t) uuid_int;
+      request->command.uuid = (uint8_t) uuid_int;
 
       if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
-        packet->command.instruction = six::GET_MODE;
+        request->command.instruction = six::GET_MODE;
       }
       else if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
-        packet->command.instruction = six::GET_INTENSITY;
+        request->command.instruction = six::GET_INTENSITY;
       }
       else if ( strncasecmp ( "GP", command, command_len ) == 0 ) {
-        packet->command.instruction = six::GET_PARAMETER;
+        request->command.instruction = six::GET_PARAMETER;
       }
 
       else
@@ -88,22 +98,24 @@ namespace six {
         value = raw_packet;
         raw_packet = parse_next ( raw_packet, &value_len, "value" );
       
-        if ( raw_packet == 0 )
+        if ( raw_packet == 0 ) {
+          response->status.status = status::SIX_ERROR_PARSING;
           return -1;
+        }
       
         *packet_len -= value_len;
 
-        packet->command.value = value;
-        packet->command.value_len = value_len;
+        request->command.value = value;
+        request->command.value_len = value_len;
 
         if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
-          packet->command.instruction = six::SET_MODE;
+          request->command.instruction = six::SET_MODE;
         }
         else if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
-          packet->command.instruction = six::SET_INTENSITY;
+          request->command.instruction = six::SET_INTENSITY;
         }
         else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {
-          packet->command.instruction = six::SET_PARAMETER;
+          request->command.instruction = six::SET_PARAMETER;
         }
       }
     }
@@ -115,6 +127,7 @@ namespace six {
       raw_packet += strlen ( protocol_name );
     }
     else {
+      response->status.status = status::SIX_ERROR_PARSING;
       return -1;
     }
     
@@ -123,6 +136,7 @@ namespace six {
     char* dot = strchr ( raw_packet, '.' );
 
     if ( dot == NULL ) {
+      response->status.status = status::SIX_ERROR_PARSING;
       return -1;
     }
 
@@ -131,17 +145,18 @@ namespace six {
     char* major = raw_packet;
     size_t major_len = strlen ( major );
 
+    // TODO this still allows: LIST SIX/0.1somethingelse
+    // USE SSCANF ( %d ) and check if string is empty afterwards!
     char* minor = dot + 1;
     size_t minor_len = strlen ( minor );
     
 
     *packet_len -= major_len + minor_len;
 
-
-    // TODO if major no correct number, return -1
     int major_int = atoi ( major );
 
     if ( major_int < 0 || major_int > 255 ) {
+      response->status.status = status::SIX_ERROR_PARSING;
       return -1;
     }
 
@@ -149,22 +164,33 @@ namespace six {
     int minor_int = atoi ( minor );
 
     if ( minor_int < 0 || minor_int > 255 ) {
+      response->status.status = status::SIX_ERROR_PARSING;
       return -1;
     }
 
-    packet->version_major = (uint8_t) major_int;
-    packet->version_minor = (uint8_t) minor_int;
-
-    char serial_buf[80];
-
-    snprintf( serial_buf, sizeof ( serial_buf ), "version: %d.%d\r\n\r\n", packet->version_major, packet->version_minor );
-    Serial.print( serial_buf );
+    request->version_major = (uint8_t) major_int;
+    request->version_minor = (uint8_t) minor_int;
     
+
+    char output_buffer[100];
+
+    snprintf ( output_buffer, sizeof output_buffer, "parsed_request = { command = '%s', "
+        "uuid = '%d', value = '%s', packet_version = '%d.%d' }\r\n",
+        INSTRUCTIONS_STRING [ request->command.instruction ],
+        //request->command.instruction,
+        request->command.uuid,
+        request->command.value,
+        request->version_major,
+        request->version_minor );
+    Serial.print ( output_buffer );
+   
+
     if ( *packet_len != 0 ) {
+      // TODO sscanf - SEE ABOVE
       // actually it should always be zero - the last string (minor) might be corrupt though
       return -1;
     }
-    
+
     return 0;
   }
 
@@ -172,13 +198,22 @@ namespace six {
 // ---------------------------------------------------------------------------------------------------------------------
 //
 //
-  int eval_command ( request_packet_t* request, response_packet_t* response ) {
+  int evaluate_command ( request_packet_t* request, response_packet_t* response ) {
+    /*
+    Serial.println( "\r\nevaluating command..." );
+    
+    Serial.print ( "request { command = '"  );
+    Serial.print ( INSTRUCTIONS_STRING [ request->command.instruction ] );
+    Serial.print ( "', uuid = '" );
+    Serial.print ( request->command.uuid );
+    Serial.print ( "', value = '" );
+    Serial.print ( request->command.value );
+    Serial.println ( "' }" );
+    */
 
     if ( six::version_major != request->version_major || six::version_minor != request->version_minor ) {
        return -1;
     }
-
-
 
     // ---------------- LIST ACTUATORS --------------------------
     if ( request->command.instruction == six::LIST ) {
@@ -300,6 +335,9 @@ namespace six {
       else if ( strncasecmp ( "VIB", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::VIBRATION;
       }
+      else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
+        mode = execute::WAVING;
+      }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::OFF;
       }
@@ -393,10 +431,12 @@ namespace six {
 
       *space = '\0';
 
+      /*
       // output example: "protocol: six/0.1"
       Serial.print ( segment_type );
       Serial.print ( ": " );
       Serial.println ( packet_segment );
+      */
 
       return space + 1;
   }

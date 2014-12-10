@@ -13,6 +13,15 @@
         EXECUTION_MODE(VIBRATION)     \
         EXECUTION_MODE(HEARTBEAT)     \
         EXECUTION_MODE(ROTATION)      \
+        EXECUTION_MODE(WAVING)        \
+
+#ifndef GENERATOR
+#define GERERATOR
+
+#define GENERATE_ENUM(ENUM) ENUM,
+#define GENERATE_STRING(STRING) #STRING,
+
+#endif
 
 namespace execute {
   //typedef enum { OFF, VIBRATION, HEARTBEAT, ROTATION } execution_mode;

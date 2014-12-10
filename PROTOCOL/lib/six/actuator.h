@@ -6,17 +6,22 @@
 
 
 #define MAX_VAL_PINS 8
-#define NUMBER_ACTUATORS 4
+#define NUMBER_ACTUATORS 5
 
 #define FOREACH_TYPE(ACTUATOR_TYPE)    \
         ACTUATOR_TYPE(VIBRATION_ARRAY) \
         ACTUATOR_TYPE(VIBRATION_RING)  \
         ACTUATOR_TYPE(ELECTRICAL)      \
         ACTUATOR_TYPE(TEMPERATURE)     \
+        ACTUATOR_TYPE(SERVO)           \
+
+#ifndef GENERATOR
+#define GERERATOR
 
 #define GENERATE_ENUM(ENUM) ENUM,
 #define GENERATE_STRING(STRING) #STRING,
 
+#endif
 
 namespace actuator {
   typedef enum { FOREACH_TYPE ( GENERATE_ENUM ) } actuator_type;

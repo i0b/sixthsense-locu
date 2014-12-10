@@ -51,7 +51,19 @@ namespace actuator {
       { 12, 22 },
       // type
       TEMPERATURE
+    },
+
+    {
+      // description
+      "Servo: this is a test to verify if pressure would be even possible",
+      // # pins
+      1,
+      // pins: PWM
+      { 8 },
+      // type
+      SERVO
     }
+
   };
 
   // calculate the total number of actuators

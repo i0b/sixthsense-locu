@@ -10,6 +10,7 @@ namespace execute {
   void heartbeat ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  void wave ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
 
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
@@ -83,11 +84,24 @@ namespace execute {
 
   int set_mode ( uint8_t uuid, execute::execution_mode mode ) {
     //execution_mode: { OFF, VIBRATION, HEARTBEAT, ROTATION }
+    /*
+    Serial.print ( "Setting mode of '" );
+    Serial.print ( executor [ uuid ].actuator->description );
+    Serial.print ( "' to mode '" );
+    Serial.print ( EXECUTION_MODE_STRING [ mode ] );
+    Serial.println ( "'\r\n" );
+    */
+
     switch ( mode ) {
 
       case execute::OFF :
         executor [ uuid ].mode = execute::OFF;
         executor [ uuid ].function = &off;
+        break;
+
+      case execute::WAVING:
+        executor [ uuid ].mode = execute::WAVING;
+        executor [ uuid ].function = &wave;
         break;
 
       case execute::VIBRATION :
@@ -119,6 +133,7 @@ namespace execute {
         set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
 
         break;
+      
     }
 
     return 0;
@@ -278,6 +293,29 @@ namespace execute {
       }
     }
 
+  }
+
+  void wave ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
+  
+    if ( actuator.type == actuator::SERVO ) {
+
+      /*
+      uint32_t local_interval = timer_value % ( 100 );
+
+      if ( local_interval == 0 ) {
+        Serial.println ( 255/2 );
+        analogWrite ( actuator.pins [ 0 ], 255/2 );
+      }
+      else if ( local_interval == 50 ) {
+        Serial.println ( parameter [ 0 ] );
+        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+      }
+      */
+
+        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+
+    }
+  
   }
 
 }

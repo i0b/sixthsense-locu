@@ -16,8 +16,8 @@ void execute_command ( char* command ) {
   PACKET_DATA [ strlen ( command ) ] = '\0';
   PACKET_LEN = strlen ( command ) + 1;
 
-  six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET );
-  six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+  six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
+  six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
 }
 
 void command(char c) {
@@ -40,10 +40,14 @@ void command(char c) {
     else if (c == 'o') {
       execute_command ( "SM 0 OFF SIX/0.1" );
     }
+    else if (c == 'a') {
+      execute_command ( "SM 4 SERVO SIX/0.1" );
+    }
+
     else if ( c >= '0' && c <= '9' ) {
       byte value = map ( c, '0', '9', 0, 255 );
       char command[20];
-      snprintf ( command, 20, "SV 0 %d SIX/0.1", value );
+      snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
       
       execute_command ( command );
     }
@@ -62,33 +66,6 @@ void command(char c) {
 // HACK END
 }
 
-void setup () {
-  Serial.begin(57600);
-  delay(200);
-  // Default pins set to 9 and 8 for REQN and RDYN
-  // Set your REQN and RDYN here before ble_begin() if you need
-  //ble_set_pins(3, 2);
-  
-  // Set your BLE Shield name here, max. length 10
-  //ble_set_name("My Name");
-  
-  // init. and start BLE library.
-  //ble_begin();
-
-  execute::init_executor();
- 
-  // set environment 
-  NEWLINE = 0;
-  PACKET_LEN = 0;
-  RESPONSE_PACKET.body = PACKET_DATA;
-  
-  // init serial debug
-}
-
-ISR(TIMER1_COMPA_vect) {         // timer compare interrupt service routine
-  execute::timer_isr();
-}
-
 // needed for creating PACKET_DATA
 int append ( char c ) {
   if ( PACKET_LEN < REQUEST_RESPONSE_PACKET_LEN ) {
@@ -103,10 +80,45 @@ int append ( char c ) {
   }
 }
 
+void setup () {
+  // init serial debug
+  Serial.begin(57600);
+  delay(200);
+
+  execute::init_executor();
+  //delay(100);
+
+  // Default pins set to 9 and 8 for REQN and RDYN
+  // Set your REQN and RDYN here before ble_begin() if you need
+  //ble_set_pins(3, 2);
+  
+  // Set your BLE Shield name here, max. length 10
+  //ble_set_name("LOCU");
+  
+  // init. and start BLE library.
+  //ble_begin();
+
+ 
+  // set environment 
+  NEWLINE = 0;
+  PACKET_LEN = 0;
+  RESPONSE_PACKET.body = PACKET_DATA;
+}
+
+
+// timer compare interrupt service routine
+// calls timer_isr every 10ms
+// parameter set in init_executor
+ISR(TIMER1_COMPA_vect) {
+  noInterrupts();
+  execute::timer_isr();
+  interrupts();
+}
+
 void loop()
 {
 /*
-TODO REPLACE REQ_PACKET, EVAL_COMMAND
+//TODO REPLACE REQ_PACKET, EVAL_COMMAND
   // Bluetooth
   // if new RX data available
   if ( ble_available() )
@@ -146,7 +158,6 @@ TODO REPLACE REQ_PACKET, EVAL_COMMAND
     }
   }
 
-  //parse_command ( "GETV 0 SIX/0.1", 14, &env );
   ble_do_events();
 */
 }
