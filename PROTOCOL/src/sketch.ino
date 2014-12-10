@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <six.h>
 #include <execute.h>
-#include <ble_shield.h>
+#include <RBL_nRF8001.h>
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
@@ -62,6 +62,15 @@ void command(char c) {
     }
     else if (c == 'p') {
       execute_command ( "GP 0 SIX/0.1" );
+    }
+    else if (c == 'h') {
+      execute_command ( "SM 2 SERVO SIX/0.1" );
+    }
+    else if (c == 'j') {
+      execute_command ( "SV 2 0 SIX/0.1" );
+    }
+    else if (c == 'k') {
+      execute_command ( "SV 2 1 SIX/0.1" );
     }
 // HACK END
 }

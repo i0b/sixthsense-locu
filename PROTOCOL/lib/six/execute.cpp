@@ -315,6 +315,28 @@ namespace execute {
         analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
     }
+
+    if ( actuator.type == actuator::VIBRATION_RING ) {
+    
+      // /(OUTPUT ENABLE)
+      digitalWrite ( actuator.pins [ 0 ], LOW );
+      // DATA
+      if ( parameter [ 0 ] == 0 ) {
+        digitalWrite ( actuator.pins [ 1 ], LOW );
+      }
+      else {
+        digitalWrite ( actuator.pins [ 1 ], HIGH );
+      }
+      // CLOCK
+      for ( uint8_t clock = 0; clock < 8; clock++ ) {
+        digitalWrite ( actuator.pins [ 2 ], HIGH );
+        digitalWrite ( actuator.pins [ 2 ], LOW );
+      }
+      // LATCH ENABLE
+      digitalWrite ( actuator.pins [ 3 ], HIGH );
+      digitalWrite ( actuator.pins [ 3 ], LOW );
+
+    }
   
   }
 
