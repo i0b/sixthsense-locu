@@ -1,7 +1,7 @@
 #include <SPI.h>
 #include <six.h>
 #include <execute.h>
-#include <RBL_nRF8001.h>
+#include <ble_shield.h>
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
@@ -45,7 +45,7 @@ void command(char c) {
     }
 
     else if ( c >= '0' && c <= '9' ) {
-      byte value = map ( c, '0', '9', 0, 255 );
+      byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
       char command[20];
       snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
       
@@ -96,7 +96,7 @@ void setup () {
   //ble_set_name("LOCU");
   
   // init. and start BLE library.
-  //ble_begin();
+  ble_begin();
 
  
   // set environment 
@@ -117,7 +117,6 @@ ISR(TIMER1_COMPA_vect) {
 
 void loop()
 {
-/*
 //TODO REPLACE REQ_PACKET, EVAL_COMMAND
   // Bluetooth
   // if new RX data available
@@ -135,18 +134,8 @@ void loop()
             Serial.print ( "Received package: " );
             Serial.println ( PACKET_DATA );
 
-            if ( six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET ) == 0 ) {
-              Serial.println("VALIDE package received");
-              if ( six::eval_command ( &REQUEST_PACKET, &RESPONSE_PACKET ) == 0 ) {
-                Serial.println("OK new settings applied");
-              }
-              else {
-                Serial.println("ERROR applying new settings");
-              }
-            }
-            else {
-              Serial.println("INVALIDE package received");
-            } 
+            six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
+            six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
           }
         }
         else
@@ -159,7 +148,6 @@ void loop()
   }
 
   ble_do_events();
-*/
 }
 
 void serialEvent() {

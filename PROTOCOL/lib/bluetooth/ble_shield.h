@@ -10,8 +10,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 */
 
-#ifndef  _RBL_NRF8001_H
-#define _RBL_NRF8001_H
+#ifndef  _BLE_SHIELD_H
+#define _BLE_SHIELD_H
 
 #include <boards.h>
 #include <lib_aci.h>
@@ -22,7 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #include <avr/interrupt.h>
 
 /* Put the nRF8001 setup in the RAM of the nRF8001.*/
-#include "RBL_services.h"
+#include "ble_shield_services.h"
 /* Include the services_lock.h to put the setup in the OTP memory of the nRF8001.
 This would mean that the setup cannot be changed once put in.
 However this removes the need to do the setup of the nRF8001 on every reset.*/

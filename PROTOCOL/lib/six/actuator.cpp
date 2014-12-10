@@ -59,7 +59,7 @@ namespace actuator {
       // # pins
       1,
       // pins: PWM
-      { 8 },
+      { 13 },
       // type
       SERVO
     }

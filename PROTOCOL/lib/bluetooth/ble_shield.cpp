@@ -1,4 +1,5 @@
 
+
 /*
 
 Copyright (c) 2012, 2013 RedBearLab
@@ -11,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 */
 
-#include "RBL_nRF8001.h"
+#include "ble_shield.h"
 
 #ifdef SERVICES_PIPE_TYPE_MAPPING_CONTENT
     static services_pipe_type_mapping_t
@@ -88,7 +89,7 @@ void ble_set_pins(uint8_t reqn, uint8_t rdyn)
 #if defined(BLEND_MICRO)
     return;
 #else
-	reqn_pin = reqn;
+  reqn_pin = reqn;
     rdyn_pin = rdyn;
 #endif
 }
@@ -134,8 +135,8 @@ void ble_begin()
     aci_state.aci_pins.active_pin            = UNUSED;
     aci_state.aci_pins.optional_chip_sel_pin = UNUSED;
 
-    aci_state.aci_pins.interface_is_interrupt	  = false;
-    aci_state.aci_pins.interrupt_number			  = 4;//1;
+    aci_state.aci_pins.interface_is_interrupt   = false;
+    aci_state.aci_pins.interrupt_number       = 4;//1;
 
     //We reset the nRF8001 here by toggling the RESET line connected to the nRF8001
     //If the RESET line is not available we call the ACI Radio Reset to soft reset the nRF8001
@@ -150,7 +151,7 @@ void ble_begin()
 static volatile byte ack = 0;
 
 void ble_write(unsigned char data)
-{	    
+{     
     if(tx_buffer_len == MAX_TX_BUFF)
     {
             return;
@@ -167,21 +168,21 @@ void ble_write_bytes(unsigned char *data, uint8_t len)
 
 int ble_read()
 {
-	int data;
-	if(rx_buffer_len == 0) return -1;
-	if(p_before == &rx_buff[MAX_RX_BUFF])
-	{
+  int data;
+  if(rx_buffer_len == 0) return -1;
+  if(p_before == &rx_buff[MAX_RX_BUFF])
+  {
         p_before = &rx_buff[0];
-	}
-	data = *p_before;
-	p_before ++;
-	rx_buffer_len--;
-	return data;
+  }
+  data = *p_before;
+  p_before ++;
+  rx_buffer_len--;
+  return data;
 }
 
 unsigned char ble_available()
 {
-	return rx_buffer_len;
+  return rx_buffer_len;
 }
 
 unsigned char ble_connected()
