@@ -57,6 +57,8 @@ namespace execute {
     TCCR1B |= (1 << CS12);    // 256 prescaler 
     TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
     interrupts();             // enable all interrupts
+    
+    ROTATION_ACTIVE_VIBRATOR = 1;
 
     Serial.println ( "six initialized.\r\n" );
     return 0;
@@ -234,8 +236,9 @@ namespace execute {
     if ( actuator.type == actuator::VIBRATION_RING ) {
       analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
+      //TODO remove hard coded value if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
       if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
-        if ( ROTATION_ACTIVE_VIBRATOR == 8 ) {
+        if ( ROTATION_ACTIVE_VIBRATOR == 4 ) {
           // push one to data
           digitalWrite ( actuator.pins [ 1 ], HIGH );
 
@@ -317,25 +320,30 @@ namespace execute {
     }
 
     if ( actuator.type == actuator::VIBRATION_RING ) {
+
+      set_enabled_vibrators ( actuator, parameter [ 1 ] );
+
+      // -- PWM seems not to work, yet: analogWrite ( actuator.pins [ 0 ], 10 );
     
+      /*
       // /(OUTPUT ENABLE)
       digitalWrite ( actuator.pins [ 0 ], LOW );
-      // DATA
-      if ( parameter [ 0 ] == 0 ) {
-        digitalWrite ( actuator.pins [ 1 ], LOW );
-      }
-      else {
-        digitalWrite ( actuator.pins [ 1 ], HIGH );
-      }
       // CLOCK
       for ( uint8_t clock = 0; clock < 8; clock++ ) {
+        // DATA
+        if ( clock < parameter [ 0 ] ) {
+          digitalWrite ( actuator.pins [ 1 ], HIGH );
+        }
+        else {
+          digitalWrite ( actuator.pins [ 1 ], LOW );
+        }
         digitalWrite ( actuator.pins [ 2 ], HIGH );
         digitalWrite ( actuator.pins [ 2 ], LOW );
       }
       // LATCH ENABLE
       digitalWrite ( actuator.pins [ 3 ], HIGH );
       digitalWrite ( actuator.pins [ 3 ], LOW );
-
+      */
     }
   
   }

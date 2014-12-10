@@ -34,8 +34,9 @@ void command(char c) {
     else if (c == 'v') {
       execute_command ( "SM 0 VIB SIX/0.1" );
     }
-    else if (c == 'r') {
-      execute_command ( "SM 0 ROT SIX/0.1" );
+    else if (c == 'n') {
+      execute_command ( "SM 2 ROT SIX/0.1" );
+      execute_command ( "SP 2 30 SIX/0.1" );
     }
     else if (c == 'o') {
       execute_command ( "SM 0 OFF SIX/0.1" );
@@ -63,14 +64,23 @@ void command(char c) {
     else if (c == 'p') {
       execute_command ( "GP 0 SIX/0.1" );
     }
-    else if (c == 'h') {
+    else if (c == 'q') {
       execute_command ( "SM 2 SERVO SIX/0.1" );
     }
-    else if (c == 'j') {
-      execute_command ( "SV 2 0 SIX/0.1" );
+    else if (c == 'w') {
+      execute_command ( "SP 2 0 SIX/0.1" );
     }
-    else if (c == 'k') {
-      execute_command ( "SV 2 1 SIX/0.1" );
+    else if (c == 'e') {
+      execute_command ( "SP 2 1 SIX/0.1" );
+    }
+    else if (c == 'r') {
+      execute_command ( "SP 2 3 SIX/0.1" );
+    }
+    else if (c == 't') {
+      execute_command ( "SP 2 7 SIX/0.1" );
+    }
+    else if (c == 'y') {
+      execute_command ( "SP 2 15 SIX/0.1" );
     }
 // HACK END
 }
