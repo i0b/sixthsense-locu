@@ -1,4 +1,6 @@
 #include <Arduino.h>
+//TODO REMOVE
+#include <Servo.h>
 
 #include "actuator.h"
 #include "execute.h"
@@ -322,8 +324,11 @@ namespace execute {
     if ( actuator.type == actuator::VIBRATION_RING ) {
 
       set_enabled_vibrators ( actuator, parameter [ 1 ] );
+      //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
-      // -- PWM seems not to work, yet: analogWrite ( actuator.pins [ 0 ], 10 );
+      // -- PWM seems not to work, yet: 
+      //analogWrite ( actuator.pins [ 0 ], 10 );
+      //analogWrite ( 11, 0 );
     
       /*
       // /(OUTPUT ENABLE)

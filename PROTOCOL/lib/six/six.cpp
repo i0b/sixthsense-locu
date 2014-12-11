@@ -252,7 +252,7 @@ namespace six {
         response->body_len += snprintf ( response->body + strlen ( response->body ), 
             REQUEST_RESPONSE_PACKET_LEN - response->body_len, 
             
-            "]\r\n"
+            " ]\r\n"
             "actuator type: %s\r\n"
             "\r\n",
             actuator::TYPE_STRING [ execute::executor [ uuid ].actuator->type ]

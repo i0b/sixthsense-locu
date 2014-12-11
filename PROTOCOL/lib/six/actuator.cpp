@@ -38,6 +38,7 @@ namespace actuator {
       4,
       // pins: PWM, DATA, CLOCK, LATCH ENABLE
       { 11, 46, 48, 47 },
+      //{ 10, 50, 52, 51 },
       // type
       VIBRATION_RING
     },

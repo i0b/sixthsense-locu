@@ -46,9 +46,10 @@ void command(char c) {
     }
 
     else if ( c >= '0' && c <= '9' ) {
-      byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
+      //byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
+      byte value =  map ( c, '0', '9', 0, 255 );
       char command[20];
-      snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+      snprintf ( command, 20, "SV 2 %d SIX/0.1", value );
       
       execute_command ( command );
     }
@@ -141,8 +142,11 @@ void loop()
   // if new RX data available
   if ( ble_available() )
   {
+    Serial.print ( "ACK\r\n" );
     while  ( ble_available() ) {
       char c = (char)ble_read();
+//TODO REMOVE temporary print all character
+      Serial.print ( c );
 
       if ( c == '\n' ) {
         if ( NEWLINE ) {
