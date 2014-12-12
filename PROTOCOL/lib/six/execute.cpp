@@ -11,6 +11,7 @@ namespace execute {
   void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void heartbeat ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+  void servo ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void wave ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
@@ -19,8 +20,13 @@ namespace execute {
 
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
 
+  //TODO REMOVE
+  Servo servomotor;
+
   uint32_t TIMER_VALUE;
   uint8_t  ROTATION_ACTIVE_VIBRATOR;
+
+  uint8_t SERVO_CHECK_ACTUATOR;
 
   function_t executor [ NUMBER_ACTUATORS ];
 
@@ -50,39 +56,41 @@ namespace execute {
     //  finally it will call the interrupt function every 10 ms
     //
     noInterrupts();           // disable all interrupts
-    TCCR1A = 0;
-    TCCR1B = 0;
-    TCNT1  = 0;
+    TCCR3A = 0;
+    TCCR3B = 0;
+    TCNT3  = 0;
 
-    OCR1A = 625;              // compare match register 16MHz/256/100Hz
-    TCCR1B |= (1 << WGM12);   // CTC mode
-    TCCR1B |= (1 << CS12);    // 256 prescaler 
-    TIMSK1 |= (1 << OCIE1A);  // enable timer compare interrupt
+    OCR3A = 625;              // compare match register 16MHz/236/100Hz
+    TCCR3B |= (1 << WGM32);   // CTC mode
+    TCCR3B |= (1 << CS32);    // 236 prescaler 
+    TIMSK3 |= (1 << OCIE3A);  // enable timer compare interrupt
+
+
+
+
+    // servo interrupt values
+    // fuction will be called every 10 us
+    
+    TCCR4A = 0;
+    TCCR4B = 0;
+    TCNT4  = 0;
+
+    // needed: up to 2 ms = 2000 us
+    #define _10uS 20 // 16000000 / 8 / 100000  ( F_CPU / PRESCALER / Hz -- 10 us = 1/10^5 )
+    OCR4A = _10uS;
+    TCCR4B |= (1 << WGM42);        // CTC mode - enable the output compare interrupt
+    TCCR4B |= (1 << CS41);         // set prescaler of 8
+    TIMSK4 |= (1 << OCIE4A);       // enable timer compare interrupt
+
     interrupts();             // enable all interrupts
     
+    SERVO_CHECK_ACTUATOR = 0;
     ROTATION_ACTIVE_VIBRATOR = 1;
 
+    //TODO REMOVE
+    servomotor.attach ( 13 );
+
     Serial.println ( "six initialized.\r\n" );
-    return 0;
-  }
-
-  void timer_isr () {
-    TIMER_VALUE++;
-
-    for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
-      executor [ uuid ].function ( TIMER_VALUE, *executor [ uuid ].actuator, executor [ uuid ].parameter );
-    }
-  }
-
-  int set_intensity ( uint8_t uuid, int intensity ) {
-    executor [ uuid ].parameter[0] = intensity;
-
-    return 0;
-  }
-
-  int set_parameter ( uint8_t uuid, int parameter ) {
-    executor [ uuid ].parameter[1] = parameter;
-
     return 0;
   }
 
@@ -106,6 +114,11 @@ namespace execute {
       case execute::WAVING:
         executor [ uuid ].mode = execute::WAVING;
         executor [ uuid ].function = &wave;
+        break;
+      
+      case execute::SERVO:
+        executor [ uuid ].mode = execute::SERVO;
+        executor [ uuid ].function = &servo;
         break;
 
       case execute::VIBRATION :
@@ -277,49 +290,24 @@ namespace execute {
     }
   }
 
-  void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
+  void servo ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
+  // for detailed information about how to write to servos see:
+  // http://www.mikrocontroller.net/articles/Modellbauservo_Ansteuerung
+  
+    if ( actuator.type == actuator::SERVO ) {
 
-    if ( actuator.type == actuator::VIBRATION_RING ) {
-      analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
-    }
+      // delay in ms, where 1 eq 0°, 2 eq 180°
+      servomotor.write ( parameter [ 0 ] );
+      //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
+      //digitalWrite ( actuator.pins [ 0 ], HIGH );
+      //delayMicroseconds( value );
+      //digitalWrite ( actuator.pins [ 0 ], LOW );
 
-    if ( actuator.type == actuator::VIBRATION_ARRAY ) {
-
-      byte value;
-      if ( parameter [ 0 ] == 0 ) {
-        value = 0;
-      }
-      else {
-        value = 1;
-      }
-
-      for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
-        digitalWrite ( actuator.pins [ pin ], value );
-      }
     }
 
   }
 
-  void wave ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
-  
-    if ( actuator.type == actuator::SERVO ) {
-
-      /*
-      uint32_t local_interval = timer_value % ( 100 );
-
-      if ( local_interval == 0 ) {
-        Serial.println ( 255/2 );
-        analogWrite ( actuator.pins [ 0 ], 255/2 );
-      }
-      else if ( local_interval == 50 ) {
-        Serial.println ( parameter [ 0 ] );
-        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
-      }
-      */
-
-        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
-
-    }
+  void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
 
     if ( actuator.type == actuator::VIBRATION_RING ) {
 
@@ -350,7 +338,89 @@ namespace execute {
       digitalWrite ( actuator.pins [ 3 ], LOW );
       */
     }
-  
+
+    if ( actuator.type == actuator::VIBRATION_ARRAY ) {
+
+      byte value;
+      if ( parameter [ 0 ] == 0 ) {
+        value = 0;
+      }
+      else {
+        value = 1;
+      }
+
+      for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+        digitalWrite ( actuator.pins [ pin ], value );
+      }
+    }
+
+  }
+
+  void wave ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
+  }
+
+// -----------------------------------------------------------------------------------------------
+// ------------------------     INTERRUPT FUNCTIONS   --------------------------------------------
+// -----------------------------------------------------------------------------------------------
+
+  void timer_isr () {
+    TIMER_VALUE++;
+
+    for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
+      executor [ uuid ].function ( TIMER_VALUE, *executor [ uuid ].actuator, executor [ uuid ].parameter );
+    }
+  }
+
+  int set_intensity ( uint8_t uuid, int intensity ) {
+    executor [ uuid ].parameter[0] = intensity;
+
+    return 0;
+  }
+
+  int set_parameter ( uint8_t uuid, int parameter ) {
+    executor [ uuid ].parameter[1] = parameter;
+
+    return 0;
+  }
+
+// -----------------------------------------------------------------------------------------------
+
+  void servo_isr () {
+    //#define _10uS 20 // 16000000 / 8 / 100000  ( F_CPU / PRESCALER / Hz -- 10 us = 1/10^5 )
+    //OCR4A = _10uS;
+
+    // reset pin of current servo - actuator
+    //
+
+    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO ) &&
+         ( executor [ SERVO_CHECK_ACTUATOR ].mode = execute::SERVO ) ) {
+      digitalWrite ( executor [ SERVO_CHECK_ACTUATOR ].actuator->pins [ 0 ], LOW );
+    }
+    
+    // select next actuator 
+    if ( SERVO_CHECK_ACTUATOR > NUMBER_ACTUATORS ) {
+      SERVO_CHECK_ACTUATOR = 0;
+    }
+    else {
+      SERVO_CHECK_ACTUATOR++;
+    }
+
+    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO ) &&
+         ( executor [ SERVO_CHECK_ACTUATOR ].mode = execute::SERVO ) &&
+         ( executor [ SERVO_CHECK_ACTUATOR ].parameter [ 0 ] > 0 ) ) {
+
+      digitalWrite ( executor [ SERVO_CHECK_ACTUATOR ].actuator->pins [ 0 ], HIGH );
+
+      // servo: 1 ms equals   0°
+      //        2 ms equals 180°
+      //  10 us * 100 = 1 ms - 10 us * 200 = 2 ms
+      OCR4A = _10uS * map ( executor [ SERVO_CHECK_ACTUATOR ].parameter [ 0 ], 0, 180, 100, 200 );
+    }
+    else {
+      // wait preset time until continue - here: 1 ms
+      OCR4A = _10uS * 100;
+    }
+
   }
 
 }

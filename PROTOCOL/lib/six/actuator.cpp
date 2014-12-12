@@ -9,6 +9,7 @@ namespace actuator {
   //
 
   actuator_t actuators [ NUMBER_ACTUATORS ] = {
+    // #0
     {
       // description
       "8-bit controllable interface: left arm vibrator",
@@ -20,6 +21,7 @@ namespace actuator {
       VIBRATION_ARRAY
     },
     
+    // #1
     {
       // description
       "Darlington array: right arm vibrator band",
@@ -31,6 +33,7 @@ namespace actuator {
       VIBRATION_ARRAY
     },
 
+    // #2
     {
       // description
       "Shift + Darlington: currently not working!",
@@ -43,6 +46,7 @@ namespace actuator {
       VIBRATION_RING
     },
 
+    // #3
     {
       // description
       "H-bridge: controlling peltier on left arm's first elements",
@@ -54,6 +58,7 @@ namespace actuator {
       TEMPERATURE
     },
 
+    // #4
     {
       // description
       "Servo: this is a test to verify if pressure would be even possible",

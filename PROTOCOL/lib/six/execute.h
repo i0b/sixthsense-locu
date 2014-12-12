@@ -13,6 +13,7 @@
         EXECUTION_MODE(VIBRATION)     \
         EXECUTION_MODE(HEARTBEAT)     \
         EXECUTION_MODE(ROTATION)      \
+        EXECUTION_MODE(SERVO)         \
         EXECUTION_MODE(WAVING)        \
 
 #ifndef GENERATOR
@@ -52,6 +53,7 @@ namespace execute {
 
   // helper function
   void timer_isr ();
+  void servo_isr ();
 
 }
 

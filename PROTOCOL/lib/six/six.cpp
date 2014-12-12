@@ -336,7 +336,7 @@ namespace six {
         mode = execute::VIBRATION;
       }
       else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
-        mode = execute::WAVING;
+        mode = execute::SERVO;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::OFF;

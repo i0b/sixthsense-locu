@@ -3,6 +3,7 @@
 #include <execute.h>
 #include <RBL_nRF8001.h>
 
+
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
 
@@ -47,9 +48,9 @@ void command(char c) {
 
     else if ( c >= '0' && c <= '9' ) {
       //byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
-      byte value =  map ( c, '0', '9', 0, 255 );
+      byte value =  map ( c, '0', '9', 0, 180 );
       char command[20];
-      snprintf ( command, 20, "SV 2 %d SIX/0.1", value );
+      snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
       
       execute_command ( command );
     }
@@ -66,7 +67,7 @@ void command(char c) {
       execute_command ( "GP 0 SIX/0.1" );
     }
     else if (c == 'q') {
-      execute_command ( "SM 2 SERVO SIX/0.1" );
+      execute_command ( "SM 2 VIB SIX/0.1" );
     }
     else if (c == 'w') {
       execute_command ( "SP 2 0 SIX/0.1" );
@@ -128,12 +129,21 @@ void setup () {
 
 // timer compare interrupt service routine
 // calls timer_isr every 10ms
+// calls servo_isr every 10us
 // parameter set in init_executor
-ISR(TIMER1_COMPA_vect) {
+ISR(TIMER3_COMPA_vect) {
   noInterrupts();
   execute::timer_isr();
   interrupts();
 }
+/*
+ISR(TIMER4_COMPA_vect) {
+  noInterrupts();
+  execute::servo_isr();
+  interrupts();
+}
+*/
+
 
 void loop()
 {
