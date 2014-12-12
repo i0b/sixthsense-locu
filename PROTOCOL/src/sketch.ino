@@ -136,13 +136,11 @@ ISR(TIMER3_COMPA_vect) {
   execute::timer_isr();
   interrupts();
 }
-/*
 ISR(TIMER4_COMPA_vect) {
   noInterrupts();
   execute::servo_isr();
   interrupts();
 }
-*/
 
 
 void loop()
