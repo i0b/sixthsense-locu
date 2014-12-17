@@ -235,17 +235,17 @@ namespace execute {
     
     uint32_t local_interval = timer_value % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ] );
 
-    if ( actuator.type != actuator::SHIFT ) {
+    if ( actuator.type == actuator::SHIFT ) {
 
       // first beat high
       if ( local_interval == 0 ) {
-        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+        analogWrite ( actuator.pins [ 0 ], 0 ); // parameter [ 0 ] );
       }
 
       // first beat low
       // turn of after on-delay passed
       else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
-        analogWrite ( actuator.pins [ 0 ], 0 );
+        analogWrite ( actuator.pins [ 0 ], 255 );
       }
 
      /* 
@@ -319,7 +319,7 @@ namespace execute {
     if ( actuator.type == actuator::SERVO ) {
 
       // delay in ms, where 1 eq 0°, 2 eq 180°
-      //servomotor.write ( parameter [ 0 ] );
+      servomotor.write ( parameter [ 0 ] );
       //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
       //digitalWrite ( actuator.pins [ 0 ], HIGH );
       //delayMicroseconds( value );

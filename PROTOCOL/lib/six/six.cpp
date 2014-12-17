@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <SPI.h>
+#include <RBL_nRF8001.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -429,6 +430,17 @@ namespace six {
 //
 //
   int send_response_packet ( response_packet_t* packet ) {
+    Serial.println ( "sending response..." );
+
+    char response_buf [ REQUEST_RESPONSE_PACKET_LEN ];
+
+    snprintf ( response_buf, REQUEST_RESPONSE_PACKET_LEN,
+        "%d %s SIX/%d.%d\r\n"
+        "%s\r\n\r\n",
+        packet->status.CODE, packet->status.DESCRIPTION, packet->version_major, packet->version_minor,
+        packet->body );
+
+    /*
     Serial.print ( packet->status.CODE );
     Serial.print ( " " );
     Serial.print ( packet->status.DESCRIPTION );
@@ -446,6 +458,11 @@ namespace six {
 
     Serial.print ( "\r\n" );
     Serial.print ( "\r\n" );
+    */
+
+    Serial.println ( response_buf );
+    // TODO check if cast is correct!
+    ble_write_bytes ( (unsigned char*)response_buf, strlen ( response_buf ) );
 
     return 0;
   }

@@ -22,7 +22,8 @@ void execute_command ( char* command ) {
 void command(char c) {
 // HACK
     if (c == 'b') {
-      execute_command ( "SM 0 BEAT SIX/0.1" );
+      execute_command ( "SM 2 BEAT SIX/0.1" );
+      execute_command ( "SP 2 40 SIX/0.1" );
     }
     else if (c == 's') {
       execute_command ( "SP 0 800 SIX/0.1" );
@@ -30,7 +31,7 @@ void command(char c) {
     else if (c == 'f') {
       execute_command ( "SP 0 600 SIX/0.1" );
     }
-    else if (c == 'v') {
+    else if (c == 'v' ) {
       execute_command ( "SM 0 VIB SIX/0.1" );
     }
     else if (c == 'n') {
@@ -41,8 +42,8 @@ void command(char c) {
       execute_command ( "SM 0 OFF SIX/0.1" );
       execute_command ( "SM 1 OFF SIX/0.1" );
       execute_command ( "SM 2 OFF SIX/0.1" );
-      execute_command ( "SM 3 OFF SIX/0.1" );
       execute_command ( "SV 3 0 SIX/0.1" );
+      execute_command ( "SM 3 OFF SIX/0.1" );
       execute_command ( "SM 4 OFF SIX/0.1" );
     }
     else if (c == 'a') {
@@ -89,6 +90,8 @@ void command(char c) {
     }
     else if (c == 'c') {
       execute_command ( "SM 2 ELEC SIX/0.1" );
+
+      execute_command ( "SM 3 TEMP SIX/0.1" );
       execute_command ( "SV 3 2 SIX/0.1" );
     }
     else if (c == 'h') {
