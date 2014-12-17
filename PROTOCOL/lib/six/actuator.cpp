@@ -43,7 +43,7 @@ namespace actuator {
       { 11, 46, 48, 47 },
       //{ 10, 50, 52, 51 },
       // type
-      VIBRATION_RING
+      SHIFT
     },
 
     // #3
@@ -51,11 +51,11 @@ namespace actuator {
       // description
       "H-bridge: controlling peltier on left arm's first elements",
       // # pins
-      2,
-      // pins: PWM, DIRECTION
-      { 12, 22 },
+      3,
+      // pins: PWM, DIR1, DIR2
+      { 12, 6, 7 },
       // type
-      TEMPERATURE
+      PELTIER
     },
 
     // #4

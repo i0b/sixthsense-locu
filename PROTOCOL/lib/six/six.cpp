@@ -24,7 +24,7 @@ namespace six {
   typedef enum { EMPTY, INT, STRING } value_t;
   const char* INSTRUCTIONS_STRING[] = { FOREACH_INSTRUCTION ( GENERATE_STRING ) };
 
-  char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  );
+  char* parse_next ( char* packet_segment, size_t* packet_len, size_t* segment_len, char* segment_type  );
   int set_packet_body ( response_packet_t* packet, value_t type, const char* value_information, const char* char_value, int int_value );
   int create_response_packet ( response_packet_t* packet, status::status_type status );
 
@@ -35,10 +35,13 @@ namespace six {
     char* command = raw_packet;
     size_t command_len;
 
-    raw_packet = parse_next ( raw_packet, &command_len, "command" );
+    raw_packet = parse_next ( raw_packet, packet_len, &command_len, "command" );
 
     if ( raw_packet == 0 ) {
-      response->status.status = status::SIX_ERROR_PARSING;
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_ERROR_PARSING );
+      send_response_packet ( response );
+
       return -1;
     }
     
@@ -60,10 +63,13 @@ namespace six {
       size_t uuid_len;
 
       // read uuid
-      raw_packet = parse_next ( raw_packet, &uuid_len, "uuid" );
+      raw_packet = parse_next ( raw_packet, packet_len, &uuid_len, "uuid" );
 
       if ( raw_packet == 0 ) {
-        response->status.status = status::SIX_ERROR_PARSING;
+        set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+        create_response_packet ( response, status::SIX_ERROR_PARSING );
+        send_response_packet ( response );
+
         return -1;
       }
     
@@ -73,7 +79,10 @@ namespace six {
       int uuid_int = atoi ( uuid );
 
       if ( uuid_int < 0 || uuid_int > 255 ) {
-        response->status.status = status::SIX_ERROR_PARSING;
+        set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+        create_response_packet ( response, status::SIX_ERROR_PARSING );
+        send_response_packet ( response );
+
         return -1;
       }
 
@@ -96,10 +105,13 @@ namespace six {
 
         // read value
         value = raw_packet;
-        raw_packet = parse_next ( raw_packet, &value_len, "value" );
+        raw_packet = parse_next ( raw_packet, packet_len, &value_len, "value" );
       
         if ( raw_packet == 0 ) {
-          response->status.status = status::SIX_ERROR_PARSING;
+          set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+          create_response_packet ( response, status::SIX_ERROR_PARSING );
+          send_response_packet ( response );
+
           return -1;
         }
       
@@ -117,6 +129,13 @@ namespace six {
         else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {
           request->command.instruction = six::SET_PARAMETER;
         }
+        else {
+          set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+          create_response_packet ( response, status::SIX_COMMAND_NOT_FOUND );
+          send_response_packet ( response );
+
+          return -1;
+        }
       }
     }
 
@@ -127,16 +146,24 @@ namespace six {
       raw_packet += strlen ( protocol_name );
     }
     else {
-      response->status.status = status::SIX_ERROR_PARSING;
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_ERROR_PARSING );
+      send_response_packet ( response );
+
       return -1;
     }
     
     *packet_len -= strlen ( protocol_name );
 
-    char* dot = strchr ( raw_packet, '.' );
+    // TODO !!!!!!!!! replace STRCHR !!!!!!!!!!!!!!!!!
+    //char* dot = strchr ( raw_packet, '.' );
+    char* dot = (char*) memchr ( (void*)raw_packet, '.', *packet_len );
 
     if ( dot == NULL ) {
-      response->status.status = status::SIX_ERROR_PARSING;
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_ERROR_PARSING );
+      send_response_packet ( response );
+
       return -1;
     }
 
@@ -151,12 +178,15 @@ namespace six {
     size_t minor_len = strlen ( minor );
     
 
-    *packet_len -= major_len + minor_len;
+    *packet_len -= major_len + minor_len + 1; // 1 = '.'
 
     int major_int = atoi ( major );
 
     if ( major_int < 0 || major_int > 255 ) {
-      response->status.status = status::SIX_ERROR_PARSING;
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_WRONG_VERSION );
+      send_response_packet ( response );
+
       return -1;
     }
 
@@ -164,7 +194,10 @@ namespace six {
     int minor_int = atoi ( minor );
 
     if ( minor_int < 0 || minor_int > 255 ) {
-      response->status.status = status::SIX_ERROR_PARSING;
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_WRONG_VERSION );
+      send_response_packet ( response );
+
       return -1;
     }
 
@@ -172,7 +205,7 @@ namespace six {
     request->version_minor = (uint8_t) minor_int;
     
 
-    char output_buffer[100];
+    char output_buffer[150];
 
     snprintf ( output_buffer, sizeof output_buffer, "parsed_request = { command = '%s', "
         "uuid = '%d', value = '%s', packet_version = '%d.%d' }\r\n",
@@ -184,12 +217,17 @@ namespace six {
         request->version_minor );
     Serial.print ( output_buffer );
    
-
+/*
     if ( *packet_len != 0 ) {
       // TODO sscanf - SEE ABOVE
       // actually it should always be zero - the last string (minor) might be corrupt though
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_SERVER_ERROR );
+      send_response_packet ( response );
+
       return -1;
     }
+*/
 
     return 0;
   }
@@ -266,15 +304,9 @@ namespace six {
       response->body_len = strlen ( response->body );
 
 
-      response->status = status::status_description [ status::SIX_OK ];
-
       // TODO find the right place for this
-      if ( response->status.status != status::SIX_OK ) {
+      if ( create_response_packet ( response, status::SIX_OK ) != 0 )
         return -1;
-      }
-      
-      response->version_major = six::version_major;
-      response->version_minor = six::version_minor;
 
       // TODO find the right place for this
       send_response_packet ( response );
@@ -335,13 +367,23 @@ namespace six {
       else if ( strncasecmp ( "VIB", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::VIBRATION;
       }
+      else if ( strncasecmp ( "TEMP", request->command.value, request->command.value_len ) == 0 ) {
+        mode = execute::TEMPERATURE;
+      }
       else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SERVO;
+      }
+      else if ( strncasecmp ( "ELEC", request->command.value, request->command.value_len ) == 0 ) {
+        mode = execute::SET_ELECTRICAL;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::OFF;
       }
       else {
+        set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+        create_response_packet ( response, status::SIX_NO_SUCH_MODE );
+        send_response_packet ( response );
+
         return -1;
       }
       
@@ -414,38 +456,34 @@ namespace six {
 // ---------------------------------------------------------------------------------------------------------------------
   
   // returns new position of inside the packet after the space
-  char* parse_next ( char* packet_segment, size_t* segment_len, char* segment_type  ) {
-      char* space = strchr ( packet_segment, ' ' );
-     
-      if ( space == NULL ) {
-       return 0;
-      }
+  char* parse_next ( char* packet_segment, size_t* packet_len, size_t* segment_len, char* segment_type  ) {
 
-      else {
-       *segment_len = space - packet_segment;
-      }
+    //TODO use memchr instead!
+    char* space = (char*) memchr ( (void*) packet_segment, ' ', *packet_len );
+    //char* space = strchr ( packet_segment, ' ' );
+   
+    if ( space == NULL ) {
+      return NULL;
+    }
 
-      if ( *segment_len < 1 ) {
-        return 0;
-      }
+    else {
+     *segment_len = space - packet_segment;
+    }
 
-      *space = '\0';
+    if ( *segment_len < 1 ) {
+      return NULL;
+    }
 
-      /*
-      // output example: "protocol: six/0.1"
-      Serial.print ( segment_type );
-      Serial.print ( ": " );
-      Serial.println ( packet_segment );
-      */
+    *space = '\0';
 
-      return space + 1;
+    return space + 1;
   }
 
   int create_response_packet ( response_packet_t* packet, status::status_type status ) {
 
     packet->version_major = six::version_major;
     packet->version_minor = six::version_minor;
-    //, size_t body_len ) {
+
     packet->status = status::status_description [ status ];
 
     // TODO find the right place for this

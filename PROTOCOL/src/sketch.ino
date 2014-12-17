@@ -7,8 +7,6 @@
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
 
-bool NEWLINE;
-
 six::request_packet_t  REQUEST_PACKET;
 six::response_packet_t RESPONSE_PACKET;
 
@@ -41,6 +39,11 @@ void command(char c) {
     }
     else if (c == 'o') {
       execute_command ( "SM 0 OFF SIX/0.1" );
+      execute_command ( "SM 1 OFF SIX/0.1" );
+      execute_command ( "SM 2 OFF SIX/0.1" );
+      execute_command ( "SM 3 OFF SIX/0.1" );
+      execute_command ( "SV 3 0 SIX/0.1" );
+      execute_command ( "SM 4 OFF SIX/0.1" );
     }
     else if (c == 'a') {
       execute_command ( "SM 4 SERVO SIX/0.1" );
@@ -84,11 +87,20 @@ void command(char c) {
     else if (c == 'y') {
       execute_command ( "SP 2 15 SIX/0.1" );
     }
+    else if (c == 'c') {
+      execute_command ( "SM 2 ELEC SIX/0.1" );
+      execute_command ( "SV 3 2 SIX/0.1" );
+    }
+    else if (c == 'h') {
+      execute_command ( "SM 3 TEMP SIX/0.1" );
+      execute_command ( "SV 3 1 SIX/0.1" );
+    }
 // HACK END
 }
 
 // needed for creating PACKET_DATA
 int append ( char c ) {
+  //PACKET_DATA [ ( PACKET_LEN++ ) % REQUEST_RESPONSE_PACKET_LEN ] = (char) ble_read();
   if ( PACKET_LEN < REQUEST_RESPONSE_PACKET_LEN ) {
     PACKET_DATA [ PACKET_LEN ] = c;
     PACKET_LEN++;
@@ -121,7 +133,6 @@ void setup () {
 
  
   // set environment 
-  NEWLINE = 0;
   PACKET_LEN = 0;
   RESPONSE_PACKET.body = PACKET_DATA;
 }
@@ -147,37 +158,24 @@ ISR(TIMER4_COMPA_vect) {
 
 void loop()
 {
-//TODO REPLACE REQ_PACKET, EVAL_COMMAND
+//TODO wait for correct ending
   // Bluetooth
   // if new RX data available
-  if ( ble_available() )
-  {
-    Serial.print ( "ACK\r\n" );
-    while  ( ble_available() ) {
-      char c = (char)ble_read();
-//TODO REMOVE temporary print all character
-      Serial.print ( c );
-
-      if ( c == '\n' ) {
-        if ( NEWLINE ) {
-          if ( append( '\0' ) == 0 ) {
-            NEWLINE = 0;
-            PACKET_LEN = 0;
-            
-            Serial.print ( "Received package: " );
-            Serial.println ( PACKET_DATA );
-
-            six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
-            six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
-          }
-        }
-        else
-          NEWLINE = 1;
-      }
-      else {
-        append ( c );
-      }
+  if ( ble_available() ) {
+    while ( ble_available() ) {
+      //PACKET_DATA [ ( PACKET_LEN++ ) % REQUEST_RESPONSE_PACKET_LEN ] = (char) ble_read();
+      char c = (char) ble_read();
+      append ( c );
     }
+
+  //if ( PACKET_LEN > 3 && PACKET_DATA [ PACKET_LEN-4 ] == '\r'
+  //                    && PACKET_DATA [ PACKET_LEN-3 ] == '\n'
+  //                    && PACKET_DATA [ PACKET_LEN-2 ] == '\r'
+  //                    && PACKET_DATA [ PACKET_LEN-1 ] == '\n' ) {
+    six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
+    six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+
+    PACKET_LEN = 0;
   }
 
   ble_do_events();
@@ -185,7 +183,6 @@ void loop()
 
 void serialEvent() {
   while (Serial.available()) {
-    // get the new byte:
     char c = (char)Serial.read();
     command(c);
   }
