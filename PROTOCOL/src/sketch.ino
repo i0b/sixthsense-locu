@@ -89,7 +89,7 @@ void command(char c) {
       execute_command ( "SP 2 15 SIX/0.1" );
     }
     else if (c == 'c') {
-      execute_command ( "SM 2 ELEC SIX/0.1" );
+      //execute_command ( "SM 2 ELEC SIX/0.1" );
 
       execute_command ( "SM 3 TEMP SIX/0.1" );
       execute_command ( "SV 3 2 SIX/0.1" );
