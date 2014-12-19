@@ -158,6 +158,72 @@ ISR(TIMER4_COMPA_vect) {
 }
 */
 
+/*
+void loop () {
+
+  execute_command ( "SM 2 VIB SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 1 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 3 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 7 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 15 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SM 2 OFF SIX/0.1" );
+  delay ( 1000 );
+
+  execute_command ( "SM 3 TEMP SIX/0.1" );
+  execute_command ( "SV 3 2 SIX/0.1" );
+  
+  execute_command ( "SM 2 ROT SIX/0.1" );
+  execute_command ( "SP 2 25 SIX/0.1" );
+  delay ( 4000 );
+  execute_command ( "SP 2 20 SIX/0.1" );
+  delay ( 3000 );
+  execute_command ( "SP 2 15 SIX/0.1" );
+  delay ( 3000 );
+  //execute_command ( "SM 2 OFF SIX/0.1" );
+  //delay ( 1000 );
+
+  execute_command ( "SM 3 TEMP SIX/0.1" );
+  execute_command ( "SV 3 1 SIX/0.1" );
+
+  execute_command ( "SM 2 BEAT SIX/0.1" );
+  execute_command ( "SP 2 60 SIX/0.1" );
+  delay ( 5000 );
+  execute_command ( "SP 2 45 SIX/0.1" );
+  delay ( 5000 );
+  execute_command ( "SM 3 OFF SIX/0.1" );
+  execute_command ( "SM 2 OFF SIX/0.1" );
+  delay ( 1000 );
+
+  
+  execute_command ( "SM 4 SERVO SIX/0.1" );
+  char command[20];
+  
+  for ( uint8_t value = 80; value <= 180; value = value + 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+  for ( uint8_t value = 180; value >= 0 && value <= 180; value = value - 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+  for ( uint8_t value = 0; value <= 80; value = value + 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+
+}
+*/
 
 void loop()
 {

@@ -48,12 +48,13 @@ namespace actuator {
 
     // #3
     {
+      // TODO --- DON'T USE 6,7,8,9!!
       // description
       "H-bridge: controlling peltier on left arm's first elements",
       // # pins
       3,
       // pins: PWM, DIR1, DIR2
-      { 12, 6, 7 },
+      { 12, 3, 4 },
       // type
       PELTIER
     },

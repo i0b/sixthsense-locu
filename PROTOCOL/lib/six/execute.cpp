@@ -130,31 +130,37 @@ namespace execute {
 
       case execute::VIBRATION :
         executor [ uuid ].mode = execute::VIBRATION;
-        executor [ uuid ].function = &vibrate; 
 
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
           set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
         }
+        
+        executor [ uuid ].function = &vibrate; 
         
         break;
 
       case execute::HEARTBEAT :
         executor [ uuid ].mode = execute::HEARTBEAT;
-        executor [ uuid ].function = &heartbeat;
         
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
           set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
         }
         
+        executor [ uuid ].function = &heartbeat;
+        
         break;
 
       case execute::ROTATION :
         executor [ uuid ].mode = execute::ROTATION;
+        
+        if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
+          // only one motor vibrating at the same time
+          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
+        }
+        
         executor [ uuid ].function = &rotate;
-        // only one motor vibrating at the same time
-        set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
 
         break;
 
@@ -214,6 +220,21 @@ namespace execute {
     // TODO map matches: VIBRATION - heartbeat, rotate, ...
 
   void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
+
+    if ( actuator.type == actuator::SHIFT ) {
+      set_enabled_vibrators ( actuator, 0x00 );
+    }
+
+    else if ( actuator.type == actuator::SERVO ) {
+      servomotor.write ( 80 );
+    }
+
+    else if ( actuator.type == actuator::PELTIER ) {
+      digitalWrite ( actuator.pins [ 0 ], LOW );
+      digitalWrite ( actuator.pins [ 1 ], LOW );
+      digitalWrite ( actuator.pins [ 2 ], LOW );
+    }
+
     // if temperatur:
     // analogWrite ( PWM_PIN, 0 );
     //
@@ -239,6 +260,7 @@ namespace execute {
 
       // first beat high
       if ( local_interval == 0 ) {
+      //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
         analogWrite ( actuator.pins [ 0 ], 0 ); // parameter [ 0 ] );
       }
 
