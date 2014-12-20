@@ -10,9 +10,9 @@
 
 #define FOREACH_TYPE(ACTUATOR_TYPE)    \
         ACTUATOR_TYPE(VIBRATION_ARRAY) \
-        ACTUATOR_TYPE(VIBRATION_RING)  \
+        ACTUATOR_TYPE(SHIFT)           \
         ACTUATOR_TYPE(ELECTRICAL)      \
-        ACTUATOR_TYPE(TEMPERATURE)     \
+        ACTUATOR_TYPE(PELTIER)         \
         ACTUATOR_TYPE(SERVO)           \
 
 #ifndef GENERATOR
@@ -25,7 +25,7 @@
 
 namespace actuator {
   typedef enum { FOREACH_TYPE ( GENERATE_ENUM ) } actuator_type;
-  //typedef enum { VIBRATION_ARRAY, VIBRATION_RING, ELECTRICAL, TEMPERATURE } actuator_type;
+  //typedef enum { VIBRATION_ARRAY, SHIFT, ELECTRICAL, TEMPERATURE } actuator_type;
 
   typedef struct {
     char* description;

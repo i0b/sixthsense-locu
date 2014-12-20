@@ -9,9 +9,11 @@ namespace status {
   
   typedef enum {
     SIX_OK,
-    SIX_NOT_FOUND,
+    SIX_COMMAND_NOT_FOUND,
+    SIX_NO_SUCH_MODE,
     SIX_SERVER_ERROR,
-    SIX_ERROR_PARSING
+    SIX_ERROR_PARSING,
+    SIX_WRONG_VERSION
   } status_type;
 
   typedef struct {

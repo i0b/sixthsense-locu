@@ -7,8 +7,6 @@
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
 
-bool NEWLINE;
-
 six::request_packet_t  REQUEST_PACKET;
 six::response_packet_t RESPONSE_PACKET;
 
@@ -24,7 +22,8 @@ void execute_command ( char* command ) {
 void command(char c) {
 // HACK
     if (c == 'b') {
-      execute_command ( "SM 0 BEAT SIX/0.1" );
+      execute_command ( "SM 2 BEAT SIX/0.1" );
+      execute_command ( "SP 2 40 SIX/0.1" );
     }
     else if (c == 's') {
       execute_command ( "SP 0 800 SIX/0.1" );
@@ -32,7 +31,7 @@ void command(char c) {
     else if (c == 'f') {
       execute_command ( "SP 0 600 SIX/0.1" );
     }
-    else if (c == 'v') {
+    else if (c == 'v' ) {
       execute_command ( "SM 0 VIB SIX/0.1" );
     }
     else if (c == 'n') {
@@ -41,6 +40,11 @@ void command(char c) {
     }
     else if (c == 'o') {
       execute_command ( "SM 0 OFF SIX/0.1" );
+      execute_command ( "SM 1 OFF SIX/0.1" );
+      execute_command ( "SM 2 OFF SIX/0.1" );
+      execute_command ( "SV 3 0 SIX/0.1" );
+      execute_command ( "SM 3 OFF SIX/0.1" );
+      execute_command ( "SM 4 OFF SIX/0.1" );
     }
     else if (c == 'a') {
       execute_command ( "SM 4 SERVO SIX/0.1" );
@@ -84,11 +88,22 @@ void command(char c) {
     else if (c == 'y') {
       execute_command ( "SP 2 15 SIX/0.1" );
     }
+    else if (c == 'c') {
+      //execute_command ( "SM 2 ELEC SIX/0.1" );
+
+      execute_command ( "SM 3 TEMP SIX/0.1" );
+      execute_command ( "SV 3 2 SIX/0.1" );
+    }
+    else if (c == 'h') {
+      execute_command ( "SM 3 TEMP SIX/0.1" );
+      execute_command ( "SV 3 1 SIX/0.1" );
+    }
 // HACK END
 }
 
 // needed for creating PACKET_DATA
 int append ( char c ) {
+  //PACKET_DATA [ ( PACKET_LEN++ ) % REQUEST_RESPONSE_PACKET_LEN ] = (char) ble_read();
   if ( PACKET_LEN < REQUEST_RESPONSE_PACKET_LEN ) {
     PACKET_DATA [ PACKET_LEN ] = c;
     PACKET_LEN++;
@@ -121,7 +136,6 @@ void setup () {
 
  
   // set environment 
-  NEWLINE = 0;
   PACKET_LEN = 0;
   RESPONSE_PACKET.body = PACKET_DATA;
 }
@@ -142,40 +156,93 @@ ISR(TIMER4_COMPA_vect) {
   interrupts();
 }
 
+/*
+void loop () {
+
+  execute_command ( "SM 2 VIB SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 1 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 3 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 7 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SP 2 15 SIX/0.1" );
+  delay ( 1000 );
+  execute_command ( "SM 2 OFF SIX/0.1" );
+  delay ( 1000 );
+
+  execute_command ( "SM 3 TEMP SIX/0.1" );
+  execute_command ( "SV 3 2 SIX/0.1" );
+  
+  execute_command ( "SM 2 ROT SIX/0.1" );
+  execute_command ( "SP 2 25 SIX/0.1" );
+  delay ( 4000 );
+  execute_command ( "SP 2 20 SIX/0.1" );
+  delay ( 3000 );
+  execute_command ( "SP 2 15 SIX/0.1" );
+  delay ( 3000 );
+  //execute_command ( "SM 2 OFF SIX/0.1" );
+  //delay ( 1000 );
+
+  execute_command ( "SM 3 TEMP SIX/0.1" );
+  execute_command ( "SV 3 1 SIX/0.1" );
+
+  execute_command ( "SM 2 BEAT SIX/0.1" );
+  execute_command ( "SP 2 60 SIX/0.1" );
+  delay ( 5000 );
+  execute_command ( "SP 2 45 SIX/0.1" );
+  delay ( 5000 );
+  execute_command ( "SM 3 OFF SIX/0.1" );
+  execute_command ( "SM 2 OFF SIX/0.1" );
+  delay ( 1000 );
+
+  
+  execute_command ( "SM 4 SERVO SIX/0.1" );
+  char command[20];
+  
+  for ( uint8_t value = 80; value <= 180; value = value + 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+  for ( uint8_t value = 180; value >= 0 && value <= 180; value = value - 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+  for ( uint8_t value = 0; value <= 80; value = value + 20 ) {
+    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+
+    execute_command ( command );
+    delay ( 500 );
+  }
+
+}
+*/
 
 void loop()
 {
-//TODO REPLACE REQ_PACKET, EVAL_COMMAND
+//TODO wait for correct ending
   // Bluetooth
   // if new RX data available
-  if ( ble_available() )
-  {
-    Serial.print ( "ACK\r\n" );
-    while  ( ble_available() ) {
-      char c = (char)ble_read();
-//TODO REMOVE temporary print all character
-      Serial.print ( c );
-
-      if ( c == '\n' ) {
-        if ( NEWLINE ) {
-          if ( append( '\0' ) == 0 ) {
-            NEWLINE = 0;
-            PACKET_LEN = 0;
-            
-            Serial.print ( "Received package: " );
-            Serial.println ( PACKET_DATA );
-
-            six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
-            six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
-          }
-        }
-        else
-          NEWLINE = 1;
-      }
-      else {
-        append ( c );
-      }
+  if ( ble_available() ) {
+    while ( ble_available() ) {
+      //PACKET_DATA [ ( PACKET_LEN++ ) % REQUEST_RESPONSE_PACKET_LEN ] = (char) ble_read();
+      char c = (char) ble_read();
+      append ( c );
     }
+
+  //if ( PACKET_LEN > 3 && PACKET_DATA [ PACKET_LEN-4 ] == '\r'
+  //                    && PACKET_DATA [ PACKET_LEN-3 ] == '\n'
+  //                    && PACKET_DATA [ PACKET_LEN-2 ] == '\r'
+  //                    && PACKET_DATA [ PACKET_LEN-1 ] == '\n' ) {
+    six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
+    six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
+
+    PACKET_LEN = 0;
   }
 
   ble_do_events();
@@ -183,7 +250,6 @@ void loop()
 
 void serialEvent() {
   while (Serial.available()) {
-    // get the new byte:
     char c = (char)Serial.read();
     command(c);
   }
