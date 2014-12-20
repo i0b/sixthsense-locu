@@ -1,4 +1,6 @@
 #include <Arduino.h>
+//TODO REMOVE
+#include <Servo.h>
 
 #include "actuator.h"
 #include "execute.h"
@@ -20,6 +22,9 @@ namespace execute {
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
 
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
+
+  //TODO REMOVE
+  Servo servomotor;
 
   uint32_t TIMER_VALUE;
   uint8_t  ROTATION_ACTIVE_VIBRATOR;
@@ -87,8 +92,10 @@ namespace execute {
 
     //TODO REMOVE
     servomotor.attach ( 13 );
+  /*
     pinMode ( 12, OUTPUT );
     digitalWrite ( 12, HIGH );
+  */
 
     Serial.println ( "six initialized.\r\n" );
 
@@ -336,7 +343,7 @@ namespace execute {
     if ( actuator.type == actuator::SERVO ) {
 
       // delay in ms, where 1 eq 0°, 2 eq 180°
-      //servomotor.write ( parameter [ 0 ] );
+      servomotor.write ( parameter [ 0 ] );
       //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
       //digitalWrite ( actuator.pins [ 0 ], HIGH );
       //delayMicroseconds( value );
