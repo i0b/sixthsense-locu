@@ -461,18 +461,25 @@ namespace execute {
     //
     switch ( actuator.type ) {
       case ( actuator::ELECTRO_CONTROL ) :
-        /*
-        uint8_t up     = actuator.pins [ 0 ];
-        uint8_t left   = actuator.pins [ 1 ];
-        uint8_t center = actuator.pins [ 2 ];
-        uint8_t right  = actuator.pins [ 3 ];
-        uint8_t down   = actuator.pins [ 4 ];
-
         // pins: LEFT, RIGHT, TOP, BOTTOM, CENTER
-        toggle_pin ( right, 1 );
-        toggle_pin (  down, 9 );
-        toggle_pin (    up, parameter [ 0 ] );
+        #define UP     0
+        #define LEFT   1
+        #define CENTER 2
+        #define RIGHT  3
+        #define DOWN   4
+
+        toggle_pin ( actuator.pins [ RIGHT ], 1 );
+        toggle_pin ( actuator.pins [ DOWN  ], 5 );
+        // set max value to 5
+        uint8_t value = parameter [ 0 ];
+
+        if ( parameter [ 0 ] < 1 || parameter [ 0 ] > 5 ) {
+          value = 0;
+        }
+
+        toggle_pin ( actuator.pins [ UP    ], value );
         break;
+
       case ( actuator::SHIFT ) :
         // every second
         uint32_t local_interval = timer_value % 10;
@@ -483,7 +490,7 @@ namespace execute {
         else {
           digitalWrite ( actuator.pins [ 0 ], LOW  );
         }
-        */
+
         break;
     }
   }
