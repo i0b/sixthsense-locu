@@ -1,6 +1,7 @@
 #include <Arduino.h>
 //TODO REMOVE
 #include <Servo.h>
+#include <SoftPWM.h>
 
 #include "actuator.h"
 #include "execute.h"
@@ -91,6 +92,7 @@ namespace execute {
     ROTATION_ACTIVE_VIBRATOR = 1;
 
     //TODO REMOVE
+    SoftPWMBegin();
     servos[0].attach ( 38 );
     servos[1].attach ( 39 );
     servos[2].attach ( 40 );
@@ -267,81 +269,98 @@ namespace execute {
     
     uint32_t local_interval = timer_value % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ] );
 
-    if ( actuator.type == actuator::SHIFT ) {
+    switch ( actuator.type ) {
+      case ( actuator::SHIFT ) :
 
-      // first beat high
-      if ( local_interval == 0 ) {
-      //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
-        analogWrite ( actuator.pins [ 0 ], 0 ); // parameter [ 0 ] );
-      }
+        // first beat high
+        if ( local_interval == 0 ) {
+        //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+          analogWrite ( actuator.pins [ 0 ], 0 ); // parameter [ 0 ] );
+        }
 
-      // first beat low
-      // turn of after on-delay passed
-      else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
-        analogWrite ( actuator.pins [ 0 ], 255 );
-      }
+        // first beat low
+        // turn of after on-delay passed
+        else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
+          analogWrite ( actuator.pins [ 0 ], 255 );
+        }
 
-     /* 
-      // second beat high
-      else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
-        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
-      }
+       /* 
+        // second beat high
+        else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
+          analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+        }
 
-      // second beat low
-      else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
-      else if ( timer_value % ....HEARBEAT_DELAY_OFF) {
-        analogWrite ( actuator.pins [ 0 ], 0 );
-      }
-     */
-    }
+        // second beat low
+        else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
+        else if ( timer_value % ....HEARBEAT_DELAY_OFF) {
+          analogWrite ( actuator.pins [ 0 ], 0 );
+        }
+        */
+        break;
 
-    else {
-      //TODO yet to be implemented
-      //for ( vibrator = 0; vibrator < actuator.number_pins; vibrator++ ) {
-      //  analogWrite ( actuator.pin [ vibrator ], LOW );
-      //}
-      return;
+      case ( actuator::VIBRATION_ARRAY ) :
+        // first beat high
+        if ( local_interval == 0 ) {
+          for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+            SoftPWMSetPercent ( actuator.pins [ pin ], parameter [ 0 ] );
+          }
+        }
+
+        // first beat low
+        else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
+          for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+            SoftPWMSetPercent ( actuator.pins [ pin ], 0 );
+          }
+        }
+        break;
     }
   }
 
   void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
     
-    if ( actuator.type == actuator::SHIFT ) {
-      analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+    switch ( actuator.type ) {
+      case ( actuator::SHIFT ) :
+        analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
-      //TODO remove hard coded value if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
-      if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
-        if ( ROTATION_ACTIVE_VIBRATOR == 4 ) {
-          // push one to data
-          digitalWrite ( actuator.pins [ 1 ], HIGH );
+        //TODO remove hard coded value if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
+        if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
+          if ( ROTATION_ACTIVE_VIBRATOR == 4 ) {
+            // push one to data
+            digitalWrite ( actuator.pins [ 1 ], HIGH );
 
-          // clock
-          toggle_pin ( actuator.pins [ 2 ], 1 );
+            // clock
+            toggle_pin ( actuator.pins [ 2 ], 1 );
 
-          // push one to data
-          digitalWrite ( actuator.pins [ 1 ], LOW );
+            // push one to data
+            digitalWrite ( actuator.pins [ 1 ], LOW );
 
-          ROTATION_ACTIVE_VIBRATOR = 1;
+            ROTATION_ACTIVE_VIBRATOR = 1;
+          }
+
+          else {
+            // clock
+            toggle_pin ( actuator.pins [ 2 ], 1 );
+
+            ROTATION_ACTIVE_VIBRATOR++;
+          }
         }
 
-        else {
-          // clock
-          toggle_pin ( actuator.pins [ 2 ], 1 );
+        // apply values to shift register
+        toggle_pin ( actuator.pins [ 3 ], 1 );
 
-          ROTATION_ACTIVE_VIBRATOR++;
+        break;
+
+      case ( actuator::VIBRATION_ARRAY ) :
+        if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
+          uint8_t active_pin = timer_value % actuator.number_pins;
+          uint8_t inactive_pin = (active_pin - 1) % actuator.number_pins; 
+
+          SoftPWMSetPercent ( actuator.pins [ inactive_pin ], 0 );
+          SoftPWMSetPercent ( actuator.pins [   active_pin ], parameter [ 0 ] );
+          //digitalWrite ( actuator.pins [ inactive_pin ], LOW  );
+          //digitalWrite ( actuator.pins [   active_pin ], HIGH );
         }
-      }
-
-      // apply values to shift register
-      toggle_pin ( actuator.pins [ 3 ], 1 );
-    }
-
-    else if ( actuator.type == actuator::VIBRATION_ARRAY ) {
-      uint8_t active_pin = timer_value % actuator.number_pins;
-      uint8_t inactive_pin = (active_pin - 1) % actuator.number_pins; 
-
-      digitalWrite ( actuator.pins [ inactive_pin ], LOW  );
-      digitalWrite ( actuator.pins [   active_pin ], HIGH );
+        break;
     }
   }
 
@@ -349,15 +368,17 @@ namespace execute {
   // for detailed information about how to write to servos see:
   // http://www.mikrocontroller.net/articles/Modellbauservo_Ansteuerung
   
-    if ( actuator.type == actuator::SERVO_ELEMENT ) {
-      uint8_t num = actuator.pins [ 0 ] % 38;
-      servos [ num ].write ( parameter [ 0 ] );
+    switch ( actuator.type ) {
+      case ( actuator::SERVO_ELEMENT ) :
+        uint8_t num = actuator.pins [ 0 ] % 38;
+        servos [ num ].write ( parameter [ 0 ] );
 
-      // delay in ms, where 1 eq 0°, 2 eq 180°
-      //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
-      //digitalWrite ( actuator.pins [ 0 ], HIGH );
-      //delayMicroseconds( value );
-      //digitalWrite ( actuator.pins [ 0 ], LOW );
+        // delay in ms, where 1 eq 0°, 2 eq 180°
+        //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
+        //digitalWrite ( actuator.pins [ 0 ], HIGH );
+        //delayMicroseconds( value );
+        //digitalWrite ( actuator.pins [ 0 ], LOW );
+        break;
     }
 
   }
@@ -388,8 +409,8 @@ namespace execute {
         }
 
         for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
-          digitalWrite ( actuator.pins [ pin ], value );
-          //SoftPWM ( actuator.pins [ pin ], parameter [ 0 ] );
+          //digitalWrite ( actuator.pins [ pin ], value );
+          SoftPWMSetPercent ( actuator.pins [ pin ], parameter [ 0 ] );
         }
         break;
     }
@@ -471,7 +492,8 @@ namespace execute {
         toggle_pin ( actuator.pins [ RIGHT ], 1 );
         toggle_pin ( actuator.pins [ DOWN  ], 5 );
         // set max value to 5
-        uint8_t value = parameter [ 0 ];
+        uint8_t value;
+        value = parameter [ 0 ];
 
         if ( parameter [ 0 ] < 1 || parameter [ 0 ] > 5 ) {
           value = 0;
