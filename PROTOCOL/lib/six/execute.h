@@ -8,14 +8,14 @@
 #include <stdint.h>
 #include "actuator.h"
 
-#define FOREACH_MODE(EXECUTION_MODE)  \
-        EXECUTION_MODE(OFF)           \
-        EXECUTION_MODE(VIBRATION)     \
-        EXECUTION_MODE(HEARTBEAT)     \
-        EXECUTION_MODE(ROTATION)      \
-        EXECUTION_MODE(SERVO)         \
-        EXECUTION_MODE(TEMPERATURE)   \
-        EXECUTION_MODE(SET_ELECTRICAL)\ 
+#define FOREACH_MODE(EXECUTION_MODE)        \
+        EXECUTION_MODE(OFF)                 \
+        EXECUTION_MODE(VIBRATION)           \
+        EXECUTION_MODE(HEARTBEAT)           \
+        EXECUTION_MODE(ROTATION)            \
+        EXECUTION_MODE(SERVO)               \
+        EXECUTION_MODE(TEMPERATURE)         \
+        EXECUTION_MODE(SET_ELECTRO_STIMULUS)\ 
 
 #ifndef GENERATOR
 #define GERERATOR

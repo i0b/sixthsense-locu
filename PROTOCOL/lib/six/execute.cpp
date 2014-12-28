@@ -15,7 +15,7 @@ namespace execute {
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void keep_temperature ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void electric_stimulation ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
-  int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable );
+  void set_shift_register ( uint8_t* pins, uint8_t enable );
   // TODO type of pin??
   void toggle_pin ( uint8_t& pin, uint8_t times );
 
@@ -23,8 +23,8 @@ namespace execute {
 
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
 
-  //TODO REMOVE
-  Servo servomotor;
+  //TODO REMOVE HACK
+  Servo servos[4];
 
   uint32_t TIMER_VALUE;
   uint8_t  ROTATION_ACTIVE_VIBRATOR;
@@ -91,7 +91,10 @@ namespace execute {
     ROTATION_ACTIVE_VIBRATOR = 1;
 
     //TODO REMOVE
-    servomotor.attach ( 13 );
+    servos[0].attach ( 38 );
+    servos[1].attach ( 39 );
+    servos[2].attach ( 40 );
+    servos[3].attach ( 41 );
   /*
     pinMode ( 12, OUTPUT );
     digitalWrite ( 12, HIGH );
@@ -135,7 +138,7 @@ namespace execute {
 
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
-          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
+          set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
         
         executor [ uuid ].function = &vibrate; 
@@ -147,7 +150,7 @@ namespace execute {
         
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
-          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0xFF );
+          set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
         
         executor [ uuid ].function = &heartbeat;
@@ -159,16 +162,16 @@ namespace execute {
         
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // only one motor vibrating at the same time
-          set_enabled_vibrators ( *(executor [ uuid ].actuator), 0x01 );
+          set_shift_register ( executor [ uuid ].actuator->pins, 0x01 );
         }
         
         executor [ uuid ].function = &rotate;
 
         break;
 
-      case execute::SET_ELECTRICAL :
+      case execute::SET_ELECTRO_STIMULUS :
         //if ( executor [ uuid ].actuator->type == actuator::ELECTRICAL ) {
-          executor [ uuid ].mode = execute::SET_ELECTRICAL;
+          executor [ uuid ].mode = execute::SET_ELECTRO_STIMULUS;
           executor [ uuid ].function = &electric_stimulation;
         //}
         //else {
@@ -183,29 +186,23 @@ namespace execute {
     return 0;
   }
 
-  int set_enabled_vibrators ( actuator::actuator_t& actuator, uint8_t enable ) {
-    // works with 8-bit sift register in vibration-ring's, where actuator, pins are:
+  void set_shift_register ( uint8_t* pins, uint8_t enable ) {
+    // works with 8-bit sift register
+    //
     // { PWM, DATA, CLOCK, LATCH ENABLE }
-    
-    //            { 11, 46, 48, 47 },
-    if ( actuator.type != actuator::SHIFT ) {
-      return -1;
-    }
 
-    for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+    for ( uint8_t pin = 0; pin < 4; pin++ ) {
       // set data of shift register according to current bit in enable-variable
-      digitalWrite ( actuator.pins [ 1 ], enable & 1 );
+      digitalWrite ( pins [ 1 ], enable & 1 );
 
       // clock shift-register
-      toggle_pin ( actuator.pins [ 2 ], 1 );
+      toggle_pin ( pins [ 2 ], 1 );
 
       enable >>= 1;
     }
-
     // apply values to shift register
-    toggle_pin ( actuator.pins [ 3 ], 1 );
-  
-    return 0;
+    toggle_pin ( pins [ 3 ], 1 );
+
   }
 
   //TODO TYPE OF PIN???
@@ -224,17 +221,29 @@ namespace execute {
   void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
 
     if ( actuator.type == actuator::SHIFT ) {
-      set_enabled_vibrators ( actuator, 0x00 );
+      set_shift_register ( actuator.pins, 0x00 );
     }
 
-    else if ( actuator.type == actuator::SERVO ) {
-      servomotor.write ( 80 );
+    else if ( actuator.type == actuator::SERVO_ELEMENT ) {
+      for ( uint8_t servo = 0; servo < 4; servo++ ) {
+        servos [ servo ].write ( 80 );
+      }
     }
 
-    else if ( actuator.type == actuator::PELTIER ) {
+    else if ( actuator.type == actuator::PELTIER_ELEMENT ) {
       digitalWrite ( actuator.pins [ 0 ], LOW );
       digitalWrite ( actuator.pins [ 1 ], LOW );
       digitalWrite ( actuator.pins [ 2 ], LOW );
+    }
+
+    else if ( actuator.type == actuator::PELTIER_SHIFT ) {
+      for ( uint8_t shift_register = 0; 
+          shift_register < ( actuator.number_pins % 4 + 1 ); 
+          shift_register++ ) {
+
+          uint8_t offset = shift_register * 4;
+          digitalWrite ( actuator.pins [ 0 + offset ], LOW );
+      }
     }
 
     // if temperatur:
@@ -340,88 +349,109 @@ namespace execute {
   // for detailed information about how to write to servos see:
   // http://www.mikrocontroller.net/articles/Modellbauservo_Ansteuerung
   
-    if ( actuator.type == actuator::SERVO ) {
+    if ( actuator.type == actuator::SERVO_ELEMENT ) {
+      uint8_t num = actuator.pins [ 0 ] % 38;
+      servos [ num ].write ( parameter [ 0 ] );
 
       // delay in ms, where 1 eq 0°, 2 eq 180°
-      servomotor.write ( parameter [ 0 ] );
       //uint32_t value = map ( parameter [ 0 ], 1000, 2000, 0, 180 );
       //digitalWrite ( actuator.pins [ 0 ], HIGH );
       //delayMicroseconds( value );
       //digitalWrite ( actuator.pins [ 0 ], LOW );
-
     }
 
   }
 
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
 
-    if ( actuator.type == actuator::SHIFT ) {
+    switch ( actuator.type ) {
+      
+      case ( actuator::SHIFT ) :
+        set_shift_register ( actuator.pins, parameter [ 1 ] );
+        //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+        //SoftPWM ( actuator.pins [ 0 ], parameter [ 0 ] );
+        break;
 
-      set_enabled_vibrators ( actuator, parameter [ 1 ] );
-      //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
+      case ( actuator::VIBRATION_ELEMENT ):
+        // parameter [ 0 ]: intensity 
+        //SoftPWM ( actuator.pins [ 0 ], value );
 
-      // -- PWM seems not to work, yet: 
-      //analogWrite ( actuator.pins [ 0 ], 10 );
-      //analogWrite ( 11, 0 );
+        break;
     
-      /*
-      // /(OUTPUT ENABLE)
-      digitalWrite ( actuator.pins [ 0 ], LOW );
-      // CLOCK
-      for ( uint8_t clock = 0; clock < 8; clock++ ) {
-        // DATA
-        if ( clock < parameter [ 0 ] ) {
-          digitalWrite ( actuator.pins [ 1 ], HIGH );
+      case ( actuator::VIBRATION_ARRAY ) :
+        byte value;
+        if ( parameter [ 0 ] == 0 ) {
+          value = 0;
         }
         else {
-          digitalWrite ( actuator.pins [ 1 ], LOW );
+          value = 1;
         }
-        digitalWrite ( actuator.pins [ 2 ], HIGH );
-        digitalWrite ( actuator.pins [ 2 ], LOW );
-      }
-      // LATCH ENABLE
-      digitalWrite ( actuator.pins [ 3 ], HIGH );
-      digitalWrite ( actuator.pins [ 3 ], LOW );
-      */
-    }
 
-    if ( actuator.type == actuator::VIBRATION_ARRAY ) {
-
-      byte value;
-      if ( parameter [ 0 ] == 0 ) {
-        value = 0;
-      }
-      else {
-        value = 1;
-      }
-
-      for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
-        digitalWrite ( actuator.pins [ pin ], value );
-      }
+        for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
+          digitalWrite ( actuator.pins [ pin ], value );
+          //SoftPWM ( actuator.pins [ pin ], parameter [ 0 ] );
+        }
+        break;
     }
 
   }
 
   void keep_temperature ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
-    if ( actuator.type == actuator::PELTIER ) {
-      // pins: ENABLE, PIN1, PIN2
-      switch ( parameter [ 0 ] ) {
-        case 0:
-          digitalWrite ( actuator.pins [ 0 ], LOW );
-          digitalWrite ( actuator.pins [ 1 ], LOW );
-          digitalWrite ( actuator.pins [ 2 ], LOW );
-          break;
-        case 1:
-          digitalWrite ( actuator.pins [ 0 ], HIGH );
-          digitalWrite ( actuator.pins [ 1 ], HIGH );
-          digitalWrite ( actuator.pins [ 2 ], LOW  );
-          break;
-        case 2:
-          digitalWrite ( actuator.pins [ 0 ], HIGH );
-          digitalWrite ( actuator.pins [ 1 ], LOW  );
-          digitalWrite ( actuator.pins [ 2 ], HIGH );
-          break;
-      }
+    switch ( actuator.type ) {
+      case ( actuator::PELTIER_ELEMENT ) :
+        // pins: ENABLE, PIN1, PIN2
+        switch ( parameter [ 0 ] ) {
+          case 0:
+            digitalWrite ( actuator.pins [ 0 ], LOW );
+            digitalWrite ( actuator.pins [ 1 ], LOW );
+            digitalWrite ( actuator.pins [ 2 ], LOW );
+            break;
+          case 1:
+            digitalWrite ( actuator.pins [ 0 ], HIGH );
+            digitalWrite ( actuator.pins [ 1 ], HIGH );
+            digitalWrite ( actuator.pins [ 2 ], LOW  );
+            break;
+          case 2:
+            digitalWrite ( actuator.pins [ 0 ], HIGH );
+            digitalWrite ( actuator.pins [ 1 ], LOW  );
+            digitalWrite ( actuator.pins [ 2 ], HIGH );
+            break;
+        }
+
+        break;
+      case ( actuator::PELTIER_SHIFT ) :
+        for ( uint8_t shift_register = 0; 
+            shift_register < ( actuator.number_pins % 4 + 1 ); 
+            shift_register++ ) {
+
+          uint8_t offset = shift_register * 4;
+          // enable PWM
+          if ( parameter [ 0 ] < 0 ) {
+            digitalWrite ( actuator.pins [ 0 + offset ], HIGH );
+          }
+          else {
+            digitalWrite ( actuator.pins [ 0 + offset ], LOW );
+          }
+
+          // prepare bits for shift register
+          //
+          uint8_t enable_bits = parameter [ 1 ];
+          uint8_t enable_shift;
+
+          for ( uint8_t peltier = 0; peltier < 4; peltier++ ) {
+            if ( enable_bits & 1  == 1 ) {
+              enable_shift >>= 0;
+              enable_shift >>= 1;
+            }
+            else {
+              enable_shift >>= 1;
+              enable_shift >>= 0;
+            }
+
+            enable_bits >>= 1;
+          }
+        }
+        break;
     }
   }
 
@@ -429,47 +459,32 @@ namespace execute {
     // parameter [ 0 ]: value of stimulation
     // parameter [ 1 ]: mode
     //
-    if ( actuator.type == actuator::VIBRATION_ARRAY ) {
-      uint8_t left   = actuator.pins [ 0 ];
-      uint8_t right  = actuator.pins [ 1 ];
-      uint8_t up     = actuator.pins [ 2 ];
-      uint8_t down   = actuator.pins [ 3 ];
-      uint8_t center = actuator.pins [ 4 ];
+    switch ( actuator.type ) {
+      case ( actuator::ELECTRO_CONTROL ) :
+        /*
+        uint8_t up     = actuator.pins [ 0 ];
+        uint8_t left   = actuator.pins [ 1 ];
+        uint8_t center = actuator.pins [ 2 ];
+        uint8_t right  = actuator.pins [ 3 ];
+        uint8_t down   = actuator.pins [ 4 ];
 
-      // pins: LEFT, RIGHT, TOP, BOTTOM, CENTER
-      toggle_pin ( right, 1 );
-      toggle_pin (  down, 9 );
-      toggle_pin (    up, parameter [ 0 ] );
-    }
+        // pins: LEFT, RIGHT, TOP, BOTTOM, CENTER
+        toggle_pin ( right, 1 );
+        toggle_pin (  down, 9 );
+        toggle_pin (    up, parameter [ 0 ] );
+        break;
+      case ( actuator::SHIFT ) :
+        // every second
+        uint32_t local_interval = timer_value % 10;
 
-    if ( actuator.type == actuator::SHIFT ) {
-      // every second
-      uint32_t local_interval = timer_value % 10;
-
-      if ( local_interval == 0 ) {
-        digitalWrite ( actuator.pins [ 0 ], HIGH );
-      }
-      else {
-        digitalWrite ( actuator.pins [ 0 ], LOW  );
-      }
-
-      /*
-      if ( local_interval == 0 ) {
-        uint8_t left   = 0b00000011;
-        uint8_t up     = 0b00001100;
-        uint8_t down   = 0b00110000;
-        
-        set_enabled_vibrators ( actuator, left );
-        toggle_pin ( actuator.pins [ 0 ], 1 );
-
-        set_enabled_vibrators ( actuator, down );
-        toggle_pin ( actuator.pins [ 0 ], 9 );
-
-        set_enabled_vibrators ( actuator, up   );
-        // TODO parameter [ 0 ] instead of 1
-        toggle_pin ( actuator.pins [ 0 ], parameter [ 1 ] );
-      }
-      */
+        if ( local_interval == 0 ) {
+          digitalWrite ( actuator.pins [ 0 ], HIGH );
+        }
+        else {
+          digitalWrite ( actuator.pins [ 0 ], LOW  );
+        }
+        */
+        break;
     }
   }
 
@@ -511,7 +526,7 @@ namespace execute {
     else
       digitalWrite ( 12, HIGH );
 
-    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO ) &&
+    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO_ELEMENT ) &&
          ( executor [ SERVO_CHECK_ACTUATOR ].mode = execute::SERVO ) ) {
       digitalWrite ( executor [ SERVO_CHECK_ACTUATOR ].actuator->pins [ 0 ], LOW );
     }
@@ -524,7 +539,7 @@ namespace execute {
       SERVO_CHECK_ACTUATOR++;
     }
 
-    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO ) &&
+    if ( ( executor [ SERVO_CHECK_ACTUATOR ].actuator->type == actuator::SERVO_ELEMENT ) &&
          ( executor [ SERVO_CHECK_ACTUATOR ].mode = execute::SERVO ) &&
          ( executor [ SERVO_CHECK_ACTUATOR ].parameter [ 0 ] > 0 ) ) {
 

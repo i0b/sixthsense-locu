@@ -375,7 +375,7 @@ namespace six {
         mode = execute::SERVO;
       }
       else if ( strncasecmp ( "ELEC", request->command.value, request->command.value_len ) == 0 ) {
-        mode = execute::SET_ELECTRICAL;
+        mode = execute::SET_ELECTRO_STIMULUS;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::OFF;

@@ -9,66 +9,140 @@ namespace actuator {
   //
 
   actuator_t actuators [ NUMBER_ACTUATORS ] = {
+  /*
     // #0
     {
       // description
-      "8-bit controllable interface: left arm vibrator",
+      "vibration armband: element 1",
       // # pins
-      8,
-      // pins: vibration motor 1 - 8
-      { 30, 31, 32, 33, 34, 35, 36, 37 },
+      1,
+      // pins: vibration
+      { 30 },
       // type
-      VIBRATION_ARRAY
+      VIBRATION_ELEMENT
     },
-    
+
     // #1
     {
       // description
-      "Darlington array: right arm vibrator band",
+      "vibration armband: element 2",
       // # pins
-      8,
-      // pins: vibration motor 1 - 8
-      { 38, 39, 40, 41, 42, 43, 44, 45 },
+      1,
+      // pins: vibration
+      { 31 },
       // type
-      VIBRATION_ARRAY
+      VIBRATION_ELEMENT
     },
 
     // #2
     {
       // description
-      "Shift + Darlington: currently not working!",
+      "vibration armband: element 3",
       // # pins
-      4,
-      // pins: PWM, DATA, CLOCK, LATCH ENABLE
-      { 11, 46, 48, 47 },
-      //{ 10, 50, 52, 51 },
+      1,
+      // pins: vibration
+      { 32 },
       // type
-      SHIFT
+      VIBRATION_ELEMENT
     },
 
     // #3
     {
-      // TODO --- DON'T USE 6,7,8,9!!
       // description
-      "H-bridge: controlling peltier on left arm's first elements",
+      "vibration armband: element 4",
       // # pins
-      3,
-      // pins: PWM, DIR1, DIR2
-      { 12, 3, 4 },
+      1,
+      // pins: vibration
+      { 33 },
       // type
-      PELTIER
+      VIBRATION_ELEMENT
     },
+    */
 
+    {
+      // description
+      "vibration armband",
+      // # pins
+      4,
+      // pins: vibration
+      { 30, 31, 32, 33 },
+      // type
+      VIBRATION_ARRAY
+    },
+    //TODO: add vibration elements 4-7 @ pin: 34, 35, 36, 37
+    
+    // #2
+    {
+      // description
+      "servo amband - element 1",
+      // # pins
+      1,
+      // pins: servo motor 1 - 8
+      { 38 },
+      // type
+      SERVO_ELEMENT
+    },
+    
+    // #3
+    {
+      // description
+      "servo amband - element 2",
+      // # pins
+      1,
+      // pins: servo motor 1 - 8
+      { 39 },
+      // type
+      SERVO_ELEMENT
+    },
+    
     // #4
     {
       // description
-      "Servo: this is a test to verify if pressure would be even possible",
+      "servo amband - element 3",
       // # pins
       1,
-      // pins: PWM
-      { 13 },
+      // pins: servo motor 1 - 8
+      { 40 },
       // type
-      SERVO
+      SERVO_ELEMENT
+    },
+    
+    // #5
+    {
+      // description
+      "servo amband - element 4",
+      // # pins
+      1,
+      // pins: servo motor 1 - 8
+      { 41 },
+      // type
+      SERVO_ELEMENT
+    },
+    
+    //TODO: add servo elements 4-7 @ pin: 42, 43, 44, 45
+
+    // #6
+    {
+      // description
+      "peltier stripe with 4 elements",
+      // # pins
+      8,
+      // pins: 2x - PWM, DATA, CLOCK, LATCH ENABLE
+      { 11, 46, 48, 47, 10, 50, 52, 51 },
+      // type
+      PELTIER_SHIFT
+    },
+
+    // #7
+    {
+      // description
+      "electro stimulation",
+      // # pins
+      5,
+      // pins: UP, LEFT, CENTER, RIGHT, DOWN
+      { 22, 23, 24, 25, 26 },
+      // type
+      ELECTRO_CONTROL
     }
 
   };
