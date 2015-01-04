@@ -59,7 +59,7 @@ namespace actuator {
     },
     */
 
-    // #1
+    // #0
     {
       // description
       "vibration armband",
@@ -72,6 +72,18 @@ namespace actuator {
     },
     //TODO: add vibration elements 4-7 @ pin: 34, 35, 36, 37
     
+    // #1
+    {
+      // description
+      "peltier stripe with 4 elements",
+      // # pins
+      8,
+      // pins: 2x - PWM, DATA, CLOCK, LATCH ENABLE
+      { 11, 46, 48, 47, 10, 50, 52, 51 },
+      // type
+      PELTIER_SHIFT
+    },
+
     // #2
     {
       // description
@@ -123,18 +135,6 @@ namespace actuator {
     //TODO: add servo elements 4-7 @ pin: 42, 43, 44, 45
 
     // #6
-    {
-      // description
-      "peltier stripe with 4 elements",
-      // # pins
-      8,
-      // pins: 2x - PWM, DATA, CLOCK, LATCH ENABLE
-      { 11, 46, 48, 47, 10, 50, 52, 51 },
-      // type
-      PELTIER_SHIFT
-    },
-
-    // #7
     {
       // description
       "electro stimulation",

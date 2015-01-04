@@ -16,8 +16,8 @@ namespace execute {
   void vibrate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void keep_temperature ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
   void electric_stimulation ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter );
+
   void set_shift_register ( uint8_t* pins, uint8_t enable );
-  // TODO type of pin??
   void toggle_pin ( uint8_t& pin, uint8_t times );
 
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
@@ -222,30 +222,33 @@ namespace execute {
 
   void off ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
 
-    if ( actuator.type == actuator::SHIFT ) {
-      set_shift_register ( actuator.pins, 0x00 );
-    }
+    switch ( actuator.type ) {
+      
+      case ( actuator::SHIFT ) :
+        set_shift_register ( actuator.pins, 0x00 );
+        break;
+      case ( actuator::SERVO_ELEMENT ) :
+        for ( uint8_t servo = 0; servo < 4; servo++ ) {
+          servos [ servo ].write ( 80 );
+        }
+        break;
 
-    else if ( actuator.type == actuator::SERVO_ELEMENT ) {
-      for ( uint8_t servo = 0; servo < 4; servo++ ) {
-        servos [ servo ].write ( 80 );
-      }
-    }
+      case ( actuator::PELTIER_ELEMENT ) :
+        digitalWrite ( actuator.pins [ 0 ], LOW );
+        digitalWrite ( actuator.pins [ 1 ], LOW );
+        digitalWrite ( actuator.pins [ 2 ], LOW );
+        break;
 
-    else if ( actuator.type == actuator::PELTIER_ELEMENT ) {
-      digitalWrite ( actuator.pins [ 0 ], LOW );
-      digitalWrite ( actuator.pins [ 1 ], LOW );
-      digitalWrite ( actuator.pins [ 2 ], LOW );
-    }
+      case ( actuator::PELTIER_SHIFT ) :
+        for ( uint8_t shift_register = 0; 
+            shift_register < ( actuator.number_pins % 4 + 1 ); 
+            shift_register++ ) {
 
-    else if ( actuator.type == actuator::PELTIER_SHIFT ) {
-      for ( uint8_t shift_register = 0; 
-          shift_register < ( actuator.number_pins % 4 + 1 ); 
-          shift_register++ ) {
+            uint8_t offset = shift_register * 4;
+            digitalWrite ( actuator.pins [ 0 + offset ], LOW );
+        }
+        break;
 
-          uint8_t offset = shift_register * 4;
-          digitalWrite ( actuator.pins [ 0 + offset ], LOW );
-      }
     }
 
     // if temperatur:
