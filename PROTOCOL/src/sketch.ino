@@ -52,9 +52,11 @@ void command(char c) {
 
     else if ( c >= '0' && c <= '9' ) {
       //byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
-      byte value =  map ( c, '0', '9', 0, 180 );
+      byte value  =  map ( c, '0', '9', 0, 255 );
+      //byte mapped =  map ( c, '0', '9', 0, 180 );
       char command[20];
-      snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+      //snprintf ( command, 20, "SV 4 %d SIX/0.1", mapped );
+      snprintf ( command, 20, "SV 0 %d SIX/0.1",  value );
       
       execute_command ( command );
     }

@@ -420,12 +420,14 @@ namespace execute {
     
       case ( actuator::VIBRATION_ARRAY ) :
         byte value;
+        /*
         if ( parameter [ 0 ] == 0 ) {
           value = 0;
         }
         else {
           value = 1;
         }
+        */
 
         for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
           //digitalWrite ( actuator.pins [ pin ], value );
