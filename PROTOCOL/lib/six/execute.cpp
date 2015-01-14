@@ -138,10 +138,12 @@ namespace execute {
       case execute::VIBRATION :
         executor [ uuid ].mode = execute::VIBRATION;
 
+        /*
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
           set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
+        */
         
         executor [ uuid ].function = &vibrate; 
         
@@ -150,10 +152,12 @@ namespace execute {
       case execute::HEARTBEAT :
         executor [ uuid ].mode = execute::HEARTBEAT;
         
+        /*
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // enable all vibrators
           set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
+        */
         
         executor [ uuid ].function = &heartbeat;
         
@@ -162,10 +166,12 @@ namespace execute {
       case execute::ROTATION :
         executor [ uuid ].mode = execute::ROTATION;
         
+        /*
         if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
           // only one motor vibrating at the same time
           set_shift_register ( executor [ uuid ].actuator->pins, 0x01 );
         }
+        */
         
         executor [ uuid ].function = &rotate;
 
@@ -224,20 +230,24 @@ namespace execute {
 
     switch ( actuator.type ) {
       
+      /*
       case ( actuator::SHIFT ) :
         set_shift_register ( actuator.pins, 0x00 );
         break;
+      */
       case ( actuator::SERVO_ELEMENT ) :
         for ( uint8_t servo = 0; servo < 4; servo++ ) {
           servos [ servo ].write ( 80 );
         }
         break;
 
+      /*
       case ( actuator::PELTIER_ELEMENT ) :
         digitalWrite ( actuator.pins [ 0 ], LOW );
         digitalWrite ( actuator.pins [ 1 ], LOW );
         digitalWrite ( actuator.pins [ 2 ], LOW );
         break;
+      */
 
       case ( actuator::PELTIER_SHIFT ) :
         for ( uint8_t shift_register = 0; 
@@ -273,6 +283,7 @@ namespace execute {
     uint32_t local_interval = timer_value % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ] );
 
     switch ( actuator.type ) {
+      /* 
       case ( actuator::SHIFT ) :
 
         // first beat high
@@ -287,7 +298,6 @@ namespace execute {
           analogWrite ( actuator.pins [ 0 ], 255 );
         }
 
-       /* 
         // second beat high
         else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
           analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
@@ -298,8 +308,8 @@ namespace execute {
         else if ( timer_value % ....HEARBEAT_DELAY_OFF) {
           analogWrite ( actuator.pins [ 0 ], 0 );
         }
-        */
         break;
+      */
 
       case ( actuator::VIBRATION_ARRAY ) :
         // first beat high
@@ -322,6 +332,7 @@ namespace execute {
   void rotate ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
     
     switch ( actuator.type ) {
+      /*
       case ( actuator::SHIFT ) :
         analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
@@ -352,6 +363,7 @@ namespace execute {
         toggle_pin ( actuator.pins [ 3 ], 1 );
 
         break;
+      */
 
       case ( actuator::VIBRATION_ARRAY ) :
         if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
@@ -390,17 +402,21 @@ namespace execute {
 
     switch ( actuator.type ) {
       
+      /*
       case ( actuator::SHIFT ) :
         set_shift_register ( actuator.pins, parameter [ 1 ] );
         //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
         //SoftPWM ( actuator.pins [ 0 ], parameter [ 0 ] );
         break;
+      */
 
+      /*
       case ( actuator::VIBRATION_ELEMENT ):
         // parameter [ 0 ]: intensity 
         //SoftPWM ( actuator.pins [ 0 ], value );
 
         break;
+      */
     
       case ( actuator::VIBRATION_ARRAY ) :
         byte value;
@@ -422,6 +438,7 @@ namespace execute {
 
   void keep_temperature ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
     switch ( actuator.type ) {
+      /*
       case ( actuator::PELTIER_ELEMENT ) :
         // pins: ENABLE, PIN1, PIN2
         switch ( parameter [ 0 ] ) {
@@ -443,6 +460,7 @@ namespace execute {
         }
 
         break;
+      */
       case ( actuator::PELTIER_SHIFT ) :
         for ( uint8_t shift_register = 0; 
             shift_register < ( actuator.number_pins % 4 + 1 ); 
@@ -505,6 +523,7 @@ namespace execute {
         toggle_pin ( actuator.pins [ UP    ], value );
         break;
 
+      /*
       case ( actuator::SHIFT ) :
         // every second
         uint32_t local_interval = timer_value % 10;
@@ -517,6 +536,7 @@ namespace execute {
         }
 
         break;
+      */
     }
   }
 
