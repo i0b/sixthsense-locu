@@ -8,7 +8,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <SPI.h>
-#include <RBL_nRF8001.h>
+//#include <RBL_nRF8001.h>
+#include <ble_shield.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))

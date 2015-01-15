@@ -1,7 +1,8 @@
 #include <SPI.h>
 #include <six.h>
 #include <execute.h>
-#include <RBL_nRF8001.h>
+//#include <RBL_nRF8001.h>
+#include <ble_shield.h>
 
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
@@ -155,6 +156,7 @@ void setup () {
   
   // init. and start BLE library.
   ble_begin();
+  //ble_connect();
 
  
   // set environment 
