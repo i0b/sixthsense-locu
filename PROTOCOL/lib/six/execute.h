@@ -2,7 +2,7 @@
 #define EXECUTE_H 
 
 // time in 10 * N ms
-#define HEARTBEAT_VIBRATOR_ON_TIME 2
+#define HEARTBEAT_VIBRATOR_ON_TIME 5
 
 #include <stddef.h>
 #include <stdint.h>

@@ -22,8 +22,8 @@ void execute_command ( char* command ) {
 void command(char c) {
 // HACK
     if (c == 'b') {
-      execute_command ( "SM 2 BEAT SIX/0.1" );
-      execute_command ( "SP 2 40 SIX/0.1" );
+      execute_command ( "SM 0 BEAT SIX/0.1" );
+      execute_command ( "SP 0 40 SIX/0.1" );
     }
     else if (c == 's') {
       execute_command ( "SP 0 800 SIX/0.1" );
@@ -35,29 +35,38 @@ void command(char c) {
       execute_command ( "SM 0 VIB SIX/0.1" );
     }
     else if (c == 'n') {
-      execute_command ( "SM 2 ROT SIX/0.1" );
-      execute_command ( "SP 2 30 SIX/0.1" );
+      execute_command ( "SM 0 ROT SIX/0.1" );
+      execute_command ( "SP 0 30 SIX/0.1" );
     }
     else if (c == 'o') {
-      execute_command ( "SM 0 OFF SIX/0.1" );
-      execute_command ( "SM 1 OFF SIX/0.1" );
-      execute_command ( "SM 2 OFF SIX/0.1" );
-      execute_command ( "SV 3 0 SIX/0.1" );
-      execute_command ( "SM 3 OFF SIX/0.1" );
-      execute_command ( "SM 4 OFF SIX/0.1" );
+      char command[20];
+      for ( byte uid = 0; uid < 10; uid++ ) {
+        snprintf ( command, 20, "SM %d OFF SIX/0.1", uid );
+        execute_command ( command );
+      }
     }
     else if (c == 'a') {
-      execute_command ( "SM 4 SERVO SIX/0.1" );
+      char command[20];
+      for ( byte uid = 5; uid <= 8; uid++ ) {
+        snprintf ( command, 20, "SV %d 90 SIX/0.1", uid );
+        execute_command ( command );
+        snprintf ( command, 20, "SM %d SERVO SIX/0.1", uid );
+        execute_command ( command );
+      }
     }
 
     else if ( c >= '0' && c <= '9' ) {
       //byte value =  ( ( map ( c, '0', '9', 0, 255 ) ) / 10 ) * 10;
-      byte value  =  map ( c, '0', '9', 0, 255 );
-      //byte mapped =  map ( c, '0', '9', 0, 180 );
+      byte value  =  map ( c, '0', '9', 0, 100 );
+      byte mapped =  map ( c, '0', '9', 0, 180 );
+
       char command[20];
-      //snprintf ( command, 20, "SV 4 %d SIX/0.1", mapped );
+      for ( byte uid = 5; uid <= 8; uid++ ) {
+        snprintf ( command, 20, "SV %d %d SIX/0.1", uid, mapped );
+        execute_command ( command );
+      }
+
       snprintf ( command, 20, "SV 0 %d SIX/0.1",  value );
-      
       execute_command ( command );
     }
     else if (c == 'l') {
@@ -73,32 +82,43 @@ void command(char c) {
       execute_command ( "GP 0 SIX/0.1" );
     }
     else if (c == 'q') {
-      execute_command ( "SM 2 VIB SIX/0.1" );
+      execute_command ( "SM 0 VIB SIX/0.1" );
     }
     else if (c == 'w') {
-      execute_command ( "SP 2 0 SIX/0.1" );
+      execute_command ( "SP 0 0 SIX/0.1" );
     }
     else if (c == 'e') {
-      execute_command ( "SP 2 1 SIX/0.1" );
+      execute_command ( "SP 0 1 SIX/0.1" );
     }
     else if (c == 'r') {
-      execute_command ( "SP 2 3 SIX/0.1" );
+      execute_command ( "SP 0 3 SIX/0.1" );
     }
     else if (c == 't') {
-      execute_command ( "SP 2 7 SIX/0.1" );
+      execute_command ( "SP 0 7 SIX/0.1" );
     }
     else if (c == 'y') {
-      execute_command ( "SP 2 15 SIX/0.1" );
+      execute_command ( "SP 0 15 SIX/0.1" );
     }
     else if (c == 'c') {
       //execute_command ( "SM 2 ELEC SIX/0.1" );
+      char command[20];
+      for ( byte uid = 1; uid <= 4; uid++ ) {
+        snprintf ( command, 20, "SM %d TEMP SIX/0.1", uid );
+        execute_command ( command );
 
-      execute_command ( "SM 3 TEMP SIX/0.1" );
-      execute_command ( "SV 3 2 SIX/0.1" );
+        snprintf ( command, 20, "SV %d 2 SIX/0.1", uid );
+        execute_command ( command );
+      }
     }
     else if (c == 'h') {
-      execute_command ( "SM 3 TEMP SIX/0.1" );
-      execute_command ( "SV 3 1 SIX/0.1" );
+      char command[20];
+      for ( byte uid = 1; uid <= 4; uid++ ) {
+        snprintf ( command, 20, "SM %d TEMP SIX/0.1", uid );
+        execute_command ( command );
+
+        snprintf ( command, 20, "SV %d 1 SIX/0.1", uid );
+        execute_command ( command );
+      }
     }
 // HACK END
 }

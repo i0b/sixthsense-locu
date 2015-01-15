@@ -93,10 +93,10 @@ namespace execute {
 
     //TODO REMOVE
     SoftPWMBegin();
-    servos[0].attach ( 38 );
-    servos[1].attach ( 39 );
-    servos[2].attach ( 40 );
-    servos[3].attach ( 41 );
+    servos[0].attach ( 44 );
+    servos[1].attach ( 45 );
+    servos[2].attach ( 46 );
+    servos[3].attach ( 47 );
   /*
     pinMode ( 12, OUTPUT );
     digitalWrite ( 12, HIGH );
@@ -139,7 +139,7 @@ namespace execute {
         executor [ uuid ].mode = execute::VIBRATION;
 
         /*
-        if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
+        if ( executor [ uuid ].actuator->type == actuator::VIBRATION_SHIFT ) {
           // enable all vibrators
           set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
@@ -153,7 +153,7 @@ namespace execute {
         executor [ uuid ].mode = execute::HEARTBEAT;
         
         /*
-        if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
+        if ( executor [ uuid ].actuator->type == actuator::VIBRATION_SHIFT ) {
           // enable all vibrators
           set_shift_register ( executor [ uuid ].actuator->pins, 0xFF );
         }
@@ -167,7 +167,7 @@ namespace execute {
         executor [ uuid ].mode = execute::ROTATION;
         
         /*
-        if ( executor [ uuid ].actuator->type == actuator::SHIFT ) {
+        if ( executor [ uuid ].actuator->type == actuator::VIBRATION_SHIFT ) {
           // only one motor vibrating at the same time
           set_shift_register ( executor [ uuid ].actuator->pins, 0x01 );
         }
@@ -231,24 +231,24 @@ namespace execute {
     switch ( actuator.type ) {
       
       /*
-      case ( actuator::SHIFT ) :
+      case ( actuator::VIBRATION_SHIFT ) :
         set_shift_register ( actuator.pins, 0x00 );
         break;
       */
+
       case ( actuator::SERVO_ELEMENT ) :
         for ( uint8_t servo = 0; servo < 4; servo++ ) {
           servos [ servo ].write ( 80 );
         }
         break;
 
-      /*
       case ( actuator::PELTIER_ELEMENT ) :
         digitalWrite ( actuator.pins [ 0 ], LOW );
         digitalWrite ( actuator.pins [ 1 ], LOW );
         digitalWrite ( actuator.pins [ 2 ], LOW );
         break;
-      */
 
+      /*
       case ( actuator::PELTIER_SHIFT ) :
         for ( uint8_t shift_register = 0; 
             shift_register < ( actuator.number_pins % 4 + 1 ); 
@@ -258,6 +258,7 @@ namespace execute {
             digitalWrite ( actuator.pins [ 0 + offset ], LOW );
         }
         break;
+      */
 
     }
 
@@ -283,8 +284,8 @@ namespace execute {
     uint32_t local_interval = timer_value % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ] );
 
     switch ( actuator.type ) {
-      /* 
-      case ( actuator::SHIFT ) :
+      /*
+      case ( actuator::VIBRATION_SHIFT ) :
 
         // first beat high
         if ( local_interval == 0 ) {
@@ -297,7 +298,9 @@ namespace execute {
         else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
           analogWrite ( actuator.pins [ 0 ], 255 );
         }
+      */
 
+      /*
         // second beat high
         else if ( timer_value % ( HEARTBEAT_DELAY_ON + parameter [ 1 ] ) == 0 ) {
           analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
@@ -308,8 +311,8 @@ namespace execute {
         else if ( timer_value % ....HEARBEAT_DELAY_OFF) {
           analogWrite ( actuator.pins [ 0 ], 0 );
         }
-        break;
       */
+        break;
 
       case ( actuator::VIBRATION_ARRAY ) :
         // first beat high
@@ -333,7 +336,7 @@ namespace execute {
     
     switch ( actuator.type ) {
       /*
-      case ( actuator::SHIFT ) :
+      case ( actuator::VIBRATION_SHIFT ) :
         analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
 
         //TODO remove hard coded value if ( ( timer_value % parameter [ 1 ] ) == 0 ) {
@@ -385,7 +388,7 @@ namespace execute {
   
     switch ( actuator.type ) {
       case ( actuator::SERVO_ELEMENT ) :
-        uint8_t num = actuator.pins [ 0 ] % 38;
+        uint8_t num = actuator.pins [ 0 ] % 44;
         servos [ num ].write ( parameter [ 0 ] );
 
         // delay in ms, where 1 eq 0°, 2 eq 180°
@@ -403,7 +406,7 @@ namespace execute {
     switch ( actuator.type ) {
       
       /*
-      case ( actuator::SHIFT ) :
+      case ( actuator::VIBRATION_SHIFT ) :
         set_shift_register ( actuator.pins, parameter [ 1 ] );
         //analogWrite ( actuator.pins [ 0 ], parameter [ 0 ] );
         //SoftPWM ( actuator.pins [ 0 ], parameter [ 0 ] );
@@ -420,14 +423,6 @@ namespace execute {
     
       case ( actuator::VIBRATION_ARRAY ) :
         byte value;
-        /*
-        if ( parameter [ 0 ] == 0 ) {
-          value = 0;
-        }
-        else {
-          value = 1;
-        }
-        */
 
         for ( uint8_t pin = 0; pin < actuator.number_pins; pin++ ) {
           //digitalWrite ( actuator.pins [ pin ], value );
@@ -440,29 +435,29 @@ namespace execute {
 
   void keep_temperature ( uint32_t& timer_value, actuator::actuator_t& actuator, int* parameter ) {
     switch ( actuator.type ) {
-      /*
       case ( actuator::PELTIER_ELEMENT ) :
         // pins: ENABLE, PIN1, PIN2
         switch ( parameter [ 0 ] ) {
           case 0:
-            digitalWrite ( actuator.pins [ 0 ], LOW );
-            digitalWrite ( actuator.pins [ 1 ], LOW );
-            digitalWrite ( actuator.pins [ 2 ], LOW );
+            digitalWrite ( actuator.pins [ 0 ], LOW  );
+            digitalWrite ( actuator.pins [ 1 ], LOW  );
+            digitalWrite ( actuator.pins [ 2 ], LOW  );
             break;
           case 1:
             digitalWrite ( actuator.pins [ 0 ], HIGH );
-            digitalWrite ( actuator.pins [ 1 ], HIGH );
-            digitalWrite ( actuator.pins [ 2 ], LOW  );
+            digitalWrite ( actuator.pins [ 1 ], LOW  );
+            digitalWrite ( actuator.pins [ 2 ], HIGH );
             break;
           case 2:
-            digitalWrite ( actuator.pins [ 0 ], HIGH );
-            digitalWrite ( actuator.pins [ 1 ], LOW  );
+            digitalWrite ( actuator.pins [ 0 ], LOW  );
+            digitalWrite ( actuator.pins [ 1 ], HIGH );
             digitalWrite ( actuator.pins [ 2 ], HIGH );
             break;
         }
 
         break;
-      */
+
+      /*
       case ( actuator::PELTIER_SHIFT ) :
         for ( uint8_t shift_register = 0; 
             shift_register < ( actuator.number_pins % 4 + 1 ); 
@@ -496,6 +491,7 @@ namespace execute {
           }
         }
         break;
+       */
     }
   }
 
