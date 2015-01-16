@@ -49,7 +49,7 @@ void command(char c) {
     else if (c == 'a') {
       char command[20];
       for ( byte uid = 5; uid <= 8; uid++ ) {
-        snprintf ( command, 20, "SV %d 90 SIX/0.1", uid );
+        snprintf ( command, 20, "SI %d 90 SIX/0.1", uid );
         execute_command ( command );
         snprintf ( command, 20, "SM %d SERVO SIX/0.1", uid );
         execute_command ( command );
@@ -63,11 +63,11 @@ void command(char c) {
 
       char command[20];
       for ( byte uid = 5; uid <= 8; uid++ ) {
-        snprintf ( command, 20, "SV %d %d SIX/0.1", uid, mapped );
+        snprintf ( command, 20, "SI %d %d SIX/0.1", uid, mapped );
         execute_command ( command );
       }
 
-      snprintf ( command, 20, "SV 0 %d SIX/0.1",  value );
+      snprintf ( command, 20, "SI 0 %d SIX/0.1",  value );
       execute_command ( command );
     }
     else if (c == 'l') {
@@ -77,7 +77,7 @@ void command(char c) {
       execute_command ( "GM 0 SIX/0.1" );
     }
     else if (c == 'i') {
-      execute_command ( "GV 0 SIX/0.1" );
+      execute_command ( "GI 0 SIX/0.1" );
     }
     else if (c == 'p') {
       execute_command ( "GP 0 SIX/0.1" );
@@ -107,7 +107,7 @@ void command(char c) {
         snprintf ( command, 20, "SM %d TEMP SIX/0.1", uid );
         execute_command ( command );
 
-        snprintf ( command, 20, "SV %d 2 SIX/0.1", uid );
+        snprintf ( command, 20, "SI %d 2 SIX/0.1", uid );
         execute_command ( command );
       }
     }
@@ -117,7 +117,7 @@ void command(char c) {
         snprintf ( command, 20, "SM %d TEMP SIX/0.1", uid );
         execute_command ( command );
 
-        snprintf ( command, 20, "SV %d 1 SIX/0.1", uid );
+        snprintf ( command, 20, "SI %d 1 SIX/0.1", uid );
         execute_command ( command );
       }
     }
@@ -199,7 +199,7 @@ void loop () {
   delay ( 1000 );
 
   execute_command ( "SM 3 TEMP SIX/0.1" );
-  execute_command ( "SV 3 2 SIX/0.1" );
+  execute_command ( "SI 3 2 SIX/0.1" );
   
   execute_command ( "SM 2 ROT SIX/0.1" );
   execute_command ( "SP 2 25 SIX/0.1" );
@@ -212,7 +212,7 @@ void loop () {
   //delay ( 1000 );
 
   execute_command ( "SM 3 TEMP SIX/0.1" );
-  execute_command ( "SV 3 1 SIX/0.1" );
+  execute_command ( "SI 3 1 SIX/0.1" );
 
   execute_command ( "SM 2 BEAT SIX/0.1" );
   execute_command ( "SP 2 60 SIX/0.1" );
@@ -228,19 +228,19 @@ void loop () {
   char command[20];
   
   for ( uint8_t value = 80; value <= 180; value = value + 20 ) {
-    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+    snprintf ( command, 20, "SI 4 %d SIX/0.1", value );
 
     execute_command ( command );
     delay ( 500 );
   }
   for ( uint8_t value = 180; value >= 0 && value <= 180; value = value - 20 ) {
-    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+    snprintf ( command, 20, "SI 4 %d SIX/0.1", value );
 
     execute_command ( command );
     delay ( 500 );
   }
   for ( uint8_t value = 0; value <= 80; value = value + 20 ) {
-    snprintf ( command, 20, "SV 4 %d SIX/0.1", value );
+    snprintf ( command, 20, "SI 4 %d SIX/0.1", value );
 
     execute_command ( command );
     delay ( 500 );

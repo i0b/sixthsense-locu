@@ -93,7 +93,7 @@ namespace six {
       if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
         request->command.instruction = six::GET_MODE;
       }
-      else if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
+      else if ( strncasecmp ( "GI", command, command_len ) == 0 ) {
         request->command.instruction = six::GET_INTENSITY;
       }
       else if ( strncasecmp ( "GP", command, command_len ) == 0 ) {
@@ -125,7 +125,7 @@ namespace six {
         if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
           request->command.instruction = six::SET_MODE;
         }
-        else if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
+        else if ( strncasecmp ( "SI", command, command_len ) == 0 ) {
           request->command.instruction = six::SET_INTENSITY;
         }
         else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {

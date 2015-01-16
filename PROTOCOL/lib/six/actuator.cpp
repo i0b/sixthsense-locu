@@ -9,56 +9,6 @@ namespace actuator {
   //
 
   actuator_t actuators [ NUMBER_ACTUATORS ] = {
-  /*
-    // #0
-    {
-      // description
-      "vibration armband: element 1",
-      // # pins
-      1,
-      // pins: vibration
-      { 30 },
-      // type
-      VIBRATION_ELEMENT
-    },
-
-    // #1
-    {
-      // description
-      "vibration armband: element 2",
-      // # pins
-      1,
-      // pins: vibration
-      { 31 },
-      // type
-      VIBRATION_ELEMENT
-    },
-
-    // #2
-    {
-      // description
-      "vibration armband: element 3",
-      // # pins
-      1,
-      // pins: vibration
-      { 32 },
-      // type
-      VIBRATION_ELEMENT
-    },
-
-    // #3
-    {
-      // description
-      "vibration armband: element 4",
-      // # pins
-      1,
-      // pins: vibration
-      { 33 },
-      // type
-      VIBRATION_ELEMENT
-    },
-    */
-
     // #0
     {
       // description
