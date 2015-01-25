@@ -4,9 +4,15 @@
   // # base address
   0x40,
   // frequency
-  100,
+  1000,
   // number of elements
   16,
   // type
-  VIBRATION_ELEMENTS
+  VIBRATION_ELEMENTS,
+  // mode
+  execute::OFF,
+  // changed
+  false,
+  // parameter
+  { 0, 0 },
 },

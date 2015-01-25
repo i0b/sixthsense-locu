@@ -5,6 +5,9 @@
 #include <stdint.h>
 #include <Arduino.h>
 //#include <WProgram.h>
+//
+#define  _ON ( 100 )
+#define _OFF (   0 )
 
 namespace adafruit {
 

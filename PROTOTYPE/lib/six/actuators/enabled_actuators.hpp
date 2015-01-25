@@ -3,13 +3,14 @@
 
 
 
-//#define NUMBER_ACTUATORS 1
+//#define NUMBER_ACTUATORS 2
 //see: lib/six/actuator.h
 
 
 actuator_t actuators [ NUMBER_ACTUATORS ] = {
 
-  #include "armband.hpp"
+  #include "vibration_armband.hpp"
+  #include "peltier_armband.hpp"
 
 };
 

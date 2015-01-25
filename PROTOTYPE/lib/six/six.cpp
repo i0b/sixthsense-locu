@@ -3,12 +3,12 @@
 #include "execute.h"
 #include "status.h"
 
+#include <Arduino.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <SPI.h>
-#include <RBL_nRF8001.h>
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -38,14 +38,14 @@ namespace six {
 
     raw_packet = parse_next ( raw_packet, packet_len, &command_len, "command" );
 
-    if ( raw_packet == 0 ) {
+    if ( raw_packet == NULL ) {
       set_packet_body ( response, EMPTY, NULL, NULL , 0 );
       create_response_packet ( response, status::SIX_ERROR_PARSING );
       send_response_packet ( response );
 
       return -1;
     }
-    
+     
     *packet_len -= command_len;
   /*
     // commands all consist of 4 characters
@@ -54,7 +54,7 @@ namespace six {
   */
 
     // evaluate command string
-     
+
     if ( strncasecmp ( "LIST", command, command_len ) == 0 ) {
       request->command.instruction = six::LIST;
     }
@@ -92,7 +92,7 @@ namespace six {
       if ( strncasecmp ( "GM", command, command_len ) == 0 ) {
         request->command.instruction = six::GET_MODE;
       }
-      else if ( strncasecmp ( "GV", command, command_len ) == 0 ) {
+      else if ( strncasecmp ( "GI", command, command_len ) == 0 ) {
         request->command.instruction = six::GET_INTENSITY;
       }
       else if ( strncasecmp ( "GP", command, command_len ) == 0 ) {
@@ -124,7 +124,7 @@ namespace six {
         if ( strncasecmp ( "SM", command, command_len ) == 0 ) {
           request->command.instruction = six::SET_MODE;
         }
-        else if ( strncasecmp ( "SV", command, command_len ) == 0 ) {
+        else if ( strncasecmp ( "SI", command, command_len ) == 0 ) {
           request->command.instruction = six::SET_INTENSITY;
         }
         else if ( strncasecmp ( "SP", command, command_len ) == 0 ) {
@@ -156,8 +156,6 @@ namespace six {
     
     *packet_len -= strlen ( protocol_name );
 
-    // TODO !!!!!!!!! replace STRCHR !!!!!!!!!!!!!!!!!
-    //char* dot = strchr ( raw_packet, '.' );
     char* dot = (char*) memchr ( (void*)raw_packet, '.', *packet_len );
 
     if ( dot == NULL ) {
@@ -269,9 +267,9 @@ namespace six {
             "actuator type: %s\r\n"
             "\r\n",
             uuid,
-            execute::executor [ uuid ].actuator->description,
-            execute::executor [ uuid ].actuator->number_elements,
-            actuator::TYPE_STRING [ execute::executor [ uuid ].actuator->type ]
+            actuator::actuators [ uuid ].description,
+            actuator::actuators [ uuid ].number_elements,
+            actuator::TYPE_STRING [ actuator::actuators [ uuid ].type ]
           );
       }
 
@@ -291,10 +289,12 @@ namespace six {
     }
 
     // ------------------ GET MODE ------------------------------
+
+    /*
     else if ( request->command.instruction == six::GET_MODE ) {
       
       if ( set_packet_body ( response, STRING, "mode", 
-           execute::EXECUTION_MODE_STRING [ execute::executor [ request->command.uuid ].mode ], 0 ) == 0 ) {
+           execute::EXECUTION_MODE_STRING [ actuator::actuators [ request->command.uuid ].mode ], 0 ) == 0 ) {
 
         create_response_packet ( response, status::SIX_OK );
 
@@ -302,12 +302,13 @@ namespace six {
       }
 
     }
+    */
 
     // ---------------- GET INTENSITY ---------------------------
     else if ( request->command.instruction == six::GET_INTENSITY ) {
 
       if ( set_packet_body ( response, INT, "intensity", NULL, 
-            execute::executor [ request->command.uuid ].parameter [ 0 ] ) == 0 ) {
+            actuator::actuators [ request->command.uuid ].parameter [ 0 ] ) == 0 ) {
 
         create_response_packet ( response, status::SIX_OK );
 
@@ -321,7 +322,7 @@ namespace six {
     else if ( request->command.instruction == six::GET_PARAMETER ) {
       
       if ( set_packet_body ( response, INT, "parameter", NULL, 
-            execute::executor [ request->command.uuid ].parameter [ 1 ] ) == 0 ) {
+            actuator::actuators [ request->command.uuid ].parameter [ 1 ] ) == 0 ) {
 
         create_response_packet ( response, status::SIX_OK );
 
@@ -332,6 +333,7 @@ namespace six {
 
 
     // -------------------- SET MODE ----------------------------
+    /*
     else if ( request->command.instruction == six::SET_MODE ) {
       execute::execution_mode mode = execute::OFF;
 
@@ -373,6 +375,7 @@ namespace six {
 
       return 0;
     }
+    */
     
     // -------------------- SET INTENSITY -----------------------
     else if ( request->command.instruction == six::SET_INTENSITY ) {
@@ -438,7 +441,6 @@ namespace six {
 
     Serial.println ( response_buf );
     // TODO check if cast is correct!
-    ble_write_bytes ( (unsigned char*)response_buf, strlen ( response_buf ) );
 
     return 0;
   }
