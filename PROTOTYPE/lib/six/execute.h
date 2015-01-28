@@ -30,7 +30,8 @@ namespace execute {
   
   typedef struct {
     uint8_t uuid;
-    void (*function) ( uint8_t uuid );
+    int parameter[2];
+    void (*function) ( uint8_t uuid, int parameter[2] );
   } execution_t;
 
   extern const char* EXECUTION_MODE_STRING[];

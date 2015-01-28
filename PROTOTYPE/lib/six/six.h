@@ -23,6 +23,20 @@
 
 #endif
 
+//#include <AltSoftSerial.h>
+
+/*
+// For UNO, AltSoftSerial library is required, please get it from:
+// http://www.pjrc.com/teensy/td_libs_AltSoftSerial.html
+#if defined (__AVR_ATmega168__) || defined (__AVR_ATmega328P__)  
+  AltSoftSerial BLEMini;
+#else
+*/
+
+#define BLEMini Serial1
+/*
+#endif
+*/
 #define REQUEST_RESPONSE_PACKET_LEN 1024
 
 namespace six {

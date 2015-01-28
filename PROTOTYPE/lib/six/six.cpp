@@ -253,6 +253,7 @@ namespace six {
     }
 
     // ---------------- LIST ACTUATORS --------------------------
+    //
     if ( request->command.instruction == six::LIST ) {
       strcpy ( response->body, "" );
       response->body_len = 0;
@@ -289,8 +290,7 @@ namespace six {
     }
 
     // ------------------ GET MODE ------------------------------
-
-    /*
+    //
     else if ( request->command.instruction == six::GET_MODE ) {
       
       if ( set_packet_body ( response, STRING, "mode", 
@@ -302,9 +302,9 @@ namespace six {
       }
 
     }
-    */
 
     // ---------------- GET INTENSITY ---------------------------
+    //
     else if ( request->command.instruction == six::GET_INTENSITY ) {
 
       if ( set_packet_body ( response, INT, "intensity", NULL, 
@@ -319,6 +319,7 @@ namespace six {
 
     // TODO NOT COPY-PASTE!!
     // ---------------- GET PARAMETER ---------------------------
+    //
     else if ( request->command.instruction == six::GET_PARAMETER ) {
       
       if ( set_packet_body ( response, INT, "parameter", NULL, 
@@ -333,26 +334,26 @@ namespace six {
 
 
     // -------------------- SET MODE ----------------------------
-    /*
+    //
     else if ( request->command.instruction == six::SET_MODE ) {
       execute::execution_mode mode = execute::OFF;
 
-      if ( strncasecmp ( "BEAT", request->command.value, request->command.value_len ) == 0 ) {
+      if ( strncasecmp ( "HEARTBEAT", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::HEARTBEAT;
       }
-      else if ( strncasecmp ( "ROT", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "ROTATION", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::ROTATION;
       }
-      else if ( strncasecmp ( "VIB", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "VIBRATION", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::VIBRATION;
       }
-      else if ( strncasecmp ( "TEMP", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "TEMPERATURE", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::TEMPERATURE;
       }
       else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SERVO;
       }
-      else if ( strncasecmp ( "ELEC", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "ELECTRIC", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SET_ELECTRICAL;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
@@ -375,9 +376,9 @@ namespace six {
 
       return 0;
     }
-    */
     
     // -------------------- SET INTENSITY -----------------------
+    //
     else if ( request->command.instruction == six::SET_INTENSITY ) {
       int intensity = atoi ( request->command.value );
       //TODO check if parameter valide
@@ -391,6 +392,7 @@ namespace six {
     }
 
     // -------------------- SET PARAMETER -----------------------
+    //
     else if ( request->command.instruction == six::SET_PARAMETER ) {
       int parameter = atoi ( request->command.value );
       //TODO check if parameter valide
@@ -440,7 +442,7 @@ namespace six {
     */
 
     Serial.println ( response_buf );
-    // TODO check if cast is correct!
+    BLEMini.println ( response_buf );
 
     return 0;
   }

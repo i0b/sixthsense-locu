@@ -2,25 +2,9 @@
 #include <six.h>
 #include <execute.h>
 
+//#include <adafruit.h>
+//#include <string.h>
 
-#include <adafruit.h>
-#include <string.h>
-
-#include <Arduino.h>
-//#include <AltSoftSerial.h>
-
-/*
-// For UNO, AltSoftSerial library is required, please get it from:
-// http://www.pjrc.com/teensy/td_libs_AltSoftSerial.html
-#if defined (__AVR_ATmega168__) || defined (__AVR_ATmega328P__)  
-  AltSoftSerial BLEMini;
-#else
-*/
-
-#define BLEMini Serial1
-/*
-#endif
-*/
 
 char PACKET_DATA [ REQUEST_RESPONSE_PACKET_LEN ];
 size_t PACKET_LEN;
@@ -37,6 +21,7 @@ void execute_command ( char* command ) {
 
 Serial.println("OK");
 }
+
 void command(char c) {
 // HACK
     if (c == 'b') {
@@ -45,8 +30,8 @@ void command(char c) {
       execute_command ( "SM 0 OFF SIX/0.1" );
     }
     else if ( c >= '0' && c <= '9' ) {
-      byte value =  map ( c, '0', '9', 0, 100 );
-      //adafruit::setPERCENT(0x40, 15, value);
+      //byte value =  map ( c, '0', '9', 0, 100 );
+      byte value =  map ( c, '0', '9', 0, 180 );
       //Serial.println(value);
       char command[20];
       snprintf ( command, 20, "SI 0 %d SIX/0.1", value );
@@ -54,16 +39,19 @@ void command(char c) {
       execute_command ( command );
     }
     else if (c == 'v') {
-      execute_command ( "SM 0 VIB SIX/0.1" );
+      execute_command ( "SM 0 VIBRATION SIX/0.1" );
+    }
+    else if (c == 's') {
+      execute_command ( "SM 0 SERVO SIX/0.1" );
     }
     else if (c == 'c') {
-      //execute_command ( "SM 2 ELEC SIX/0.1" );
+      //execute_command ( "SM 2 ELECTRO SIX/0.1" );
 
-      execute_command ( "SM 1 TEMP SIX/0.1" );
+      execute_command ( "SM 1 TEMPERATURE SIX/0.1" );
       execute_command ( "SI 1 2 SIX/0.1" );
     }
     else if (c == 'h') {
-      execute_command ( "SM 1 TEMP SIX/0.1" );
+      execute_command ( "SM 1 TEMPERATURE SIX/0.1" );
       execute_command ( "SI 1 1 SIX/0.1" );
     }
 // HACK END
