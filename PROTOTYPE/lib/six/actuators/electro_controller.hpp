@@ -1,14 +1,14 @@
 {
   // description
-  "peltier armband - left arm",
+  "electro controller",
   // # base address
-  0x43,
+  0x40,
   // frequency
-  100,
+  1000,
   // number of elements
-  12,
+  5,
   // type
-  PELTIER_ELEMENTS,
+  ELECTRO_CONTROLLER,
   // mode
   execute::OFF,
   // changed

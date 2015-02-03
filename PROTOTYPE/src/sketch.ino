@@ -24,19 +24,33 @@ Serial.println("OK");
 
 void command(char c) {
 // HACK
-    if (c == 'b') {
-    }
-    else if (c == 'o') {
+    if (c == 'o') {
       execute_command ( "SM 0 OFF SIX/0.1" );
+      execute_command ( "SM 1 OFF SIX/0.1" );
+      execute_command ( "SM 2 OFF SIX/0.1" );
     }
     else if ( c >= '0' && c <= '9' ) {
-      //byte value =  map ( c, '0', '9', 0, 100 );
-      byte value =  map ( c, '0', '9', 0, 180 );
-      //Serial.println(value);
       char command[20];
-      snprintf ( command, 20, "SI 0 %d SIX/0.1", value );
-      
+
+      // vibration
+      byte percent =  map ( c, '0', '9', 0, 100 );
+      snprintf ( command, 20, "SI 0 %d SIX/0.1", percent );
       execute_command ( command );
+      
+/*
+      // peltier
+      byte on_off =  map ( c, '0', '9', 0, 2 );
+      snprintf ( command, 20, "SI 1 %d SIX/0.1", on_off );
+      execute_command ( command );
+
+*/
+      delay ( 200 );
+      // electro
+      snprintf ( command, 20, "SI 2 %c SIX/0.1", c );
+      execute_command ( command );
+    }
+    else if (c == 'e') {
+      execute_command ( "SM 2 ELECTRO SIX/0.1" );
     }
     else if (c == 'v') {
       execute_command ( "SM 0 VIBRATION SIX/0.1" );
@@ -53,6 +67,16 @@ void command(char c) {
     else if (c == 'h') {
       execute_command ( "SM 1 TEMPERATURE SIX/0.1" );
       execute_command ( "SI 1 1 SIX/0.1" );
+    }
+    else if (c == 'l') {
+      execute_command ( "LIST SIX/0.1" );
+    }
+    else if (c == 'b') {
+      execute_command ( "SM 0 HEARTBEAT SIX/0.1" );
+
+      delay ( 200 );
+
+      execute_command ( "SP 0 80 SIX/0.1" );
     }
 // HACK END
 }
@@ -103,27 +127,35 @@ ISR ( TIMER1_COMPA_vect ) {
 
 void loop()
 {
-//TODO wait for correct ending
+  PACKET_LEN = 0;
+  //six::packet_data_init ();
+
+  //TODO wait for correct ending
   // Bluetooth
   // if new RX data available
+
+/*
   if ( BLEMini.available() ) {
     while ( BLEMini.available() ) {
       //PACKET_DATA [ ( PACKET_LEN++ ) % REQUEST_RESPONSE_PACKET_LEN ] = (char) ble_read();
       char c = (char) BLEMini.read();
-      append ( c );
+      //six::packet_data_append ( c );
+      //append ( c );
       Serial.print(c);
     }
+*/
 
   //if ( PACKET_LEN > 3 && PACKET_DATA [ PACKET_LEN-4 ] == '\r'
   //                    && PACKET_DATA [ PACKET_LEN-3 ] == '\n'
   //                    && PACKET_DATA [ PACKET_LEN-2 ] == '\r'
   //                    && PACKET_DATA [ PACKET_LEN-1 ] == '\n' ) {
+
+  if ( PACKET_LEN > 3 ) {
     six::parse_command ( PACKET_DATA, &PACKET_LEN, &REQUEST_PACKET, &RESPONSE_PACKET );
     six::evaluate_command ( &REQUEST_PACKET, &RESPONSE_PACKET );
-
-    PACKET_LEN = 0;
   }
 /*
+  }
   while (1) {
     execute_command ("SM 0 VIB SIX/0.1");
     delay(1000);
@@ -175,7 +207,6 @@ void loop()
     Serial.println("Repeat....");
   }
 */
-
   execute::run_executor();
 }
 

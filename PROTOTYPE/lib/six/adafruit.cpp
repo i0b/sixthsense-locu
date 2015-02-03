@@ -56,7 +56,8 @@ namespace adafruit {
 
   void setPERCENT(uint8_t i2c_address, uint8_t channel, uint8_t percent) {
     // Low value equals high ratio
-    uint16_t val = map ( percent, 0, 100, 4095, 0 );
+    //uint16_t val = map ( percent, 0, 100, 4095, 0 );
+    uint16_t val = map ( percent, 100, 0, 4095, 0 );
 
     if (val == 0) {
       // Special value for signal fully on.

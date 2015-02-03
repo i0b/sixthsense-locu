@@ -7,6 +7,8 @@
 #include "actuator.h"
 #include "execute.h"
 
+#define KEEPALIVE_TIMEOUT 200 // 200 * 10 ms = 2 sec
+
 namespace execute {
 
   // executeable functions
@@ -14,14 +16,15 @@ namespace execute {
   void execute_vibration ( uint8_t uuid, int parameter [ 2 ] );
   void execute_servo ( uint8_t uuid, int parameter [ 2 ] );
   void execute_temperature ( uint8_t uuid, int parameter [ 2 ] );
-
-  void electric_stimulation ( uint8_t uuid, int parameter [ 2 ] );
+  void electro_stimulation ( uint8_t uuid, int parameter [ 2 ] );
 
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
 
   //const uint8_t NUMBER_ACTUATORS = sizeof ( actuator::actuators ) / sizeof ( actuator_t );
 
-  uint32_t TIMER_VALUE;
+  uint32_t EXECUTION_TIMER;
+  uint16_t KEEPALIVE_TIMER;
+
   QueueList <execution_t> execution_queue;
 
 // -------------------------------------------------------------------------------------
@@ -67,6 +70,23 @@ namespace execute {
 
     interrupts();             // enable all interrupts
 
+
+    // initiallize heartbeat
+    KEEPALIVE_TIMER = KEEPALIVE_TIMEOUT;
+
+
+    // turn all outputs off
+    for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
+      for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
+        if ( actuator::actuators [ uuid ].type != actuator::ELECTRO_CONTROLLER ) {
+          adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, _OFF );
+        }
+        else {
+          adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel,  _ON );
+        }
+      }
+    }
+
     Serial.println ( "six initialized.\r\n" );
 
     return 0;
@@ -88,11 +108,38 @@ namespace execute {
 
       Serial.print ( "actuator_mode: " );
       Serial.println ( EXECUTION_MODE_STRING [ actuator::actuators [ execution_element.uuid ].mode ] );
+
+      Serial.print ( "execution_intensity: " );
+      Serial.println ( execution_element.parameter [ 0 ] );
+
+      Serial.print ( "execution_parameter: " );
+      Serial.println ( execution_element.parameter [ 1 ] );
       Serial.println ();
+
+      // TODO REMOVE!!
+      actuator::actuators [ execution_element.uuid ].changed = false;
     }
 
     return 0;
   }
+
+// -------------------------------------------------------------------------------------
+
+  int ping () {
+    /*
+    if ( KEEPALIVE_TIMER > 0 ) {
+      KEEPALIVE_TIMER = KEEPALIVE_TIMEOUT;
+    }
+    else {
+      return -1;
+    }
+    */
+
+    KEEPALIVE_TIMER = KEEPALIVE_TIMEOUT;
+
+    return 0;
+  }
+
 
 // -------------------------------------------------------------------------------------
 
@@ -132,8 +179,8 @@ namespace execute {
         actuator::actuators [ uuid ].mode = execute::ROTATION;
         break;
 
-      case execute::SET_ELECTRICAL :
-        actuator::actuators [ uuid ].mode = execute::SET_ELECTRICAL;
+      case execute::SET_ELECTRO :
+        actuator::actuators [ uuid ].mode = execute::SET_ELECTRO;
         break;
       
     }
@@ -141,6 +188,58 @@ namespace execute {
     actuator::actuators [ uuid ].changed = true;
 
     return 0;
+
+    /*
+    switch ( actuator::actuators [ uuid ].type ) {
+
+      case ( actuator::VIBRATION_ELEMENTS ) :
+
+        switch ( mode ) {
+          case execute::VIBRATION :
+            actuator::actuators [ uuid ].mode = execute::VIBRATION;
+            actuator::actuators [ uuid ].changed = true;
+            break;
+
+          case execute::HEARTBEAT :
+            actuator::actuators [ uuid ].mode = execute::HEARTBEAT;
+            actuator::actuators [ uuid ].changed = true;
+            break;
+
+          case execute::ROTATION :
+            actuator::actuators [ uuid ].mode = execute::ROTATION;
+            actuator::actuators [ uuid ].changed = true;
+            break;
+
+          default :
+            return -1;
+        }
+
+        break;
+
+      case ( actuator::PELTIER_ELEMENTS ) :
+        if ( mode == execute::TEMPERATURE ) {
+          actuator::actuators [ uuid ].mode = execute::TEMPERATURE;
+          actuator::actuators [ uuid ].changed = true;
+        }
+        else {
+          return -1;
+        }
+        break;
+
+      case ( actuator::SERVO_ELEMENTS ) :
+        if ( mode == execute::SERVO ) {
+          actuator::actuators [ uuid ].mode = execute::SERVO;
+          actuator::actuators [ uuid ].changed = true;
+        }
+        else {
+          return -1;
+        }
+        break;
+    
+    }
+
+    return 0;
+    */
   }
 
 // -------------------------------------------------------------------------------------
@@ -163,9 +262,10 @@ namespace execute {
 
 // -------------------------------------------------------------------------------------
 
-    // TODO map matches: VIBRATION - heartbeat, rotate, ...
-
   void execute_off ( uint8_t uuid, int parameter [ 2 ] ) {
+
+    // TODO remove
+    actuator::actuators [ uuid ].changed = false;
 
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::VIBRATION_ELEMENTS ) :
@@ -189,15 +289,7 @@ namespace execute {
   void execute_servo ( uint8_t uuid, int parameter [ 2 ] ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
-
       case ( actuator::SERVO_ELEMENTS ) :
-        /*
-        for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {
-          for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
-            adafruit::setPWM ( actuator::actuators [ uuid ].base_address, channel, 0, pulselen );
-          }
-        }
-        */
         uint16_t pulselen = map ( actuator::actuators [ uuid ].parameter [ 0 ], 0, 180, SERVOMIN, SERVOMAX );
 
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
@@ -210,7 +302,7 @@ namespace execute {
   }
 
   void execute_vibration ( uint8_t uuid, int parameter [ 2 ] ) {
- 
+
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::VIBRATION_ELEMENTS ) :
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
@@ -255,9 +347,49 @@ namespace execute {
 
   }
 
-  void electric_stimulation ( uint8_t uuid, int parameter [ 2 ] ) {
+  void electro_stimulation ( uint8_t uuid, int parameter [ 2 ] ) {
     // parameter [ 0 ]: value of stimulation
     // parameter [ 1 ]: mode
+    // FOR NOW: parameter [ 0 ]: 1 = LEFT, 2 = RIGHT, 3 = UP, 4 = DOWN, 5 = MODE
+    #define  LEFT 2
+    #define RIGHT 1
+    #define    UP 0
+    #define  DOWN 5
+    #define  MODE 4
+
+    switch ( actuator::actuators [ uuid ].type ) {
+
+      case ( actuator::ELECTRO_CONTROLLER ) :
+        switch ( parameter [ 0 ] ) {
+          case ( 1 ) :
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  LEFT, _OFF );
+             delay ( 80 );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  LEFT,  _ON );
+            break;
+          case ( 2 ) :
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, RIGHT, _OFF );
+             delay ( 80 );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, RIGHT,  _ON );
+            break;
+          case ( 3 ) :
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,    UP, _OFF );
+             delay ( 80 );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,    UP,  _ON );
+            break;
+          case ( 4 ) :
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  DOWN, _OFF );
+             delay ( 80 );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  DOWN,  _ON );
+            break;
+          case ( 5 ) :
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  MODE, _OFF );
+             delay ( 80 );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  MODE,  _ON );
+            break;
+        }
+        break;
+    }
+
   }
 
 // -----------------------------------------------------------------------------------------------
@@ -265,7 +397,13 @@ namespace execute {
 // -----------------------------------------------------------------------------------------------
 
   void timer_isr () {
-    TIMER_VALUE++;
+    EXECUTION_TIMER++;
+
+    if ( --KEEPALIVE_TIMER == 0 ) {
+
+    // TODO do disconnect pattern ;
+    
+    }
 
     // DECISSION LOGIC
     //
@@ -276,7 +414,7 @@ namespace execute {
 
       switch ( actuator::actuators [ uuid ].mode ) {
 
-        case execute::OFF :
+        case ( execute::OFF ) :
           if ( actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, { 0 }, execute_off };
@@ -284,35 +422,36 @@ namespace execute {
           }
           break;
 
-        case execute::TEMPERATURE :
-          if ( actuator::PELTIER_ELEMENTS && actuator::actuators [ uuid ].changed == true ) {
+        case ( execute::TEMPERATURE ) :
+          if ( actuator::actuators [ uuid ].type == actuator::PELTIER_ELEMENTS 
+              && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, { parameter [ 0 ] }, execute_temperature };
             execution_queue.push ( execution_element );
           }
           break;
 
-        case execute::SERVO :
-          if ( actuator::SERVO_ELEMENTS && actuator::actuators [ uuid ].changed == true ) {
+        case ( execute::SERVO ) :
+          if ( actuator::actuators [ uuid ].type == actuator::SERVO_ELEMENTS 
+              && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, { parameter [ 0 ] }, execute_servo };
             execution_queue.push ( execution_element );
           }
           break;
 
-        case execute::VIBRATION :
-          Serial.println ( "EXECUTE VIBRATION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" );
-
-          if ( actuator::VIBRATION_ELEMENTS && actuator::actuators [ uuid ].changed == true ) {
+        case ( execute::VIBRATION ) :
+          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION_ELEMENTS 
+              && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, { parameter [ 0 ] }, execute_vibration };
             execution_queue.push ( execution_element );
           }
           break;
 
-        #define HEARTBEAT_VIBRATOR_ON_TIME 5
-        case execute::HEARTBEAT :
-          if ( actuator::VIBRATION_ELEMENTS ) {
+        #define HEARTBEAT_VIBRATOR_ON_TIME 10
+        case ( execute::HEARTBEAT ) :
+          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION_ELEMENTS ) {
             // parameter [ 0 ]: intensity
             // parameter [ 1 ]: inter beat intervall
             if ( actuator::actuators [ uuid ].changed == true ) {
@@ -321,7 +460,7 @@ namespace execute {
               execution_queue.push ( execution_element );
             }
 
-            uint32_t local_interval = TIMER_VALUE % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ]);
+            uint32_t local_interval = EXECUTION_TIMER % ( HEARTBEAT_VIBRATOR_ON_TIME + parameter [ 1 ]);
 
             // first beat high
             if ( local_interval == 0 ) {
@@ -332,16 +471,23 @@ namespace execute {
             // first beat low
             // turn of after on-delay passed
             else if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
+            //if ( local_interval == HEARTBEAT_VIBRATOR_ON_TIME ) {
               execution_t execution_element = { uuid, { 0 }, execute_vibration };
               execution_queue.push ( execution_element );
             }
           }
           break;
 
-        case execute::ROTATION :
+        case ( execute::ROTATION ) :
           break;
 
-        case execute::SET_ELECTRICAL :
+        case ( execute::SET_ELECTRO ) :
+          if ( actuator::actuators [ uuid ].type == actuator::ELECTRO_CONTROLLER
+              && actuator::actuators [ uuid ].changed == true ) {
+            actuator::actuators [ uuid ].changed = false;
+            execution_t execution_element = { uuid, { parameter [ 0 ] }, electro_stimulation };
+            execution_queue.push ( execution_element );
+          }
           break;
 
       }

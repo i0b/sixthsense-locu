@@ -59,6 +59,10 @@ namespace six {
       request->command.instruction = six::LIST;
     }
 
+    else if ( strncasecmp ( "PING", command, command_len ) == 0 ) {
+      request->command.instruction = six::PING_DEVICE;
+    }
+
     else {
       char* uuid = raw_packet;
       size_t uuid_len;
@@ -287,6 +291,22 @@ namespace six {
 
       // TODO find the right place for this
       send_response_packet ( response );
+
+      return 0;
+    }
+
+    // ------------------ KEEPALIVE PING ------------------------
+    //
+    else if ( request->command.instruction == six::PING_DEVICE ) {
+      
+      execute::ping ();
+
+
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_OK );
+      send_response_packet ( response );
+
+      return 0;
     }
 
     // ------------------ GET MODE ------------------------------
@@ -301,6 +321,7 @@ namespace six {
         send_response_packet ( response );
       }
 
+      return 0;
     }
 
     // ---------------- GET INTENSITY ---------------------------
@@ -315,6 +336,7 @@ namespace six {
         send_response_packet ( response );
       }
 
+      return 0;
     }
 
     // TODO NOT COPY-PASTE!!
@@ -330,6 +352,7 @@ namespace six {
         send_response_packet ( response );
       }
 
+      return 0;
     }
 
 
@@ -353,8 +376,8 @@ namespace six {
       else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SERVO;
       }
-      else if ( strncasecmp ( "ELECTRIC", request->command.value, request->command.value_len ) == 0 ) {
-        mode = execute::SET_ELECTRICAL;
+      else if ( strncasecmp ( "ELECTRO", request->command.value, request->command.value_len ) == 0 ) {
+        mode = execute::SET_ELECTRO;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::OFF;

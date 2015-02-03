@@ -2,7 +2,7 @@
   // description
   "vibration armband - left arm",
   // # base address
-  0x40,
+  0x41,
   // frequency
   1000,
   // number of elements

@@ -14,7 +14,7 @@
         EXECUTION_MODE(ROTATION)      \
         EXECUTION_MODE(SERVO)         \
         EXECUTION_MODE(TEMPERATURE)   \
-        EXECUTION_MODE(SET_ELECTRICAL)\ 
+        EXECUTION_MODE(SET_ELECTRO)   \ 
 
 #ifndef GENERATOR
 #define GERERATOR
@@ -38,6 +38,7 @@ namespace execute {
 
   int init_executor ();
   int run_executor ();
+  int ping ();
 
   int set_mode ( uint8_t uuid, execute::execution_mode mode );
   int set_intensity ( uint8_t uuid, int intensity );

@@ -7,6 +7,7 @@
 
 #define FOREACH_INSTRUCTION(COMMAND)  \
         COMMAND(LIST)          \
+        COMMAND(PING_DEVICE)   \
         COMMAND(INSTRUCTIONS)  \
         COMMAND(GET_MODE)      \
         COMMAND(GET_INTENSITY) \

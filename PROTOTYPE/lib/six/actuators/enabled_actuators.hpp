@@ -12,6 +12,7 @@ actuator_t actuators [ NUMBER_ACTUATORS ] = {
   #include "vibration_armband.hpp"
 //#include "servo_armband.hpp"
   #include "peltier_armband.hpp"
+  #include "electro_controller.hpp"
 
 };
 
