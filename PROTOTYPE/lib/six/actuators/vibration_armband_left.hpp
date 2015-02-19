@@ -6,7 +6,7 @@
   // frequency
   1000,
   // number of elements
-  16,
+  8,
   // type
   VIBRATION_ELEMENTS,
   // mode

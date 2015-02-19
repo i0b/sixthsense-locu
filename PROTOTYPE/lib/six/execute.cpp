@@ -25,6 +25,8 @@ namespace execute {
   uint32_t EXECUTION_TIMER;
   uint16_t KEEPALIVE_TIMER;
 
+  uint8_t  CONNECTED;
+
   QueueList <execution_t> execution_queue;
 
 // -------------------------------------------------------------------------------------
@@ -87,6 +89,8 @@ namespace execute {
       }
     }
 
+    CONNECTED = false;
+
     Serial.println ( "six initialized.\r\n" );
 
     return 0;
@@ -99,7 +103,7 @@ namespace execute {
     while ( !execution_queue.isEmpty() ) {
       execution_t execution_element = execution_queue.pop();
       execution_element.function ( execution_element.uuid, execution_element.parameter );
-
+/*
       Serial.print ( "execution_queue.count(): " );
       Serial.println ( execution_queue.count()+1 );
 
@@ -115,6 +119,7 @@ namespace execute {
       Serial.print ( "execution_parameter: " );
       Serial.println ( execution_element.parameter [ 1 ] );
       Serial.println ();
+*/
 
       // TODO REMOVE!!
       actuator::actuators [ execution_element.uuid ].changed = false;
@@ -135,6 +140,8 @@ namespace execute {
     }
     */
 
+    //Serial.println("DEBUG: ping() - KEEP_ALIVE");
+    CONNECTED = true;
     KEEPALIVE_TIMER = KEEPALIVE_TIMEOUT;
 
     return 0;
@@ -264,9 +271,6 @@ namespace execute {
 
   void execute_off ( uint8_t uuid, int parameter [ 2 ] ) {
 
-    // TODO remove
-    actuator::actuators [ uuid ].changed = false;
-
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::VIBRATION_ELEMENTS ) :
         set_intensity ( uuid, 0 );
@@ -282,6 +286,7 @@ namespace execute {
         break;
     }
 
+    actuator::actuators [ uuid ].changed = false;
   }
 
   #define SERVOMIN  150 // this is the 'minimum' pulse length count (out of 4096)
@@ -306,45 +311,77 @@ namespace execute {
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::VIBRATION_ELEMENTS ) :
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
-          adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, actuator::actuators [ uuid ].parameter [ 0 ] );
+          if ( ( actuator::actuators [ uuid ].parameter [ 1 ] >> channel) & 1  ) {
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, actuator::actuators [ uuid ].parameter [ 0 ] );
+          }
+          else {
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, _OFF );
+          }
         }
         break;
     }
 
   }
 
+  void execute_disconnect( uint8_t uuid, int parameter [ 2 ] ) {}
+
   void execute_temperature ( uint8_t uuid, int parameter [ 2 ] ) {
 
-    // element_offset: PIN1, PIN2, ENABLE
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::PELTIER_ELEMENTS ) :
-        switch ( actuator::actuators [ uuid ].parameter [ 0 ] ) {
-          //case 0:
-          case 1:
-            for ( uint8_t peltier = 0; peltier < ( actuator::actuators [ uuid ].number_elements / 3 ); peltier++ ) {
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1,  _ON );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
+        Serial.print("ADDR: ");
+        Serial.println(actuator::actuators [ uuid ].base_address);
+/*
+        for ( uint8_t peltier = 0; peltier < 4; peltier++ ) {
+          if ( parameter [ 0 ] == 1  ) {
+            Serial.println("SET: COLD");
+            Serial.print("ADDR: ");
+            Serial.println(actuator::actuators [ uuid ].base_address);
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1,  _ON );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
+          }
+          else if ( parameter [ 0 ] == 2  ) {
+            Serial.println("SET: HOT");
+            Serial.print("ADDR: ");
+            Serial.println(actuator::actuators [ uuid ].base_address);
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0,  _ON );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
+          }
+          else {
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2, _OFF );
+          }
+*/
+        for ( uint8_t peltier = 0; peltier < ( actuator::actuators [ uuid ].number_elements / 3 ); peltier++ ) {
+          // parameter [ 0 ]: DIRECTION bitmap
+          // parameter [ 1 ]: ON / OFF  bitmap
+          // example: only peltier element 1 should be hot - parameter = { 0x0, 0x1 }
+          if ( ( actuator::actuators [ uuid ].parameter [ 0 ] >> peltier ) & 1  ) {
+            // hot 
+            if ( ( actuator::actuators [ uuid ].parameter [ 1 ] >> peltier ) & 1  ) {
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0,  _ON );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
             }
-            break;
-          case 2:
-            for ( uint8_t peltier = 0; peltier < ( actuator::actuators [ uuid ].number_elements / 3 ); peltier++ ) {
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0,  _ON );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
+            // cold
+            else {
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1,  _ON );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2,  _ON );
             }
-            break;
-          default:
-            for ( uint8_t peltier = 0; peltier < ( actuator::actuators [ uuid ].number_elements / 3 ); peltier++ ) {
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
-              adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2, _OFF );
-            }
-            break;
+          }
+          else {
+                // element_offset: PIN1, PIN2, ENABLE
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 0, _OFF );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 1, _OFF );
+                adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, 3 * peltier + 2, _OFF );
+          }
         }
         break;
     }
-
   }
 
   void electro_stimulation ( uint8_t uuid, int parameter [ 2 ] ) {
@@ -400,9 +437,14 @@ namespace execute {
     EXECUTION_TIMER++;
 
     if ( --KEEPALIVE_TIMER == 0 ) {
-
     // TODO do disconnect pattern ;
-    
+    // TODO don't hardcode vibration element(s)
+      CONNECTED = false;
+
+      execution_t execution_element_left_vibration  = { 0, { 0 }, execute_disconnect };
+      execution_t execution_element_right_vibration = { 1, { 0 }, execute_disconnect };
+      execution_queue.push ( execution_element_left_vibration );
+      execution_queue.push ( execution_element_right_vibration );
     }
 
     // DECISSION LOGIC

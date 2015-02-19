@@ -60,6 +60,7 @@ namespace six {
     }
 
     else if ( strncasecmp ( "PING", command, command_len ) == 0 ) {
+      //Serial.println("DEBUG: parsed 'ping' as valid command");
       request->command.instruction = six::PING_DEVICE;
     }
 
@@ -105,8 +106,8 @@ namespace six {
 
       else
       {
-        char* value;
         size_t value_len;
+        char* value;
 
         // read value
         value = raw_packet;
@@ -206,11 +207,10 @@ namespace six {
 
     request->version_major = (uint8_t) major_int;
     request->version_minor = (uint8_t) minor_int;
-    
 
-    char output_buffer[150];
+    char output_buffer[256];
 
-    snprintf ( output_buffer, sizeof output_buffer, "parsed_request = { command = '%s', "
+    snprintf ( output_buffer, sizeof output_buffer, "DEBUG: parsed_request = { command = '%s', "
         "uuid = '%d', value = '%s', packet_version = '%d.%d' }\r\n",
         INSTRUCTIONS_STRING [ request->command.instruction ],
         //request->command.instruction,
@@ -240,8 +240,8 @@ namespace six {
 //
 //
   int evaluate_command ( request_packet_t* request, response_packet_t* response ) {
+    //Serial.println( "DEBUG: evaluate_command()");
     /*
-    Serial.println( "\r\nevaluating command..." );
     
     Serial.print ( "request { command = '"  );
     Serial.print ( INSTRUCTIONS_STRING [ request->command.instruction ] );
@@ -256,6 +256,8 @@ namespace six {
        return -1;
     }
 
+    //Serial.println(" ---------------------------------------------- ACK ------------------------------------------------ ");
+    //Serial.println(INSTRUCTIONS_STRING[request->command.instruction]);
     // ---------------- LIST ACTUATORS --------------------------
     //
     if ( request->command.instruction == six::LIST ) {
@@ -298,9 +300,9 @@ namespace six {
     // ------------------ KEEPALIVE PING ------------------------
     //
     else if ( request->command.instruction == six::PING_DEVICE ) {
-      
-      execute::ping ();
+      //Serial.println("DEBUG: call execute::ping(), create SIX_OK response");
 
+      execute::ping ();
 
       set_packet_body ( response, EMPTY, NULL, NULL , 0 );
       create_response_packet ( response, status::SIX_OK );
@@ -361,22 +363,22 @@ namespace six {
     else if ( request->command.instruction == six::SET_MODE ) {
       execute::execution_mode mode = execute::OFF;
 
-      if ( strncasecmp ( "HEARTBEAT", request->command.value, request->command.value_len ) == 0 ) {
+      if ( strncasecmp ( "BEAT", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::HEARTBEAT;
       }
-      else if ( strncasecmp ( "ROTATION", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "ROT", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::ROTATION;
       }
-      else if ( strncasecmp ( "VIBRATION", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "VIB", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::VIBRATION;
       }
-      else if ( strncasecmp ( "TEMPERATURE", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "TEMP", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::TEMPERATURE;
       }
       else if ( strncasecmp ( "SERVO", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SERVO;
       }
-      else if ( strncasecmp ( "ELECTRO", request->command.value, request->command.value_len ) == 0 ) {
+      else if ( strncasecmp ( "ELEC", request->command.value, request->command.value_len ) == 0 ) {
         mode = execute::SET_ELECTRO;
       }
       else if ( strncasecmp ( "OFF", request->command.value, request->command.value_len ) == 0 ) {
@@ -434,8 +436,8 @@ namespace six {
 //
 //
   int send_response_packet ( response_packet_t* packet ) {
-    Serial.println ( "sending response..." );
 
+    //Serial.println ( "sending response..." );
     char response_buf [ REQUEST_RESPONSE_PACKET_LEN ];
 
     snprintf ( response_buf, REQUEST_RESPONSE_PACKET_LEN,
@@ -495,6 +497,9 @@ namespace six {
     }
 
     *space = '\0';
+    //Serial.println(packet_segment);
+    //char tmp [100];
+    //snprintf ( tmp, strlen(packet_segment)+10, "%s: %d --\r\n", packet_segment, *segment_len);
 
     return space + 1;
   }

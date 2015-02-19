@@ -2,7 +2,7 @@
   // description
   "peltier armband - left arm",
   // # base address
-  0x43,
+  0x44,
   // frequency
   100,
   // number of elements
