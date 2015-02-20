@@ -64,6 +64,10 @@ namespace six {
       request->command.instruction = six::PING_DEVICE;
     }
 
+    else if ( strncasecmp ( "DISCDEMO", command, command_len ) == 0 ) {
+      request->command.instruction = six::DEMONSTRATE_DISCONNECT;
+    }
+
     else {
       char* uuid = raw_packet;
       size_t uuid_len;
@@ -71,7 +75,7 @@ namespace six {
       // read uuid
       raw_packet = parse_next ( raw_packet, packet_len, &uuid_len, "uuid" );
 
-      if ( raw_packet == 0 ) {
+      if ( raw_packet == NULL ) {
         set_packet_body ( response, EMPTY, NULL, NULL , 0 );
         create_response_packet ( response, status::SIX_ERROR_PARSING );
         send_response_packet ( response );
@@ -113,7 +117,7 @@ namespace six {
         value = raw_packet;
         raw_packet = parse_next ( raw_packet, packet_len, &value_len, "value" );
       
-        if ( raw_packet == 0 ) {
+        if ( raw_packet == NULL ) {
           set_packet_body ( response, EMPTY, NULL, NULL , 0 );
           create_response_packet ( response, status::SIX_ERROR_PARSING );
           send_response_packet ( response );
@@ -311,6 +315,18 @@ namespace six {
       return 0;
     }
 
+    // ----------- DEMONSTRATE DISCONNECT PATTERN ---------------
+    //
+    else if ( request->command.instruction == six::DEMONSTRATE_DISCONNECT ) {
+      set_packet_body ( response, EMPTY, NULL, NULL , 0 );
+      create_response_packet ( response, status::SIX_OK );
+      send_response_packet ( response );
+
+      execute::demonstrate_disconnect ();
+
+      return 0;
+    }
+
     // ------------------ GET MODE ------------------------------
     //
     else if ( request->command.instruction == six::GET_MODE ) {
@@ -489,7 +505,7 @@ namespace six {
     }
 
     else {
-     *segment_len = space - packet_segment;
+     *segment_len = space - packet_segment + 1;
     }
 
     if ( *segment_len < 1 ) {

@@ -7,16 +7,17 @@
 #include "actuator.h"
 #include "execute.h"
 
-#define KEEPALIVE_TIMEOUT 200 // 200 * 10 ms = 2 sec
+#define KEEPALIVE_TIMEOUT 2000 // 200 * 10 ms = 2 sec
 
 namespace execute {
 
   // executeable functions
+  void execute_disconnect ( uint8_t uuid, int parameter [ 2 ] );
   void execute_off ( uint8_t uuid, int parameter [ 2 ] );
-  void execute_vibration ( uint8_t uuid, int parameter [ 2 ] );
   void execute_servo ( uint8_t uuid, int parameter [ 2 ] );
-  void execute_temperature ( uint8_t uuid, int parameter [ 2 ] );
   void electro_stimulation ( uint8_t uuid, int parameter [ 2 ] );
+  void execute_temperature ( uint8_t uuid, int parameter [ 2 ] );
+  void execute_vibration ( uint8_t uuid, int parameter [ 2 ] );
 
   const char* EXECUTION_MODE_STRING[] = { FOREACH_MODE ( GENERATE_STRING ) };
 
@@ -143,6 +144,16 @@ namespace execute {
     //Serial.println("DEBUG: ping() - KEEP_ALIVE");
     CONNECTED = true;
     KEEPALIVE_TIMER = KEEPALIVE_TIMEOUT;
+
+    return 0;
+  }
+
+// -------------------------------------------------------------------------------------
+
+  int demonstrate_disconnect () {
+    // TODO which uuid?? -- not hard coded!!
+    execution_t execution_element = { 0, { 0 }, execute_disconnect };
+    execution_queue.push ( execution_element );
 
     return 0;
   }
@@ -323,13 +334,29 @@ namespace execute {
 
   }
 
-  void execute_disconnect( uint8_t uuid, int parameter [ 2 ] ) {}
+  void execute_disconnect( uint8_t uuid, int parameter [ 2 ] ) {
+
+    switch ( actuator::actuators [ uuid ].type ) {
+      case ( actuator::VIBRATION_ELEMENTS ) :
+        for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements+1; channel++ ) {
+          if ( channel > 0 ) {
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel-1, _OFF );
+          }
+          if ( channel != actuator::actuators [ uuid ].number_elements ) {
+            adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel,  _ON );
+          }
+          // CAREFUL!! USE OF DELAY
+          delay(200);
+        }
+        break;
+    }
+  
+  }
 
   void execute_temperature ( uint8_t uuid, int parameter [ 2 ] ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
       case ( actuator::PELTIER_ELEMENTS ) :
-        Serial.print("ADDR: ");
         Serial.println(actuator::actuators [ uuid ].base_address);
 /*
         for ( uint8_t peltier = 0; peltier < 4; peltier++ ) {
@@ -436,16 +463,18 @@ namespace execute {
   void timer_isr () {
     EXECUTION_TIMER++;
 
-    if ( --KEEPALIVE_TIMER == 0 ) {
+    /*
+    if ( CONNECTED && --KEEPALIVE_TIMER == 0 ) {
     // TODO do disconnect pattern ;
     // TODO don't hardcode vibration element(s)
       CONNECTED = false;
 
       execution_t execution_element_left_vibration  = { 0, { 0 }, execute_disconnect };
-      execution_t execution_element_right_vibration = { 1, { 0 }, execute_disconnect };
       execution_queue.push ( execution_element_left_vibration );
-      execution_queue.push ( execution_element_right_vibration );
+      //execution_t execution_element_right_vibration = { 1, { 0 }, execute_disconnect };
+      //execution_queue.push ( execution_element_right_vibration );
     }
+    */
 
     // DECISSION LOGIC
     //

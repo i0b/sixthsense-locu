@@ -5,16 +5,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define FOREACH_INSTRUCTION(COMMAND)  \
-        COMMAND(LIST)          \
-        COMMAND(PING_DEVICE)   \
-        COMMAND(INSTRUCTIONS)  \
-        COMMAND(GET_MODE)      \
-        COMMAND(GET_INTENSITY) \
-        COMMAND(GET_PARAMETER) \
-        COMMAND(SET_MODE)      \
-        COMMAND(SET_INTENSITY) \
-        COMMAND(SET_PARAMETER) \
+#define FOREACH_INSTRUCTION(COMMAND)    \
+        COMMAND(LIST)                   \
+        COMMAND(PING_DEVICE)            \
+        COMMAND(DEMONSTRATE_DISCONNECT) \
+        COMMAND(INSTRUCTIONS)           \
+        COMMAND(GET_MODE)               \
+        COMMAND(GET_INTENSITY)          \
+        COMMAND(GET_PARAMETER)          \
+        COMMAND(SET_MODE)               \
+        COMMAND(SET_INTENSITY)          \
+        COMMAND(SET_PARAMETER)          \
 
 #ifndef GENERATOR
 #define GENERATOR

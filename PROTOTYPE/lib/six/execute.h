@@ -39,6 +39,7 @@ namespace execute {
   int init_executor ();
   int run_executor ();
   int ping ();
+  int demonstrate_disconnect ();
 
   int set_mode ( uint8_t uuid, execute::execution_mode mode );
   int set_intensity ( uint8_t uuid, int intensity );
