@@ -127,8 +127,8 @@ ISR ( TIMER1_COMPA_vect ) {
 }
 */
 
-void loop()
-{
+void loop() {
+
   execute::run_executor();
 
   //six::packet_data_init ();
@@ -144,6 +144,7 @@ void loop()
   if ( BLEMini.available() ) {
     fetch_and_execute_bluetooth_data();
   }
+
 }
 
 char cmd[256];

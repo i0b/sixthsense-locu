@@ -30,14 +30,15 @@ namespace actuator {
   typedef struct {
     char* description;
     uint8_t base_address;
+    bool active;
     uint8_t frequency;
     uint8_t number_elements;
     actuator_type type;
     execute::execution_mode mode;
     bool changed;
-    // first parameter:  intensity
-    // second parameter: function specific parameter
-    int parameter[2];
+    int intensity;
+    int parameter;
+    int attribute;
   } actuator_t;
 
 

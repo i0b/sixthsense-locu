@@ -3,6 +3,8 @@
   "electro controller",
   // # base address
   0x40,
+  // active
+  true,
   // frequency
   1000,
   // number of elements
@@ -13,6 +15,10 @@
   execute::OFF,
   // changed
   false,
+  // intensity
+  0,
   // parameter
-  { 0, 0 },
+  0,
+  // attribute
+  0,
 },

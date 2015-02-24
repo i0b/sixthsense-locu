@@ -347,7 +347,7 @@ namespace six {
     else if ( request->command.instruction == six::GET_INTENSITY ) {
 
       if ( set_packet_body ( response, INT, "intensity", NULL, 
-            actuator::actuators [ request->command.uuid ].parameter [ 0 ] ) == 0 ) {
+            actuator::actuators [ request->command.uuid ].intensity ) == 0 ) {
 
         create_response_packet ( response, status::SIX_OK );
 
@@ -363,7 +363,7 @@ namespace six {
     else if ( request->command.instruction == six::GET_PARAMETER ) {
       
       if ( set_packet_body ( response, INT, "parameter", NULL, 
-            actuator::actuators [ request->command.uuid ].parameter [ 1 ] ) == 0 ) {
+            actuator::actuators [ request->command.uuid ].parameter ) == 0 ) {
 
         create_response_packet ( response, status::SIX_OK );
 
