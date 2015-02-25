@@ -33,7 +33,7 @@
 
 
 
-namespace six {
+namespace parse {
   typedef enum { EMPTY, INT, STRING } value_t;
   static const char* INSTRUCTIONS_STRING[] = { FOREACH_INSTRUCTION ( GENERATE_STRING ) };
 
@@ -75,7 +75,7 @@ namespace six {
       size_t uidLength;
 
       // read uuid
-      rawPacket = parseNext ( uid, packetLength, &uidLength, "uuid" );
+      rawPacket = _parseNext ( uid, packetLength, &uidLength, "uuid" );
 
       if ( rawPacket == NULL ) {
         _setPacketBody ( EMPTY, NULL, NULL , 0 );
@@ -116,7 +116,7 @@ namespace six {
         size_t valueLength;
 
         // read value
-        rawPacket = parseNext ( value, packetLength, &valueLength, "value" );
+        rawPacket = _parseNext ( value, packetLength, &valueLength, "value" );
       
         if ( rawPacket == NULL ) {
           _setPacketBody ( EMPTY, NULL, NULL , 0 );
@@ -212,8 +212,8 @@ namespace six {
     }
     */
 
-    _requestPacket->versionMajor = 0;//(uint8_t) major_int;
-    _requestPacket->versionMinor = 1;//(uint8_t) minor_int;
+    _requestPacket->versionMajor = versionMajor;//(uint8_t) major_int;
+    _requestPacket->versionMinor = versionMinor;//(uint8_t) minor_int;
 
     char outputBuffer[256];
 
@@ -255,12 +255,12 @@ namespace six {
     // ---------------- LIST ACTUATORS --------------------------
     //
     if ( _requestPacket->command.instruction == six::LIST ) {
-      strcpy ( response->body, "" );
-      response->bodyLength = 0;
+      strcpy ( _responsePacket->body, "" );
+      _responsePacket->bodyLength = 0;
 
-      for ( uint8_t uid = 0; uid < NUMBER_ACTUATORS; uid++ ) {
-        response->bodyLength += snprintf ( response->body + strlen ( response->body ), 
-            REQUEST_RESPONSE_PACKET_LEN - response->bodyLength, 
+      for ( uint8_t uid = 0; uid < six::Six::_numberActuators; uid++ ) {
+        _responsePacket->bodyLength += snprintf ( _responsePacket->body + strlen ( _responsePacket->body ), 
+            REQUEST_RESPONSE_PACKET_LEN - _responsePacket->bodyLength, 
             
             "uid: %d\r\n"
             "description: %s\r\n"
@@ -274,11 +274,11 @@ namespace six {
           );
       }
 
-      response->bodyLength += snprintf ( response->body + strlen ( response->body ), 
-          REQUEST_RESPONSE_PACKET_LEN - response->bodyLength, 
+      _responsePacket->bodyLength += snprintf ( _responsePacket->body + strlen ( _responsePacket->body ), 
+          REQUEST_RESPONSE_PACKET_LEN - _responsePacket->bodyLength, 
           "\r\n" );
 
-      response->bodyLength = strlen ( response->body );
+      _responsePacket->bodyLength = strlen ( _responsePacket->body );
 
 
       // TODO find the right place for this

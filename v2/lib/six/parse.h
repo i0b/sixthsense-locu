@@ -43,8 +43,6 @@
 
 namespace six {
   class Parse {
-    static const uint8_t versionMajor = 0;
-    static const uint8_t versionMinor = 1;
     //extern static const uint8_t VERSION_MAJOR;
     //extern static const uint8_t VERSION_MINOR;
 
@@ -82,6 +80,10 @@ namespace six {
       // upon successful completion, these functions shall return 0. Otherwise, these functions shall return −1
       static int parseCommand ( char* rawPacket, size_t packetLength );
       static int evaluateCommand ();
+
+      static const uint8_t versionMajor = 0;
+      static const uint8_t versionMinor = 1;
+
     private:
       static char _packetData [ requestResponsePacketLength ];
       static size_t _packetLength;

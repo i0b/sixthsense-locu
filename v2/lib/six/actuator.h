@@ -52,12 +52,13 @@ namespace six {
                           six::Execute::executionMode mode=EXECUTE_OFF, bool changed=false,
                           int intensity=0, int parameter=0, int attribute=0);
         static actuator_t* getActuatorByUID ( uint8_t uid );
+        static uint8_t getNumberActuators ();
         
         extern static const char* ACTUATOR_TYPE_STRING[];
 
-
     private:
       static actuatorNode* _actuatorList = NULL;
+      static uint8_t _numberActuators = 0;
 
   }
 }
