@@ -10,7 +10,7 @@
   // number of elements
   4,
   // type
-  SERVO_ELEMENTS,
+  PRESSURE,
   // mode
   execute::OFF,
   // changed

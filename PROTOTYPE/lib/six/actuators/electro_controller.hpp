@@ -10,7 +10,7 @@
   // number of elements
   5,
   // type
-  ELECTRO_CONTROLLER,
+  ELECTRIC,
   // mode
   execute::OFF,
   // changed

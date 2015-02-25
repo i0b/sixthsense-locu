@@ -10,7 +10,7 @@
   // number of elements
   12,
   // type
-  PELTIER_ELEMENTS,
+  TEMPERATURE,
   // mode
   execute::OFF,
   // changed

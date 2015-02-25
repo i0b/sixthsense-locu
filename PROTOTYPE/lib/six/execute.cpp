@@ -79,7 +79,7 @@ namespace execute {
     // turn all outputs off
     for ( uint8_t uuid = 0; uuid < NUMBER_ACTUATORS; uuid++ ) {
       for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
-        if ( actuator::actuators [ uuid ].type != actuator::ELECTRO_CONTROLLER ) {
+        if ( actuator::actuators [ uuid ].type != actuator::ELECTRIC ) {
           adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, _OFF );
         }
         else {
@@ -161,14 +161,6 @@ namespace execute {
 // -------------------------------------------------------------------------------------
 
   int set_mode ( uint8_t uuid, execute::execution_mode mode ) {
-    /*
-     *   ACTUATOR_TYPE(VIBRATION_ELEMENTS) \
-     *   ACTUATOR_TYPE(SERVO_ELEMENTS)     \
-     *   ACTUATOR_TYPE(PELTIER_ELEMENTS)   \
-     *   ACTUATOR_TYPE(ELECTRO_CONTROL)    \
-     *
-     *
-     */
 
     switch ( mode ) {
 
@@ -230,15 +222,15 @@ namespace execute {
   void execute_off ( uint8_t uuid, int intensity, int parameter ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
-      case ( actuator::VIBRATION_ELEMENTS ) :
+      case ( actuator::VIBRATION ) :
         set_intensity ( uuid, 0 );
         execute_vibration ( uuid, actuator::actuators [ uuid ].intensity, actuator::actuators [ uuid ].parameter );
         break;
-      case ( actuator::PELTIER_ELEMENTS ) :
+      case ( actuator::TEMPERATURE ) :
         set_intensity ( uuid, 0 );
         execute_temperature ( uuid, actuator::actuators [ uuid ].intensity, actuator::actuators [ uuid ].parameter );
         break;
-      case ( actuator::SERVO_ELEMENTS ) :
+      case ( actuator::PRESSURE ) :
         set_intensity ( uuid, 90 );
         execute_servo ( uuid, actuator::actuators [ uuid ].intensity, actuator::actuators [ uuid ].parameter );
         break;
@@ -252,7 +244,7 @@ namespace execute {
   void execute_servo ( uint8_t uuid, int intensity, int parameter ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
-      case ( actuator::SERVO_ELEMENTS ) :
+      case ( actuator::PRESSURE ) :
         uint16_t pulselen = map ( actuator::actuators [ uuid ].intensity, 0, 180, SERVOMIN, SERVOMAX );
 
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
@@ -266,7 +258,7 @@ namespace execute {
 
   void execute_vibration ( uint8_t uuid, int intensity, int parameter ) {
     switch ( actuator::actuators [ uuid ].type ) {
-      case ( actuator::VIBRATION_ELEMENTS ) :
+      case ( actuator::VIBRATION ) :
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements; channel++ ) {
           if ( ( parameter >> channel) & 1  ) {
             adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel, intensity );
@@ -283,7 +275,7 @@ namespace execute {
   void execute_disconnect( uint8_t uuid, int intensity, int parameter ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
-      case ( actuator::VIBRATION_ELEMENTS ) :
+      case ( actuator::VIBRATION ) :
         for ( int channel = 0; channel < actuator::actuators [ uuid ].number_elements+1; channel++ ) {
           if ( channel > 0 ) {
             adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address, channel-1, _OFF );
@@ -302,7 +294,7 @@ namespace execute {
   void execute_temperature ( uint8_t uuid, int intensity, int parameter ) {
 
     switch ( actuator::actuators [ uuid ].type ) {
-      case ( actuator::PELTIER_ELEMENTS ) :
+      case ( actuator::TEMPERATURE ) :
         for ( uint8_t peltier = 0; peltier < ( actuator::actuators [ uuid ].number_elements / 3 ); peltier++ ) {
           // parameter [ 0 ]: DIRECTION bitmap
           // parameter [ 1 ]: ON / OFF  bitmap
@@ -345,7 +337,7 @@ namespace execute {
 
     switch ( actuator::actuators [ uuid ].type ) {
 
-      case ( actuator::ELECTRO_CONTROLLER ) :
+      case ( actuator::ELECTRIC ) :
         switch ( intensity ) {
           case ( 1 ) :
             adafruit::setPERCENT ( actuator::actuators [ uuid ].base_address,  LEFT, _OFF );
@@ -415,7 +407,7 @@ namespace execute {
           break;
 
         case ( execute::TEMPERATURE ) :
-          if ( actuator::actuators [ uuid ].type == actuator::PELTIER_ELEMENTS 
+          if ( actuator::actuators [ uuid ].type == actuator::TEMPERATURE
               && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, intensity, 0, execute_temperature };
@@ -424,7 +416,7 @@ namespace execute {
           break;
 
         case ( execute::SERVO ) :
-          if ( actuator::actuators [ uuid ].type == actuator::SERVO_ELEMENTS 
+          if ( actuator::actuators [ uuid ].type == actuator::PRESSURE
               && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, intensity, 0, execute_servo };
@@ -433,7 +425,7 @@ namespace execute {
           break;
 
         case ( execute::VIBRATION ) :
-          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION_ELEMENTS 
+          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION
               && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, intensity, parameter, execute_vibration };
@@ -443,7 +435,7 @@ namespace execute {
 
         #define HEARTBEAT_VIBRATOR_ON_TIME 10
         case ( execute::HEARTBEAT ) :
-          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION_ELEMENTS ) {
+          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION ) {
             if ( actuator::actuators [ uuid ].changed == true ) {
               actuator::actuators [ uuid ].changed = false;
               execution_t execution_element = { uuid, 0, 0, execute_vibration };
@@ -467,7 +459,7 @@ namespace execute {
           break;
 
         case ( execute::ROTATION ) :
-          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION_ELEMENTS ) {
+          if ( actuator::actuators [ uuid ].type == actuator::VIBRATION ) {
             if ( actuator::actuators [ uuid ].changed == true ) {
               actuator::actuators [ uuid ].changed = false;
               execution_t execution_element = { uuid, 0, 0, execute_vibration };
@@ -493,7 +485,7 @@ namespace execute {
           break;
 
         case ( execute::SET_ELECTRO ) :
-          if ( actuator::actuators [ uuid ].type == actuator::ELECTRO_CONTROLLER
+          if ( actuator::actuators [ uuid ].type == actuator::ELECTRIC
               && actuator::actuators [ uuid ].changed == true ) {
             actuator::actuators [ uuid ].changed = false;
             execution_t execution_element = { uuid, intensity, 0, electro_stimulation };

@@ -10,7 +10,7 @@
   // number of elements
   8,
   // type
-  VIBRATION_ELEMENTS,
+  VIBRATION,
   // mode
   execute::OFF,
   // changed

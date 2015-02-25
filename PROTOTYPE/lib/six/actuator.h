@@ -7,13 +7,12 @@
 #include <stdint.h>
 
 #define MAX_ELEMENTS 16
-#define NUMBER_ACTUATORS 4
 
-#define FOREACH_TYPE(ACTUATOR_TYPE)       \
-        ACTUATOR_TYPE(VIBRATION_ELEMENTS) \
-        ACTUATOR_TYPE(SERVO_ELEMENTS)     \
-        ACTUATOR_TYPE(PELTIER_ELEMENTS)   \
-        ACTUATOR_TYPE(ELECTRO_CONTROLLER) \
+#define FOREACH_TYPE(ACTUATOR_TYPE)     \
+        ACTUATOR_TYPE(VIBRATION)        \
+        ACTUATOR_TYPE(PRESSURE)         \
+        ACTUATOR_TYPE(TEMPERATURE)      \
+        ACTUATOR_TYPE(ELECTRIC)         \
 
 #ifndef GENERATOR
 #define GERERATOR
@@ -24,31 +23,43 @@
 
 #endif
 
-namespace actuator {
-  typedef enum { FOREACH_TYPE ( GENERATE_ENUM ) } actuator_type;
+namespace six {
+  class Actuator {
+    typedef enum { FOREACH_TYPE ( GENERATE_ENUM ) } actuatorType;
 
-  typedef struct {
-    char* description;
-    uint8_t base_address;
-    bool active;
-    uint8_t frequency;
-    uint8_t number_elements;
-    actuator_type type;
-    execute::execution_mode mode;
-    bool changed;
-    int intensity;
-    int parameter;
-    int attribute;
-  } actuator_t;
+    typedef struct {
+      char* description;
+      uint8_t baseAddress;
+      bool active;
+      uint8_t frequency;
+      uint8_t numberElements;
+      actuator_type type;
+      execute::executionMode mode;
+      bool changed;
+      int intensity;
+      int parameter;
+      int attribute;
+    } actuator_t;
+
+    struct actuatorNode {
+      actuator_t actuator;
+      actuatorNode* nextActuator;
+    };
+
+    public:
+        static int addActuator ( char[] description, six::Actuator::actuatorType type, uint8_t numberElements=16,
+                          uint8_t baseAddress = 0x40, uint16_t frequency=1000, bool active=true,
+                          six::Execute::executionMode mode=EXECUTE_OFF, bool changed=false,
+                          int intensity=0, int parameter=0, int attribute=0);
+        static actuator_t* getActuatorByUID ( uint8_t uid );
+        
+        extern static const char* ACTUATOR_TYPE_STRING[];
 
 
-  extern const char* TYPE_STRING[];
+    private:
+      static actuatorNode* _actuatorList = NULL;
 
-  extern actuator_t actuators [ NUMBER_ACTUATORS ];
-
-  // total number of actuators
-  // extern const uint8_t NUMBER_ACTUATORS;
-
+  }
 }
 
 #endif
