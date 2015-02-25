@@ -1,16 +1,16 @@
 {
   // description
-  "electro controller",
+  "servo armband - right arm",
   // # base address
-  0x47,
+  0x46,
   // active
   true,
   // frequency
-  1000,
+  60,
   // number of elements
-  5,
+  4,
   // type
-  ELECTRO_CONTROLLER,
+  SERVO_ELEMENTS,
   // mode
   execute::OFF,
   // changed
@@ -18,7 +18,5 @@
   // intensity
   0,
   // parameter
-  0,
-  // attribute
   0,
 },

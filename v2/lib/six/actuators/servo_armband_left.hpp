@@ -2,7 +2,7 @@
   // description
   "servo armband - left arm",
   // # base address
-  0x40,
+  0x45,
   // active
   true,
   // frequency

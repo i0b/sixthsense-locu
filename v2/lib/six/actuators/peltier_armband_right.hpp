@@ -2,7 +2,7 @@
   // description
   "peltier armband - right arm",
   // # base address
-  0x43,
+  0x44,
   // active
   true,
   // frequency

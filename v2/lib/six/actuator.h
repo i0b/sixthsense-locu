@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #define MAX_ELEMENTS 16
-#define NUMBER_ACTUATORS 4
+#define NUMBER_ACTUATORS 7
 
 #define FOREACH_TYPE(ACTUATOR_TYPE)       \
         ACTUATOR_TYPE(VIBRATION_ELEMENTS) \
