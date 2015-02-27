@@ -1,20 +1,32 @@
-#include "execute.h"
-#include "actuator.h"
+#include <stddef.h>
+#include <stdint.h>
 
-class Six
-{
-  public:
-    Six ();
-    static int parseEvaluate ( char[] command );
-    static void runExecutor ();
-    static int addActuator ( char[] description, actuatorType type, uint8_t numberElements=16, 
-                      uint8_t baseAddress = 0x40, uint16_t frequency=1000, bool active=true, 
-                      executionMode mode=EXECUTE_OFF, bool changed=false, 
-                      int intensity=0, int parameter=0, int attribute=0);
-    static uint8_t getNumberActuators ();
-    static void begin ();
-  private:
-    static actuatorNode* _actuatorList = NULL;
-    static actuator_t* _actuatorByUID ( uint8_t uid );
-    static uint8_t _numberActuators;
+#define MAX_ELEMENTS 16
+
+#ifndef _SIX_H
+#define _SIX_H
+
+namespace six {
+  class Six {
+    public:
+      Six ();
+
+      enum class actuatorType { VIBRATION, PRESSURE, TEMPERATURE, ELECTRIC };
+      const char* actuatorTypeString[4] = { "vibration band", "pressure band", "temperature sleeve", "electric stimulation pads" };
+      enum class executionMode { OFF, VIBRATION, HEARTBEAT, ROTATION, PRESSURE, TEMPERATURE, ELECTRO };
+
+      static int parseEvaluate(char* command);
+      static void runExecutor();
+      static int addActuator(char* description, actuatorType type, uint8_t numberElements, uint8_t baseAddress);
+      static uint8_t getNumberActuators();
+      static void begin();
+
+    private:
+      class Actuator;
+      Actuator* _actuator;
+      class Executor;
+      Executor* _executor;
+  };
 }
+
+#endif
