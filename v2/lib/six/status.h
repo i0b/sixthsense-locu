@@ -1,16 +1,28 @@
-#include "status.h"
+#ifndef STATUS_H
+#define STATUS_H
 
-namespace status {
-/*
-  enum state {
+#include <stddef.h>
+#include <stdint.h>
+
+namespace six {
+  
+  typedef enum {
     SIX_OK,
-    SIX_NOT_FOUND,
+    SIX_COMMAND_NOT_FOUND,
+    SIX_NO_SUCH_MODE,
     SIX_SERVER_ERROR,
-    SIX_ERROR_PARSING
-  } state_t;
-*/
+    SIX_ERROR_PARSING,
+    SIX_WRONG_VERSION
+  } statusType;
 
-  status_t status_description[] = {
+  typedef struct {
+    statusType status;
+    uint16_t code;
+    char* description;
+  } status_t;
+
+
+  status_t statusDescription[] = {
     {
       SIX_OK,
       200,
@@ -45,3 +57,5 @@ namespace status {
   };
 
 }
+
+#endif

@@ -2,7 +2,7 @@
 #include <QueueList.h>
 #include <avr/interrupt.h>
 
-//#include "adafruit.h"
+#include "adafruit.h"
 #include "actuator.h"
 #include "executor.h"
 
@@ -10,18 +10,20 @@ namespace six {
 
   Executor::Executor(Actuator* actuator) {
     _actuator = actuator;
-
     //TODO
-    //adafruit::begin();
+    //executorIsr = _timerIsr;
+
+    _adafruit = new Adafruit();
+    _adafruit->begin();
 
     while(!Serial);
     Serial.println();
 
     for ( uint8_t id = 0; id < _actuator->getNumberActuators(); id++ ) {
       Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
-    //TODO
-      //adafruit::resetPWM ( anActuator->baseAddress );
-      //adafruit::setPWMFreq( anActuator->baseAddress, anActuator->frequency );
+
+      _adafruit->resetPwm(anActuator->baseAddress);
+      _adafruit->setPwmFreq(anActuator->baseAddress, anActuator->frequency);
 
       Serial.print ( "executor " );
       Serial.print ( id );
@@ -49,20 +51,20 @@ namespace six {
     interrupts();             // enable all interrupts
 
 
-    //TODO
-    /*
     // turn all outputs off
-    for ( uint8_t id = 0; id < NUMBER_ACTUATORS; id++ ) {
-      for ( int channel = 0; channel < actuator::actuators [ id ].numberElements; channel++ ) {
-        if ( actuator::actuators [ id ].type != actuator::ELECTRIC ) {
-          adafruit::setPERCENT ( actuator::actuators [ id ].baseAddress, channel, _OFF );
+
+    for ( uint8_t id = 0; id < _actuator->getNumberActuators(); id++ ) {
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+
+      for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
+        if ( anActuator->type != Six::actuatorType::ELECTRIC ) {
+          _adafruit->setPercent(anActuator->baseAddress, channel, _OFF);
         }
         else {
-          adafruit::setPERCENT ( actuator::actuators [ id ].baseAddress, channel,  _ON );
+          _adafruit->setPercent(anActuator->baseAddress, channel, _ON);
         }
       }
     }
-    */
 
     // initiallize heartbeat
     _connected = false;
@@ -81,7 +83,7 @@ namespace six {
     while ( !_executionQueue.isEmpty() ) {
       _execution_t executionElement = _executionQueue.pop();
       //TODO
-      //*(executionElement.*function) ( executionElement.id, executionElement.intensity, executionElement.parameter );
+      //executionElement.function ( executionElement.id, executionElement.intensity, executionElement.parameter );
 
       /*
       Serial.print ( "executionQueue.count(): " );
@@ -118,6 +120,33 @@ namespace six {
     }
   }
 
+  int Executor::list(char** body, size_t* bodyLength) {
+
+    for ( uint8_t id = 0; id < _actuator->getNumberActuators(); id++ ) {
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+
+      *bodyLength += snprintf(*body+strlen(*body), 
+        REQUEST_RESPONSE_PACKET_LENGTH-*bodyLength, 
+        "id: %d\r\n"
+        "description: %s\r\n"
+        "number elements: %d\r\n"
+        "actuator type: %s\r\n"
+        "\r\n",
+
+        id,
+        anActuator->description,
+        anActuator->numberElements,
+        ""//TODO FIXME Six::actuatorTypeString[ anActuator->type ]
+      );
+    }
+
+    if (*bodyLength < 0) {
+      return -1;
+    }
+  
+    return 0;
+  }
+
 // -------------------------------------------------------------------------------------
 
   int Executor::demonstrateDisconnect() {
@@ -128,6 +157,41 @@ namespace six {
     return 0;
   }
 
+// -------------------------------------------------------------------------------------
+
+  Six::executionMode Executor::getMode(uint8_t id) {
+    if (id >= 0 && id <= _actuator->getNumberActuators()) {
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+      return anActuator->mode;
+    }
+    else {
+      return Six::executionMode::NONE;
+    }
+  }
+
+// -------------------------------------------------------------------------------------
+
+  int Executor::getIntensity(uint8_t id){
+    if (id >= 0 && id <= _actuator->getNumberActuators()) {
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+      return anActuator->intensity;
+    }
+    else {
+      return 0;
+    }
+  }
+
+// -------------------------------------------------------------------------------------
+
+  int Executor::getParameter(uint8_t id){
+    if (id >= 0 && id <= _actuator->getNumberActuators()) {
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+      return anActuator->parameter;
+    }
+    else {
+      return 0;
+    }
+  }
 
 // -------------------------------------------------------------------------------------
 
@@ -230,8 +294,7 @@ namespace six {
         uint16_t pulselen = map ( anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX );
 
         for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
-          //TODO
-          //adafruit::setPWM ( anActuator->baseAddress, channel, 0, pulselen );
+          _adafruit->setPwm(anActuator->baseAddress, channel, 0, pulselen);
         }
 
         break;
@@ -247,12 +310,10 @@ namespace six {
       case ( Six::actuatorType::VIBRATION ) :
         for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
           if ( ( parameter >> channel) & 1  ) {
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, channel, intensity );
+            _adafruit->setPercent(anActuator->baseAddress, channel, intensity);
           }
           else {
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, channel, _OFF );
+            _adafruit->setPercent(anActuator->baseAddress, channel, _OFF);
           }
         }
         break;
@@ -268,12 +329,10 @@ namespace six {
       case ( Six::actuatorType::VIBRATION ) :
         for ( int channel = 0; channel < anActuator->numberElements+1; channel++ ) {
           if ( channel > 0 ) {
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, channel-1, _OFF );
+            _adafruit->setPercent(anActuator->baseAddress, channel-1, _OFF);
           }
           if ( channel != anActuator->numberElements ) {
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, channel,  _ON );
+            _adafruit->setPercent(anActuator->baseAddress, channel,  _ON);
           }
           // CAREFUL!! USE OF DELAY
           delay(200);
@@ -296,31 +355,22 @@ namespace six {
           if ( ( anActuator->intensity >> peltier ) & 1  ) {
             // hot 
             if ( ( anActuator->parameter >> peltier ) & 1  ) {
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 0,  _ON );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 1, _OFF );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 2,  _ON );
+                _adafruit->setPercent(anActuator->baseAddress, 3*peltier+0,  _ON);
+                _adafruit->setPercent(anActuator->baseAddress, 3*peltier+1, _OFF);
+                _adafruit->setPercent(anActuator->baseAddress, 3*peltier+2,  _ON);
             }
             // cold
             else {
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 0, _OFF );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 1,  _ON );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 2,  _ON );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 0, _OFF );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 1,  _ON );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 2,  _ON );
             }
           }
           else {
                 // elementOffset: PIN1, PIN2, ENABLE
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 0, _OFF );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 1, _OFF );
-                //TODO
-                //adafruit::setPERCENT ( anActuator->baseAddress, 3 * peltier + 2, _OFF );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 0, _OFF );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 1, _OFF );
+                _adafruit->setPercent ( anActuator->baseAddress, 3 * peltier + 2, _OFF );
           }
         }
         break;
@@ -345,39 +395,29 @@ namespace six {
       case ( Six::actuatorType::ELECTRIC ) :
         switch ( intensity ) {
           case ( 1 ) :
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  LEFT, _OFF );
+            _adafruit->setPercent ( anActuator->baseAddress,  LEFT, _OFF );
              delay ( 80 );
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  LEFT,  _ON );
+            _adafruit->setPercent ( anActuator->baseAddress,  LEFT,  _ON );
             break;
           case ( 2 ) :
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, RIGHT, _OFF );
+            _adafruit->setPercent ( anActuator->baseAddress, RIGHT, _OFF );
              delay ( 80 );
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress, RIGHT,  _ON );
+            _adafruit->setPercent ( anActuator->baseAddress, RIGHT,  _ON );
             break;
           case ( 3 ) :
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,    UP, _OFF );
+            _adafruit->setPercent ( anActuator->baseAddress,    UP, _OFF );
              delay ( 80 );
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,    UP,  _ON );
+            _adafruit->setPercent ( anActuator->baseAddress,    UP,  _ON );
             break;
           case ( 4 ) :
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  DOWN, _OFF );
+            _adafruit->setPercent ( anActuator->baseAddress,  DOWN, _OFF );
              delay ( 80 );
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  DOWN,  _ON );
+            _adafruit->setPercent ( anActuator->baseAddress,  DOWN,  _ON );
             break;
           case ( 5 ) :
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  MODE, _OFF );
+            _adafruit->setPercent ( anActuator->baseAddress,  MODE, _OFF );
              delay ( 80 );
-            //TODO
-            //adafruit::setPERCENT ( anActuator->baseAddress,  MODE,  _ON );
+            _adafruit->setPercent ( anActuator->baseAddress,  MODE,  _ON );
             break;
         }
         break;
@@ -390,7 +430,7 @@ namespace six {
 // ------------------------     INTERRUPT FUNCTIONS   --------------------------------------------
 // -----------------------------------------------------------------------------------------------
 
-  void Executor::timerIsr () {
+  void Executor::_timerIsr () {
     _executionTimer++;
 
     if ( _connected && --_keepAliveTimer == 0 ) {
