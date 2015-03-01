@@ -1,12 +1,13 @@
 #ifndef EXECUTER_H 
 #define EXECUTER_H 
 
-#include "six.h"
+#include "type.h"
 #include "actuator.h"
 #include "adafruit.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <QueueList.h>
+#include <avr/interrupt.h>
 
 namespace six {
 
@@ -19,21 +20,20 @@ namespace six {
       int ping();
       int demonstrateDisconnect();
 
-      int setMode(uint8_t id, Six::executionMode mode);
+      int setMode(uint8_t id, executionMode mode);
       int setIntensity(uint8_t id, int intensity);
       int setParameter(uint8_t id, int parameter);
-      Six::executionMode getMode(uint8_t id);
+      executionMode getMode(uint8_t id);
       int getIntensity(uint8_t id);
       int getParameter(uint8_t id);
-
-      static void (six::Executor::*executorIsr)();
-
+      void timerIsr();
     
     private:
       Actuator* _actuator;
       Adafruit* _adafruit;
 
       typedef struct {
+        Executor* object;
         uint8_t id;
         int intensity;
         int parameter;
@@ -51,18 +51,11 @@ namespace six {
       uint32_t _executionTimer;
       uint16_t _keepAliveTimer;
       uint8_t  _connected;
-
-      uint16_t _keepAliveTimeout = 2000; // 200 * 10 ms = 2 sec
+      uint16_t _keepAliveTimeout;
 
       QueueList <_execution_t> _executionQueue;
-      void _timerIsr();
 
   };
-
-  ISR(TIMER3_COMPA_vect) {
-    //*(Executor::executorIsr)();
-  }
-
 
 }
 

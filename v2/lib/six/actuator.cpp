@@ -1,5 +1,5 @@
 #include "actuator.h"
-#include "executor.h"
+#include "type.h"
 
 namespace six {
 
@@ -8,10 +8,10 @@ namespace six {
     _numberActuators = 0;
   }
 
-  int Actuator::addActuator(char* description, Six::actuatorType type, uint8_t numberElements,
-                            uint8_t baseAddress, uint16_t frequency, bool active,
-                            Six::executionMode mode, bool changed,
-                            int intensity, int parameter, int attribute) {
+  int Actuator::addActuator(char* description, actuatorType type, uint8_t numberElements,
+                                   uint8_t baseAddress, uint16_t frequency, bool active,
+                                   executionMode mode, bool changed,
+                                   int intensity, int parameter, int attribute) {
 
     actuator_t* actuator = new actuator_t();
 

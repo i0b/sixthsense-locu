@@ -2,8 +2,8 @@
 #define PARSER_H
 
 #include "executor.h"
-#include "six.h"
 #include "status.h"
+#include "type.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -12,12 +12,15 @@ namespace six {
   class Parser {
     public:
       Parser(Executor* executor);
+      void reset();
+      void append(char c);
+      int parseCommand();
       int parseCommand(char* rawPacket, size_t* packetLength);
       int evaluateCommand();
 
     private:
       typedef struct {
-        Six::instructions instruction;
+        instructions instruction;
         uint8_t id;
         char* value;
         size_t valueLength;

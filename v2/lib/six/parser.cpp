@@ -1,6 +1,6 @@
 #include "executor.h"
-#include "six.h"
 #include "status.h"
+#include "type.h"
 #include "parser.h"
 
 #include <Arduino.h>
@@ -14,6 +14,21 @@ namespace six {
   Parser::Parser(Executor* executor) {
     _executor = executor;
     _packetLength = 0;
+  }
+
+  void Parser::reset() {
+    _packetLength = 0;
+  }
+
+  void Parser::append(char c) {
+    size_t oldLength = _packetLength;
+    _packetLength = (_packetLength+1)%REQUEST_RESPONSE_PACKET_LENGTH;
+    _packetData[oldLength] = c;
+    _packetData[_packetLength] = '\0';
+  }
+
+  int Parser::parseCommand(){
+    return Parser::parseCommand(_packetData, &_packetLength);
   }
 
   int Parser::parseCommand(char* rawPacket, size_t* packetLength) {
@@ -37,16 +52,16 @@ namespace six {
     // evaluate command string
 
     if (strncasecmp ("LIST", command, commandLength) == 0) {
-      _requestPacket.command.instruction = Six::instructions::LIST;
+      _requestPacket.command.instruction = instructions::LIST;
     }
 
     else if (strncasecmp ("PING", command, commandLength) == 0) {
       //Serial.println("DEBUG: parsed 'ping' as valid command");
-      _requestPacket.command.instruction = Six::instructions::PING_DEVICE;
+      _requestPacket.command.instruction = instructions::PING_DEVICE;
     }
 
     else if (strncasecmp ("DISCDEMO", command, commandLength) == 0) {
-      _requestPacket.command.instruction = Six::instructions::DEMONSTRATE_DISCONNECT;
+      _requestPacket.command.instruction = instructions::DEMONSTRATE_DISCONNECT;
     }
 
     else {
@@ -80,13 +95,13 @@ namespace six {
       _requestPacket.command.id = (uint8_t) idIntegerValue;
 
       if (strncasecmp ("GM", command, commandLength) == 0) {
-        _requestPacket.command.instruction = Six::instructions::GET_MODE;
+        _requestPacket.command.instruction = instructions::GET_MODE;
       }
       else if (strncasecmp ("GI", command, commandLength) == 0) {
-        _requestPacket.command.instruction = Six::instructions::GET_INTENSITY;
+        _requestPacket.command.instruction = instructions::GET_INTENSITY;
       }
       else if (strncasecmp ("GP", command, commandLength) == 0) {
-        _requestPacket.command.instruction = Six::instructions::GET_PARAMETER;
+        _requestPacket.command.instruction = instructions::GET_PARAMETER;
       }
 
       else
@@ -111,13 +126,13 @@ namespace six {
         _requestPacket.command.valueLength = valueLength;
 
         if (strncasecmp ("SM", command, commandLength) == 0) {
-          _requestPacket.command.instruction = Six::instructions::SET_MODE;
+          _requestPacket.command.instruction = instructions::SET_MODE;
         }
         else if (strncasecmp ("SI", command, commandLength) == 0) {
-          _requestPacket.command.instruction = Six::instructions::SET_INTENSITY;
+          _requestPacket.command.instruction = instructions::SET_INTENSITY;
         }
         else if (strncasecmp ("SP", command, commandLength) == 0) {
-          _requestPacket.command.instruction = Six::instructions::SET_PARAMETER;
+          _requestPacket.command.instruction = instructions::SET_PARAMETER;
         }
         else {
           _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -191,8 +206,8 @@ namespace six {
     }
     */
 
-    _requestPacket.versionMajor = Six::versionMajor;//(uint8_t) majorInt;
-    _requestPacket.versionMinor = Six::versionMinor;//(uint8_t) minorInt;
+    _requestPacket.versionMajor = VERSION_MAJOR;//(uint8_t) majorInt;
+    _requestPacket.versionMinor = VERSION_MINOR;//(uint8_t) minorInt;
 
     char outputBuffer[256];
 
@@ -227,13 +242,13 @@ namespace six {
 //
   int Parser::evaluateCommand() {
 
-    if (Six::versionMajor != _requestPacket.versionMajor || Six::versionMinor != _requestPacket.versionMinor) {
+    if (_requestPacket.versionMajor != VERSION_MAJOR|| _requestPacket.versionMinor != VERSION_MINOR ) {
        return -1;
     }
 
     // ---------------- LIST ACTUATORS --------------------------
     //
-    if (_requestPacket.command.instruction == Six::instructions::LIST) {
+    if (_requestPacket.command.instruction == instructions::LIST) {
       strcpy (_responsePacket.body, "");
       _responsePacket.bodyLength = 0;
 
@@ -258,7 +273,7 @@ namespace six {
 
     // ------------------ KEEPALIVE PING ------------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::PING_DEVICE) {
+    else if (_requestPacket.command.instruction == instructions::PING_DEVICE) {
       _executor->ping();
 
       _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -270,7 +285,7 @@ namespace six {
 
     // ----------- DEMONSTRATE DISCONNECT PATTERN ---------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::DEMONSTRATE_DISCONNECT) {
+    else if (_requestPacket.command.instruction == instructions::DEMONSTRATE_DISCONNECT) {
       _setPacketBody(EMPTY, NULL, NULL , 0);
       _createResponsePacket(six::SIX_OK);
       _sendResponsePacket();
@@ -282,11 +297,11 @@ namespace six {
 
     // ------------------ GET MODE ------------------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::GET_MODE) {
+    else if (_requestPacket.command.instruction == instructions::GET_MODE) {
       
       //TODO FIXME
       /*
-      if (_setPacketBody(STRING, "mode", Six::executionModeString[_executor->getMode(_requestPacket.command.id)]) == 0) {
+      if (_setPacketBody(STRING, "mode", executionModeString[_executor->getMode(_requestPacket.command.id)]) == 0) {
         _createResponsePacket(six::SIX_OK);
         _sendResponsePacket();
       }
@@ -297,7 +312,7 @@ namespace six {
 
     // ---------------- GET INTENSITY ---------------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::GET_INTENSITY) {
+    else if (_requestPacket.command.instruction == instructions::GET_INTENSITY) {
 
       if (_setPacketBody(INT, "intensity", NULL, _executor->getIntensity(_requestPacket.command.id)) == 0) {
         _createResponsePacket(six::SIX_OK);
@@ -310,7 +325,7 @@ namespace six {
     // TODO NOT COPY-PASTE!!
     // ---------------- GET PARAMETER ---------------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::GET_PARAMETER) {
+    else if (_requestPacket.command.instruction == instructions::GET_PARAMETER) {
       
       if (_setPacketBody(INT, "parameter", NULL, _executor->getParameter(_requestPacket.command.id)) == 0) {
         _createResponsePacket(six::SIX_OK);
@@ -323,29 +338,29 @@ namespace six {
 
     // -------------------- SET MODE ----------------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::SET_MODE) {
-      Six::executionMode mode = Six::executionMode::OFF;
+    else if (_requestPacket.command.instruction == instructions::SET_MODE) {
+      executionMode mode = executionMode::OFF;
 
       if (strncasecmp ("BEAT", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::HEARTBEAT;
+        mode = executionMode::HEARTBEAT;
       }
       else if (strncasecmp ("ROT", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::ROTATION;
+        mode = executionMode::ROTATION;
       }
       else if (strncasecmp ("VIB", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::VIBRATION;
+        mode = executionMode::VIBRATION;
       }
       else if (strncasecmp ("TEMP", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::TEMPERATURE;
+        mode = executionMode::TEMPERATURE;
       }
       else if (strncasecmp ("PRESS", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::PRESSURE;
+        mode = executionMode::PRESSURE;
       }
       else if (strncasecmp ("ELEC", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::ELECTRO;
+        mode = executionMode::ELECTRO;
       }
       else if (strncasecmp ("OFF", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = Six::executionMode::OFF;
+        mode = executionMode::OFF;
       }
       else {
         _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -367,7 +382,7 @@ namespace six {
     
     // -------------------- SET INTENSITY -----------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::SET_INTENSITY) {
+    else if (_requestPacket.command.instruction == instructions::SET_INTENSITY) {
       int intensity = atoi(_requestPacket.command.value);
       //TODO check if parameter valide
       _executor->setIntensity(_requestPacket.command.id, intensity);
@@ -381,7 +396,7 @@ namespace six {
 
     // -------------------- SET PARAMETER -----------------------
     //
-    else if (_requestPacket.command.instruction == Six::instructions::SET_PARAMETER) {
+    else if (_requestPacket.command.instruction == instructions::SET_PARAMETER) {
       int parameter = atoi(_requestPacket.command.value);
       //TODO check if parameter valide
       _executor->setParameter(_requestPacket.command.id, parameter);
@@ -470,8 +485,8 @@ namespace six {
 // ---------------------------------------------------------------------------------------------------------------------
 
   int Parser::_createResponsePacket(six::statusType status) {
-    _responsePacket.versionMajor = Six::versionMajor;
-    _responsePacket.versionMinor = Six::versionMinor;
+    _responsePacket.versionMajor = VERSION_MAJOR;
+    _responsePacket.versionMinor = VERSION_MINOR;
 
     _responsePacket.status = six::statusDescription [ status ];
 

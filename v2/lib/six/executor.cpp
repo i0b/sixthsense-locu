@@ -5,13 +5,16 @@
 #include "adafruit.h"
 #include "actuator.h"
 #include "executor.h"
+#include "type.h"
 
 namespace six {
+  //SIGNAL (TIMER3_COMPA_vect) {
+  //  Executor::timerIsr();
+  //}
 
   Executor::Executor(Actuator* actuator) {
+
     _actuator = actuator;
-    //TODO
-    //executorIsr = _timerIsr;
 
     _adafruit = new Adafruit();
     _adafruit->begin();
@@ -57,7 +60,7 @@ namespace six {
       Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
       for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
-        if ( anActuator->type != Six::actuatorType::ELECTRIC ) {
+        if ( anActuator->type != actuatorType::ELECTRIC ) {
           _adafruit->setPercent(anActuator->baseAddress, channel, _OFF);
         }
         else {
@@ -82,8 +85,7 @@ namespace six {
 
     while ( !_executionQueue.isEmpty() ) {
       _execution_t executionElement = _executionQueue.pop();
-      //TODO
-      //executionElement.function ( executionElement.id, executionElement.intensity, executionElement.parameter );
+      ((executionElement.object)->*(executionElement.function)) ( executionElement.id, executionElement.intensity, executionElement.parameter );
 
       /*
       Serial.print ( "executionQueue.count(): " );
@@ -136,7 +138,7 @@ namespace six {
         id,
         anActuator->description,
         anActuator->numberElements,
-        ""//TODO FIXME Six::actuatorTypeString[ anActuator->type ]
+        ""//TODO FIXME actuatorTypeString[ anActuator->type ]
       );
     }
 
@@ -151,7 +153,7 @@ namespace six {
 
   int Executor::demonstrateDisconnect() {
     // TODO which id?? -- not hard coded!!
-    _execution_t executionElement = { 0, 0, 0, &six::Executor::_executeDisconnect };
+    //_execution_t executionElement = { 0, 0, 0, &six::Executor::_executeDisconnect };
     //_executionQueue.push(executionElement);
 
     return 0;
@@ -159,13 +161,13 @@ namespace six {
 
 // -------------------------------------------------------------------------------------
 
-  Six::executionMode Executor::getMode(uint8_t id) {
+  executionMode Executor::getMode(uint8_t id) {
     if (id >= 0 && id <= _actuator->getNumberActuators()) {
       Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
       return anActuator->mode;
     }
     else {
-      return Six::executionMode::NONE;
+      return executionMode::NONE;
     }
   }
 
@@ -195,37 +197,37 @@ namespace six {
 
 // -------------------------------------------------------------------------------------
 
-  int Executor::setMode ( uint8_t id, Six::executionMode mode ) {
+  int Executor::setMode ( uint8_t id, executionMode mode ) {
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
     switch ( mode ) {
 
-      case Six::executionMode::OFF :
-        anActuator->mode = Six::executionMode::OFF;
+      case executionMode::OFF :
+        anActuator->mode = executionMode::OFF;
         break;
 
-      case Six::executionMode::TEMPERATURE :
-        anActuator->mode = Six::executionMode::TEMPERATURE;
+      case executionMode::TEMPERATURE :
+        anActuator->mode = executionMode::TEMPERATURE;
         break;
       
-      case Six::executionMode::PRESSURE:
-        anActuator->mode = Six::executionMode::PRESSURE;
+      case executionMode::PRESSURE:
+        anActuator->mode = executionMode::PRESSURE;
         break;
 
-      case Six::executionMode::VIBRATION :
-        anActuator->mode = Six::executionMode::VIBRATION;
+      case executionMode::VIBRATION :
+        anActuator->mode = executionMode::VIBRATION;
         break;
 
-      case Six::executionMode::HEARTBEAT :
-        anActuator->mode = Six::executionMode::HEARTBEAT;
+      case executionMode::HEARTBEAT :
+        anActuator->mode = executionMode::HEARTBEAT;
         break;
 
-      case Six::executionMode::ROTATION :
-        anActuator->mode = Six::executionMode::ROTATION;
+      case executionMode::ROTATION :
+        anActuator->mode = executionMode::ROTATION;
         break;
 
-      case Six::executionMode::ELECTRO :
-        anActuator->mode = Six::executionMode::ELECTRO;
+      case executionMode::ELECTRO :
+        anActuator->mode = executionMode::ELECTRO;
         break;
       
     }
@@ -263,17 +265,17 @@ namespace six {
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
     switch ( anActuator->type ) {
-      case ( Six::actuatorType::VIBRATION ) :
+      case ( actuatorType::VIBRATION ) :
         setIntensity ( id, 0 );
         setParameter ( id, 0 );
         _executeVibration ( id, 0, 0 );
         break;
-      case ( Six::actuatorType::TEMPERATURE ) :
+      case ( actuatorType::TEMPERATURE ) :
         setIntensity ( id, 0 );
         setParameter ( id, 0 );
         _executeTemperature ( id, 0, 0 );
         break;
-      case ( Six::actuatorType::PRESSURE ) :
+      case ( actuatorType::PRESSURE ) :
         setIntensity ( id, 90 );
         setParameter ( id, 0 );
         _executeServo ( id, 90, 0 );
@@ -290,7 +292,7 @@ namespace six {
     #define SERVOMAX  600 // this is the 'maximum' pulse length count (out of 4096)
 
     switch ( anActuator->type ) {
-      case ( Six::actuatorType::PRESSURE ) :
+      case ( actuatorType::PRESSURE ) :
         uint16_t pulselen = map ( anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX );
 
         for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
@@ -307,7 +309,7 @@ namespace six {
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
     switch ( anActuator->type ) {
-      case ( Six::actuatorType::VIBRATION ) :
+      case ( actuatorType::VIBRATION ) :
         for ( int channel = 0; channel < anActuator->numberElements; channel++ ) {
           if ( ( parameter >> channel) & 1  ) {
             _adafruit->setPercent(anActuator->baseAddress, channel, intensity);
@@ -326,7 +328,7 @@ namespace six {
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
     switch ( anActuator->type ) {
-      case ( Six::actuatorType::VIBRATION ) :
+      case ( actuatorType::VIBRATION ) :
         for ( int channel = 0; channel < anActuator->numberElements+1; channel++ ) {
           if ( channel > 0 ) {
             _adafruit->setPercent(anActuator->baseAddress, channel-1, _OFF);
@@ -347,7 +349,7 @@ namespace six {
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
     switch ( anActuator->type ) {
-      case ( Six::actuatorType::TEMPERATURE ) :
+      case ( actuatorType::TEMPERATURE ) :
         for ( uint8_t peltier = 0; peltier < ( anActuator->numberElements / 3 ); peltier++ ) {
           // parameter [ 0 ]: DIRECTION bitmap
           // parameter [ 1 ]: ON / OFF  bitmap
@@ -392,7 +394,7 @@ namespace six {
 
     switch ( anActuator->type ) {
 
-      case ( Six::actuatorType::ELECTRIC ) :
+      case ( actuatorType::ELECTRIC ) :
         switch ( intensity ) {
           case ( 1 ) :
             _adafruit->setPercent ( anActuator->baseAddress,  LEFT, _OFF );
@@ -430,7 +432,7 @@ namespace six {
 // ------------------------     INTERRUPT FUNCTIONS   --------------------------------------------
 // -----------------------------------------------------------------------------------------------
 
-  void Executor::_timerIsr () {
+  void Executor::timerIsr () {
     _executionTimer++;
 
     if ( _connected && --_keepAliveTimer == 0 ) {
@@ -455,47 +457,47 @@ namespace six {
 
       switch ( anActuator->mode ) {
 
-        case ( Six::executionMode::OFF ) :
+        case ( executionMode::OFF ) :
           if ( anActuator->changed == true ) {
             anActuator->changed = false;
-            _execution_t executionElement = { id, 0, 0, &six::Executor::_executeOff };
+            _execution_t executionElement = { this, id, 0, 0, &six::Executor::_executeOff };
             _executionQueue.push ( executionElement );
           }
           break;
 
-        case ( Six::executionMode::TEMPERATURE ) :
-          if ( anActuator->type == Six::actuatorType::TEMPERATURE
+        case ( executionMode::TEMPERATURE ) :
+          if ( anActuator->type == actuatorType::TEMPERATURE
               && anActuator->changed == true ) {
             anActuator->changed = false;
-            _execution_t executionElement = { id, intensity, 0, &six::Executor::_executeTemperature };
+            _execution_t executionElement = { this, id, intensity, 0, &six::Executor::_executeTemperature };
             _executionQueue.push ( executionElement );
           }
           break;
 
-        case ( Six::executionMode::PRESSURE ) :
-          if ( anActuator->type == Six::actuatorType::PRESSURE
+        case ( executionMode::PRESSURE ) :
+          if ( anActuator->type == actuatorType::PRESSURE
               && anActuator->changed == true ) {
             anActuator->changed = false;
-            _execution_t executionElement = { id, intensity, 0, &six::Executor::_executeServo };
+            _execution_t executionElement = { this, id, intensity, 0, &six::Executor::_executeServo };
             _executionQueue.push ( executionElement );
           }
           break;
 
-        case ( Six::executionMode::VIBRATION ) :
-          if ( anActuator->type == Six::actuatorType::VIBRATION
+        case ( executionMode::VIBRATION ) :
+          if ( anActuator->type == actuatorType::VIBRATION
               && anActuator->changed == true ) {
             anActuator->changed = false;
-            _execution_t executionElement = { id, intensity, parameter, &six::Executor::_executeVibration };
+            _execution_t executionElement = { this, id, intensity, parameter, &six::Executor::_executeVibration };
             _executionQueue.push ( executionElement );
           }
           break;
 
         #define HEARTBEAT_VIBRATOR_ON_TIME 10
-        case ( Six::executionMode::HEARTBEAT ) :
-          if ( anActuator->type == Six::actuatorType::VIBRATION ) {
+        case ( executionMode::HEARTBEAT ) :
+          if ( anActuator->type == actuatorType::VIBRATION ) {
             if ( anActuator->changed == true ) {
               anActuator->changed = false;
-              _execution_t executionElement = { id, 0, 0, &six::Executor::_executeVibration };
+              _execution_t executionElement = { this, id, 0, 0, &six::Executor::_executeVibration };
               _executionQueue.push ( executionElement );
             }
 
@@ -503,23 +505,23 @@ namespace six {
 
             // first beat high
             if ( localInterval == 0 ) {
-              _execution_t executionElement = { id, intensity, 0xFF, &six::Executor::_executeVibration };
+              _execution_t executionElement = { this, id, intensity, 0xFF, &six::Executor::_executeVibration };
               _executionQueue.push ( executionElement );
             }
 
             // first beat low
             else if ( localInterval == HEARTBEAT_VIBRATOR_ON_TIME ) {
-              _execution_t executionElement = { id, 0, 0, &six::Executor::_executeVibration };
+              _execution_t executionElement = { this, id, 0, 0, &six::Executor::_executeVibration };
               _executionQueue.push ( executionElement );
             }
           }
           break;
 
-        case ( Six::executionMode::ROTATION ) :
-          if ( anActuator->type == Six::actuatorType::VIBRATION ) {
+        case ( executionMode::ROTATION ) :
+          if ( anActuator->type == actuatorType::VIBRATION ) {
             if ( anActuator->changed == true ) {
               anActuator->changed = false;
-              _execution_t executionElement = { id, 0, 0, &six::Executor::_executeVibration };
+              _execution_t executionElement = { this, id, 0, 0, &six::Executor::_executeVibration };
               _executionQueue.push ( executionElement );
             }
 
@@ -535,17 +537,17 @@ namespace six {
                 channelBitmap <<= 1;
               }
 
-              _execution_t executionElement = { id, intensity, channelBitmap, &six::Executor::_executeVibration };
+              _execution_t executionElement = { this, id, intensity, channelBitmap, &six::Executor::_executeVibration };
               _executionQueue.push ( executionElement );
             }
           }
           break;
 
-        case ( Six::executionMode::ELECTRO ) :
-          if ( anActuator->type == Six::actuatorType::ELECTRIC
+        case ( executionMode::ELECTRO ) :
+          if ( anActuator->type == actuatorType::ELECTRIC
               && anActuator->changed == true ) {
             anActuator->changed = false;
-            _execution_t executionElement = { id, intensity, 0, &six::Executor::_electroStimulation };
+            _execution_t executionElement = { this, id, intensity, 0, &six::Executor::_electroStimulation };
             _executionQueue.push ( executionElement );
           }
           break;
