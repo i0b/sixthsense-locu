@@ -17,6 +17,7 @@ namespace six {
 
   enum class instructions { LIST, PING_DEVICE, DEMONSTRATE_DISCONNECT, GET_MODE, GET_INTENSITY, GET_PARAMETER,
                             SET_MODE, SET_INTENSITY, SET_PARAMETER };
+  extern const char* instructionsString[];
 
 }
 

@@ -29,6 +29,28 @@ void setup() {
     0x42
   );
 
+  sixthsense.addActuator(
+    // description
+    "peltier armband - left arm",
+    // type
+    six::actuatorType::TEMPERATURE,
+    // number of elements
+    12,
+    // # base address
+    0x43
+  );
+
+  sixthsense.addActuator(
+    // description
+    "peltier armband - right arm",
+    // type
+    six::actuatorType::TEMPERATURE,
+    // number of elements
+    12,
+    // # base address
+    0x44
+  );
+
 }
 
 ISR ( TIMER3_COMPA_vect ) {
@@ -70,7 +92,7 @@ void serialEvent() {
     else {
       cmd[cmd_pos] = c;
       Serial.print(c);
+      cmd_pos++;
     }
-    cmd_pos++;
   }
 }

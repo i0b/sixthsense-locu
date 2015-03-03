@@ -213,8 +213,8 @@ namespace six {
 
     snprintf (outputBuffer, sizeof outputBuffer, "DEBUG: parsedRequest = { command = '', "
         "id = '%d', value = '%s', packetVersion = '%d.%d' }\r\n",
-        //INSTRUCTIONS_STRING [ _requestPacket.command.instruction ],
-        //_requestPacket.command.instruction,
+        //TODO FIXME
+        //instructionsString [ (int)_requestPacket.command.instruction ],
         _requestPacket.command.id,
         _requestPacket.command.value,
         _requestPacket.versionMajor,
