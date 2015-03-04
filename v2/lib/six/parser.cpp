@@ -1,3 +1,4 @@
+#include "actuator.h"
 #include "executor.h"
 #include "status.h"
 #include "type.h"
@@ -11,7 +12,8 @@
 
 namespace six {
 
-  Parser::Parser(Executor* executor) {
+  Parser::Parser(Actuator* actuator, Executor* executor) {
+    _actuator = actuator;
     _executor = executor;
     _packetLength = 0;
   }
@@ -52,16 +54,16 @@ namespace six {
     // evaluate command string
 
     if (strncasecmp ("LIST", command, commandLength) == 0) {
-      _requestPacket.command.instruction = instructions::LIST;
+      _requestPacket.command.instruction = instructionClass::LIST;
     }
 
     else if (strncasecmp ("PING", command, commandLength) == 0) {
       //Serial.println("DEBUG: parsed 'ping' as valid command");
-      _requestPacket.command.instruction = instructions::PING_DEVICE;
+      _requestPacket.command.instruction = instructionClass::PING_DEVICE;
     }
 
     else if (strncasecmp ("DISCDEMO", command, commandLength) == 0) {
-      _requestPacket.command.instruction = instructions::DEMONSTRATE_DISCONNECT;
+      _requestPacket.command.instruction = instructionClass::DEMONSTRATE_DISCONNECT;
     }
 
     else {
@@ -85,23 +87,42 @@ namespace six {
 
       if (idIntegerValue < 0 || idIntegerValue > 255) {
         _setPacketBody(EMPTY, NULL, NULL , 0);
-        // TODO error MALFORMAT
         _createResponsePacket(six::SIX_ERROR_PARSING);
         _sendResponsePacket();
 
         return -1;
       }
 
+      else if (idIntegerValue > _actuator->getNumberActuators()) {
+        _setPacketBody(EMPTY, NULL, NULL , 0);
+        _createResponsePacket(six::SIX_NO_SUCH_ACTUATOR);
+        _sendResponsePacket();
+
+        return -1;
+      }
+
+      else {
+        for(uint8_t idStringPosition=0; idStringPosition < (idLength-1) && idStringPosition<3; idStringPosition++) {
+          if(isdigit(id[idStringPosition]) == 0) {
+            _setPacketBody(EMPTY, NULL, NULL , 0);
+            _createResponsePacket(six::SIX_ERROR_PARSING);
+            _sendResponsePacket();
+
+            return -1;
+          }
+        }
+      }
+
       _requestPacket.command.id = (uint8_t) idIntegerValue;
 
       if (strncasecmp ("GM", command, commandLength) == 0) {
-        _requestPacket.command.instruction = instructions::GET_MODE;
+        _requestPacket.command.instruction = instructionClass::GET_MODE;
       }
       else if (strncasecmp ("GI", command, commandLength) == 0) {
-        _requestPacket.command.instruction = instructions::GET_INTENSITY;
+        _requestPacket.command.instruction = instructionClass::GET_INTENSITY;
       }
       else if (strncasecmp ("GP", command, commandLength) == 0) {
-        _requestPacket.command.instruction = instructions::GET_PARAMETER;
+        _requestPacket.command.instruction = instructionClass::GET_PARAMETER;
       }
 
       else
@@ -126,13 +147,13 @@ namespace six {
         _requestPacket.command.valueLength = valueLength;
 
         if (strncasecmp ("SM", command, commandLength) == 0) {
-          _requestPacket.command.instruction = instructions::SET_MODE;
+          _requestPacket.command.instruction = instructionClass::SET_MODE;
         }
         else if (strncasecmp ("SI", command, commandLength) == 0) {
-          _requestPacket.command.instruction = instructions::SET_INTENSITY;
+          _requestPacket.command.instruction = instructionClass::SET_INTENSITY;
         }
         else if (strncasecmp ("SP", command, commandLength) == 0) {
-          _requestPacket.command.instruction = instructions::SET_PARAMETER;
+          _requestPacket.command.instruction = instructionClass::SET_PARAMETER;
         }
         else {
           _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -248,7 +269,7 @@ namespace six {
 
     // ---------------- LIST ACTUATORS --------------------------
     //
-    if (_requestPacket.command.instruction == instructions::LIST) {
+    if (_requestPacket.command.instruction == instructionClass::LIST) {
       strcpy (_responsePacket.body, "");
       _responsePacket.bodyLength = 0;
 
@@ -273,7 +294,7 @@ namespace six {
 
     // ------------------ KEEPALIVE PING ------------------------
     //
-    else if (_requestPacket.command.instruction == instructions::PING_DEVICE) {
+    else if (_requestPacket.command.instruction == instructionClass::PING_DEVICE) {
       _executor->ping();
 
       _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -285,7 +306,7 @@ namespace six {
 
     // ----------- DEMONSTRATE DISCONNECT PATTERN ---------------
     //
-    else if (_requestPacket.command.instruction == instructions::DEMONSTRATE_DISCONNECT) {
+    else if (_requestPacket.command.instruction == instructionClass::DEMONSTRATE_DISCONNECT) {
       _setPacketBody(EMPTY, NULL, NULL , 0);
       _createResponsePacket(six::SIX_OK);
       _sendResponsePacket();
@@ -297,7 +318,7 @@ namespace six {
 
     // ------------------ GET MODE ------------------------------
     //
-    else if (_requestPacket.command.instruction == instructions::GET_MODE) {
+    else if (_requestPacket.command.instruction == instructionClass::GET_MODE) {
       
       //TODO FIXME
       /*
@@ -312,7 +333,7 @@ namespace six {
 
     // ---------------- GET INTENSITY ---------------------------
     //
-    else if (_requestPacket.command.instruction == instructions::GET_INTENSITY) {
+    else if (_requestPacket.command.instruction == instructionClass::GET_INTENSITY) {
 
       if (_setPacketBody(INT, "intensity", NULL, _executor->getIntensity(_requestPacket.command.id)) == 0) {
         _createResponsePacket(six::SIX_OK);
@@ -325,7 +346,7 @@ namespace six {
     // TODO NOT COPY-PASTE!!
     // ---------------- GET PARAMETER ---------------------------
     //
-    else if (_requestPacket.command.instruction == instructions::GET_PARAMETER) {
+    else if (_requestPacket.command.instruction == instructionClass::GET_PARAMETER) {
       
       if (_setPacketBody(INT, "parameter", NULL, _executor->getParameter(_requestPacket.command.id)) == 0) {
         _createResponsePacket(six::SIX_OK);
@@ -338,29 +359,29 @@ namespace six {
 
     // -------------------- SET MODE ----------------------------
     //
-    else if (_requestPacket.command.instruction == instructions::SET_MODE) {
-      executionMode mode = executionMode::OFF;
+    else if (_requestPacket.command.instruction == instructionClass::SET_MODE) {
+      executionModeClass mode = executionModeClass::OFF;
 
       if (strncasecmp ("BEAT", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::HEARTBEAT;
+        mode = executionModeClass::HEARTBEAT;
       }
       else if (strncasecmp ("ROT", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::ROTATION;
+        mode = executionModeClass::ROTATION;
       }
       else if (strncasecmp ("VIB", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::VIBRATION;
+        mode = executionModeClass::VIBRATION;
       }
       else if (strncasecmp ("TEMP", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::TEMPERATURE;
+        mode = executionModeClass::TEMPERATURE;
       }
       else if (strncasecmp ("PRESS", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::PRESSURE;
+        mode = executionModeClass::PRESSURE;
       }
       else if (strncasecmp ("ELEC", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::ELECTRO;
+        mode = executionModeClass::ELECTRO;
       }
       else if (strncasecmp ("OFF", _requestPacket.command.value, _requestPacket.command.valueLength) == 0) {
-        mode = executionMode::OFF;
+        mode = executionModeClass::OFF;
       }
       else {
         _setPacketBody(EMPTY, NULL, NULL , 0);
@@ -382,7 +403,7 @@ namespace six {
     
     // -------------------- SET INTENSITY -----------------------
     //
-    else if (_requestPacket.command.instruction == instructions::SET_INTENSITY) {
+    else if (_requestPacket.command.instruction == instructionClass::SET_INTENSITY) {
       int intensity = atoi(_requestPacket.command.value);
       //TODO check if parameter valide
       _executor->setIntensity(_requestPacket.command.id, intensity);
@@ -396,7 +417,7 @@ namespace six {
 
     // -------------------- SET PARAMETER -----------------------
     //
-    else if (_requestPacket.command.instruction == instructions::SET_PARAMETER) {
+    else if (_requestPacket.command.instruction == instructionClass::SET_PARAMETER) {
       int parameter = atoi(_requestPacket.command.value);
       //TODO check if parameter valide
       _executor->setParameter(_requestPacket.command.id, parameter);

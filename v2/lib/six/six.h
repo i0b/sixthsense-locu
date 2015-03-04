@@ -3,6 +3,7 @@
 
 #include "type.h"
 #include "actuator.h"
+#include "adafruit.h"
 #include "executor.h"
 #include "parser.h"
 #include <stddef.h>
@@ -17,13 +18,14 @@ namespace six {
       int parseEvaluate();
       int parseEvaluate(char* command);
       void runExecutor();
-      int addActuator(char* description, actuatorType type, uint8_t numberElements, uint8_t baseAddress);
+      int addActuator(char* description, actuatorTypeClass type, uint8_t numberElements, uint8_t baseAddress);
       uint8_t getNumberActuators();
       void begin();
       void timerIsr();
 
     private:
       Actuator* _actuator;
+      Adafruit* _adafruit;
       Executor* _executor;
       Parser* _parser;
   };

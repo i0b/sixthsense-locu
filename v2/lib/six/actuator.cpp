@@ -1,16 +1,18 @@
 #include "actuator.h"
+#include "adafruit.h"
 #include "type.h"
 
 namespace six {
 
-  Actuator::Actuator() {
+  Actuator::Actuator(Adafruit* adafruit) {
+    _adafruit = adafruit;
     _actuatorList = NULL;
     _numberActuators = 0;
   }
 
-  int Actuator::addActuator(char* description, actuatorType type, uint8_t numberElements,
+  int Actuator::addActuator(char* description, actuatorTypeClass type, uint8_t numberUsedChannels,
                                    uint8_t baseAddress, uint16_t frequency, bool active,
-                                   executionMode mode, bool changed,
+                                   executionModeClass mode, bool changed,
                                    int intensity, int parameter, int attribute) {
 
     actuator_t* actuator = new actuator_t();
@@ -18,14 +20,27 @@ namespace six {
     actuator->description = description;
     actuator->baseAddress = baseAddress;
     actuator->active = active;
-    actuator->frequency = frequency;
-    actuator->numberElements = numberElements;
     actuator->type = type;
+    actuator->numberUsedChannels = numberUsedChannels;
     actuator->mode = mode;
     actuator->changed = changed;
     actuator->intensity = intensity;
     actuator->parameter = parameter;
     actuator->attribute = attribute;
+
+    _adafruit->resetPwm(baseAddress);
+    _adafruit->setPwmFrequency(baseAddress, frequency);
+
+    for (int channel = 0; channel < actuator->numberUsedChannels; channel++){
+      switch (actuator->type) {
+        case (actuatorTypeClass::ELECTRIC):
+          _adafruit->setPercent(actuator->baseAddress, channel, _ON);
+          break;
+        default:
+          _adafruit->setPercent(actuator->baseAddress, channel, _OFF);
+          break;
+      }
+    }
 
     _actuatorNode_t* node = new _actuatorNode();
     node->actuator = actuator;

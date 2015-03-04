@@ -2,6 +2,7 @@
 #define ACTUATOR_H
 
 #include "type.h"
+#include "adafruit.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -11,25 +12,24 @@ namespace six {
   class Actuator {
 
     public:
-      Actuator();
+      Actuator(Adafruit* adafruit);
 
       typedef struct {
         char* description;
         uint8_t baseAddress;
         bool active;
-        uint8_t frequency;
-        uint8_t numberElements;
-        actuatorType type;
-        executionMode mode;
+        uint8_t numberUsedChannels;
+        actuatorTypeClass type;
+        executionModeClass mode;
         bool changed;
         int intensity;
         int parameter;
         int attribute;
       } actuator_t;
 
-      int addActuator(char* description, actuatorType type, uint8_t numberElements=16,
+      int addActuator(char* description, actuatorTypeClass type, uint8_t numberUsedChannels=16,
                              uint8_t baseAddress = 0x40, uint16_t frequency=1000, bool active=true,
-                             executionMode mode=executionMode::OFF, bool changed=false,
+                             executionModeClass mode=executionModeClass::OFF, bool changed=false,
                              int intensity=0, int parameter=0, int attribute=0);
 
       actuator_t* getActuatorById(uint8_t getId);
@@ -43,6 +43,7 @@ namespace six {
 
       _actuatorNode_t* _actuatorList;
       uint8_t _numberActuators;
+      Adafruit* _adafruit;
 
   };
 }

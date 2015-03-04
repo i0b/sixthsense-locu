@@ -19,6 +19,11 @@ namespace six {
       "ERROR no such mode"
     },
     {
+      SIX_NO_SUCH_ACTUATOR,
+      406,
+      "ERROR actuator id not found"
+    },
+    {
       SIX_SERVER_ERROR,
       500,
       "ERROR wrong command applied"

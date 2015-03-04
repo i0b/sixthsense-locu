@@ -31,7 +31,7 @@ namespace six {
       void begin(void);
       void setPercent(uint8_t i2c_address, uint8_t channel, uint8_t percent);
       void setPwm(uint8_t i2c_address, uint8_t num, uint16_t on, uint16_t off);
-      void setPwmFreq(uint8_t i2c_address, float freq);
+      void setPwmFrequency(uint8_t i2c_address, float frequency);
       void resetPwm(uint8_t i2c_address);
 
     private:

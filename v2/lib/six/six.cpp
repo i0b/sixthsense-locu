@@ -5,30 +5,82 @@
 
 namespace six {
   Six::Six() {
-    _actuator = new Actuator();
-    _executor = new Executor(_actuator);
-    _parser = new Parser(_executor);
+  }
+
+  void Six::begin() {
+    //SIGNAL(TIMER3_COMPA_vect){
+    //  Executor::timerIsr();
+    //}
+    _adafruit = new Adafruit();
+    _adafruit->begin();
+    _actuator = new Actuator(_adafruit);
+    _executor = new Executor(_actuator, _adafruit);
+    _parser = new Parser(_actuator, _executor);
+
+    // Define Timer Interrupt / Timer1 to CTC mode
+    //  finally it will call the interrupt function every 10 ms
+    //
+    noInterrupts();           // disable all interrupts
+
+    TCCR3A = 0;
+    TCCR3B = 0;
+    TCNT3  = 0;
+
+    OCR3A = 625;            // compare match register 16MHz/256/100Hz
+    TCCR3B |=(1 << WGM32);   // CTC mode
+    TCCR3B |=(1 << CS32);    // 256 prescaler 
+    TIMSK3 |=(1 << OCIE3A);  // enable timer compare interrupt
+
+    interrupts();             // enable all interrupts
+
+    Serial.println("six initialized.\r\n");
   }
 
   void Six::timerIsr() {
     _executor->timerIsr();
   }
 
-  int Six::addActuator(char* description, actuatorType type, uint8_t numberElements, uint8_t baseAddress) {
+  int Six::addActuator(char* description, actuatorTypeClass type, uint8_t numberElements, uint8_t baseAddress) {
     uint16_t frequency = 100;
     int intensity = 0;
     int parameter = 0;
     int attribute = 0;
     bool active = true;
     bool changed = false;
-    executionMode mode = executionMode::OFF;
+    uint8_t numberUsedChannels;
+    executionModeClass mode = executionModeClass::OFF;
 
-    if ( type == actuatorType::VIBRATION ) {
-      frequency = 1000;
+    switch (type) {
+      case (actuatorTypeClass::VIBRATION):
+        frequency = 1000;
+        break;
+    };
+
+    size_t debugOutputLength = 500;
+    char debugOutput[debugOutputLength];
+
+    snprintf(debugOutput, debugOutputLength,
+        "newActuator = { 'id': %d, 'baseAddress': 0x%02x, 'actuatorType': \"TODO FIXME\", 'numberElements': %d, 'description': \"%s\" }",
+        _actuator->getNumberActuators(),
+        baseAddress,
+        numberElements,
+        description);
+
+    Serial.println(debugOutput);
+
+
+    // change number of elements to number of channels
+    switch (type) {
+      case (actuatorTypeClass::TEMPERATURE):
+        numberUsedChannels = 3*numberElements;
+        break;
+      default:
+        numberUsedChannels = numberElements;
+        break;
     }
 
     return _actuator->addActuator(
-        description, type, numberElements, baseAddress, frequency, active, mode, changed, intensity, parameter, attribute);
+        description, type, numberUsedChannels, baseAddress, frequency, active, mode, changed, intensity, parameter, attribute);
   
   }
 

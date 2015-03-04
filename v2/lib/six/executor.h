@@ -13,17 +13,17 @@ namespace six {
 
   class Executor {
     public:
-      Executor(Actuator* actuator);
+      Executor(Actuator* actuator, Adafruit* adafruit);
 
       int runExecutor();
       int list(char** body, size_t* bodyLength);
       int ping();
       int demonstrateDisconnect();
 
-      int setMode(uint8_t id, executionMode mode);
+      int setMode(uint8_t id, executionModeClass mode);
       int setIntensity(uint8_t id, int intensity);
       int setParameter(uint8_t id, int parameter);
-      executionMode getMode(uint8_t id);
+      executionModeClass getMode(uint8_t id);
       int getIntensity(uint8_t id);
       int getParameter(uint8_t id);
       void timerIsr();
@@ -53,7 +53,7 @@ namespace six {
       uint8_t  _connected;
       uint16_t _keepAliveTimeout;
 
-      QueueList <_execution_t> _executionQueue;
+      QueueList<_execution_t>* _executionQueue;
 
   };
 

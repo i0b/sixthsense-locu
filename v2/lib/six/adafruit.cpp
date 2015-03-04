@@ -12,10 +12,10 @@ namespace six {
    _write8(i2c_address, PCA9685_MODE1, 0x0);
   }
 
-  void Adafruit::setPwmFreq(uint8_t i2c_address, float freq) {
+  void Adafruit::setPwmFrequency(uint8_t i2c_address, float frequency) {
     float prescaleval = 25000000;
     prescaleval /= 4096;
-    prescaleval /= freq;
+    prescaleval /= frequency;
     prescaleval -= 1;
     uint8_t prescale = floor(prescaleval + 0.5);
     

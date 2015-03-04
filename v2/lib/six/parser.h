@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "actuator.h"
 #include "executor.h"
 #include "status.h"
 #include "type.h"
@@ -11,7 +12,7 @@ namespace six {
 
   class Parser {
     public:
-      Parser(Executor* executor);
+      Parser(Actuator* actuator, Executor* executor);
       void reset();
       void append(char c);
       int parseCommand();
@@ -20,7 +21,7 @@ namespace six {
 
     private:
       typedef struct {
-        instructions instruction;
+        instructionClass instruction;
         uint8_t id;
         char* value;
         size_t valueLength;
@@ -53,6 +54,7 @@ namespace six {
       int _createResponsePacket(six::statusType status);
       int _sendResponsePacket();
 
+      Actuator* _actuator;
       Executor* _executor;
   };
 

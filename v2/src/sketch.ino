@@ -7,11 +7,13 @@ six::Six sixthsense;
 void setup() {
   Serial.begin(57600);
 
+  sixthsense.begin();
+
   sixthsense.addActuator(
     // description
     "vibration armband - left arm",
     // type
-    six::actuatorType::VIBRATION,
+    six::actuatorTypeClass::VIBRATION,
     // number of elements
     8,
     // # base address
@@ -22,7 +24,7 @@ void setup() {
     // description
     "vibration armband - right arm",
     // type
-    six::actuatorType::VIBRATION,
+    six::actuatorTypeClass::VIBRATION,
     // number of elements
     8,
     // # base address
@@ -31,24 +33,57 @@ void setup() {
 
   sixthsense.addActuator(
     // description
-    "peltier armband - left arm",
+    "peltier sleeve - left arm",
     // type
-    six::actuatorType::TEMPERATURE,
+    six::actuatorTypeClass::TEMPERATURE,
     // number of elements
-    12,
+    4,
     // # base address
     0x43
   );
 
   sixthsense.addActuator(
     // description
-    "peltier armband - right arm",
+    "peltier sleeve - right arm",
     // type
-    six::actuatorType::TEMPERATURE,
+    six::actuatorTypeClass::TEMPERATURE,
     // number of elements
-    12,
+    4,
     // # base address
     0x44
+  );
+
+  sixthsense.addActuator(
+    // description
+    "pressure armband - left arm",
+    // type
+    six::actuatorTypeClass::PRESSURE,
+    // number of elements
+    4,
+    // # base address
+    0x45
+  );
+
+  sixthsense.addActuator(
+    // description
+    "pressure armband - right arm",
+    // type
+    six::actuatorTypeClass::PRESSURE,
+    // number of elements
+    4,
+    // # base address
+    0x46
+  );
+
+  sixthsense.addActuator(
+    // description
+    "electro stimuation pads",
+    // type
+    six::actuatorTypeClass::ELECTRIC,
+    // number of elements
+    5,
+    // # base address
+    0x47
   );
 
 }
