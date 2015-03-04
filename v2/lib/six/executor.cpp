@@ -78,11 +78,13 @@ namespace six {
     while ( (anActuator = _actuator->getActuatorById(id)) != NULL ) {
       bodyLength += snprintf(body+bodyLength, REQUEST_RESPONSE_PACKET_LENGTH-bodyLength, 
         "id: %d\r\n"
+        "bus address: %x\r\n"
         "description: %s\r\n"
-        "number elements: %d\r\n"
+        "used channels: %d\r\n"
         //"actuator type: %s\r\n"
         "\r\n",
         id,
+        anActuator->baseAddress,
         anActuator->description,
         anActuator->numberUsedChannels
         //actuatorTypeClassString[ anActuator->type ]
