@@ -18,7 +18,7 @@ namespace six {
         char* description;
         uint8_t baseAddress;
         bool active;
-        uint8_t numberUsedChannels;
+        uint8_t numberElements;
         actuatorTypeClass type;
         executionModeClass mode;
         bool changed;
@@ -27,7 +27,7 @@ namespace six {
         int attribute;
       } actuator_t;
 
-      int addActuator(char* description, actuatorTypeClass type, uint8_t numberUsedChannels=16,
+      int addActuator(char* description, actuatorTypeClass type, uint8_t numberElements=16,
                              uint8_t baseAddress = 0x40, uint16_t frequency=1000, bool active=true,
                              executionModeClass mode=executionModeClass::OFF, bool changed=false,
                              int intensity=0, int parameter=0, int attribute=0);

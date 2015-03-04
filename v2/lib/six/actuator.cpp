@@ -11,7 +11,7 @@ namespace six {
     _numberActuators = 0;
   }
 
-  int Actuator::addActuator(char* description, actuatorTypeClass type, uint8_t numberUsedChannels,
+  int Actuator::addActuator(char* description, actuatorTypeClass type, uint8_t numberElements,
                                    uint8_t baseAddress, uint16_t frequency, bool active,
                                    executionModeClass mode, bool changed,
                                    int intensity, int parameter, int attribute) {
@@ -22,7 +22,7 @@ namespace six {
     actuator->baseAddress = baseAddress;
     actuator->active = active;
     actuator->type = type;
-    actuator->numberUsedChannels = numberUsedChannels;
+    actuator->numberElements = numberElements;
     actuator->mode = mode;
     actuator->changed = changed;
     actuator->intensity = intensity;
@@ -50,15 +50,22 @@ namespace six {
     _adafruit->resetPwm(actuator->baseAddress);
     _adafruit->setPwmFrequency(actuator->baseAddress, frequency);
 
-    for (int channel = 0; channel < actuator->numberUsedChannels; channel++){
-      switch (actuator->type) {
-        case (actuatorTypeClass::ELECTRIC):
+    switch (actuator->type) {
+      case (actuatorTypeClass::ELECTRIC):
+        for (int channel = 0; channel < actuator->numberElements; channel++){
           _adafruit->setPercent(actuator->baseAddress, channel, _ON);
-          break;
-        default:
+        }
+        break;
+      case (actuatorTypeClass::TEMPERATURE):
+        for (int channel = 0; channel < actuator->numberElements*3; channel++){
           _adafruit->setPercent(actuator->baseAddress, channel, _OFF);
-          break;
-      }
+        }
+        break;
+      default:
+        for (int channel = 0; channel < actuator->numberElements; channel++){
+          _adafruit->setPercent(actuator->baseAddress, channel, _OFF);
+        }
+        break;
     }
 
     _numberActuators++;

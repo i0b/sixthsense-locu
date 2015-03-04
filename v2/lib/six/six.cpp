@@ -55,7 +55,7 @@ namespace six {
     int attribute = 0;
     bool active = true;
     bool changed = false;
-    uint8_t numberUsedChannels;
+    uint8_t numberUsedChannels = numberElements;
     executionModeClass mode = executionModeClass::OFF;
 
     switch (type) {
@@ -68,15 +68,18 @@ namespace six {
     char debugOutput[debugOutputLength];
 
     snprintf(debugOutput, debugOutputLength,
-        "newActuator = { 'id': %d, 'baseAddress': 0x%02x, 'actuatorType': \"TODO FIXME\", 'numberElements': %d, 'description': \"%s\" }",
+        "newActuator = { 'id': %d, 'baseAddress': 0x%02x, 'numberElements': %d, 'description': \"%s\" }",
+        //"newActuator = { 'id': %d, 'baseAddress': 0x%02x, 'actuatorType': \"%s\", 'numberElements': %d, 'description': \"%s\" }",
         _actuator->getNumberActuators(),
         baseAddress,
+        //actuatorTypes[(int)type].actuatorTypeString,
         numberElements,
         description);
 
     Serial.println(debugOutput);
 
 
+    /*
     // change number of elements to number of channels
     switch (type) {
       case (actuatorTypeClass::TEMPERATURE):
@@ -86,6 +89,7 @@ namespace six {
         numberUsedChannels = numberElements;
         break;
     }
+    */
 
     return _actuator->addActuator(
         description, type, numberUsedChannels, baseAddress, frequency, active, mode, changed, intensity, parameter, attribute);

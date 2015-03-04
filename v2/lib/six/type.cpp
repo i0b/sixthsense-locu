@@ -2,6 +2,8 @@
 
 namespace six {
 
+  // a std::map is better programming style ;)
+  //
   actuatorType_t actuatorTypes[] = {
     { actuatorTypeClass::VIBRATION,   "vibration band" },
     { actuatorTypeClass::PRESSURE,    "pressure band" },

@@ -80,14 +80,14 @@ namespace six {
         "id: %d\r\n"
         "bus address: %x\r\n"
         "description: %s\r\n"
-        "used channels: %d\r\n"
-        //"actuator type: %s\r\n"
+        "number elements: %d\r\n"
+        "actuator type: %s\r\n"
         "\r\n",
         id,
         anActuator->baseAddress,
         anActuator->description,
-        anActuator->numberUsedChannels
-        //actuatorTypeClassString[ anActuator->type ]
+        anActuator->numberElements,
+        actuatorTypes[ (int)anActuator->type ].actuatorTypeString
         );
 
       id++;
@@ -247,7 +247,7 @@ namespace six {
       case (actuatorTypeClass::PRESSURE):
         uint16_t pulselen = map(anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX);
 
-        for (int channel = 0; channel < anActuator->numberUsedChannels; channel++){
+        for (int channel = 0; channel < anActuator->numberElements; channel++){
           _adafruit->setPwm(anActuator->baseAddress, channel, 0, pulselen);
         }
 
@@ -262,7 +262,7 @@ namespace six {
 
     switch (anActuator->type){
       case (actuatorTypeClass::VIBRATION):
-        for (int channel = 0; channel < anActuator->numberUsedChannels; channel++){
+        for (int channel = 0; channel < anActuator->numberElements; channel++){
           if ((parameter >> channel)& 1 ){
             _adafruit->setPercent(anActuator->baseAddress, channel, intensity);
           }
@@ -281,11 +281,11 @@ namespace six {
 
     switch (anActuator->type){
       case (actuatorTypeClass::VIBRATION):
-        for (int channel = 0; channel < anActuator->numberUsedChannels+1; channel++){
+        for (int channel = 0; channel < anActuator->numberElements+1; channel++){
           if (channel > 0){
             _adafruit->setPercent(anActuator->baseAddress, channel-1, _OFF);
           }
-          if (channel != anActuator->numberUsedChannels){
+          if (channel != anActuator->numberElements){
             _adafruit->setPercent(anActuator->baseAddress, channel,  _ON);
           }
           // CAREFUL!! USE OF DELAY
@@ -302,20 +302,21 @@ namespace six {
 
     switch (anActuator->type){
       case (actuatorTypeClass::TEMPERATURE):
-        Serial.println("DEBUG: executeTemperature()");
-        for (uint8_t peltier = 0; peltier <(anActuator->numberUsedChannels / 3); peltier++){
+        for (uint8_t peltier = 0; peltier < anActuator->numberElements; peltier++){
           // parameter [ 0 ]: DIRECTION bitmap
           // parameter [ 1 ]: ON / OFF  bitmap
           // example: only peltier element 1 should be hot - parameter = { 0x0, 0x1 }
           if ((anActuator->intensity >> peltier)& 1 ){
             // hot 
             if ((anActuator->parameter >> peltier)& 1 ){
+                Serial.println("DEBUG: executeTemperature(hot)");
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+0,  _ON);
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+1, _OFF);
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+2,  _ON);
             }
             // cold
             else {
+                Serial.println("DEBUG: executeTemperature(cold)");
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 0, _OFF);
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 1,  _ON);
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 2,  _ON);
@@ -481,7 +482,7 @@ namespace six {
             uint32_t localInterval = _executionTimer % parameter;
 
             if (localInterval == 0){
-              uint8_t activeChannel =(anActuator->attribute + 1)% anActuator->numberUsedChannels;
+              uint8_t activeChannel =(anActuator->attribute + 1)% anActuator->numberElements;
               anActuator->attribute = activeChannel;
 
               uint8_t channelBitmap = 1;

@@ -193,10 +193,9 @@ namespace six {
 
     char outputBuffer[256];
 
-    snprintf (outputBuffer, sizeof outputBuffer, "DEBUG: parsedRequest = { command = 'TODO FIXME', "
+    snprintf (outputBuffer, sizeof outputBuffer, "DEBUG: parsedRequest = { command = '%s', "
         "id = '%d', value = '%s', packetVersion = '%d.%d' }\r\n",
-        //TODO FIXME
-        //instructionsString [ (int)_requestPacket.command.instruction ],
+        instructions[(int)_requestPacket.command.instruction].instructionString,
         _requestPacket.command.id,
         _requestPacket.command.value,
         _requestPacket.versionMajor,
@@ -262,9 +261,8 @@ namespace six {
     // ------------------ GET MODE ------------------------------
     //
     else if (_requestPacket.command.instruction == instructionClass::GET_MODE) {
-      //TODO FIXME
-      //if (_setPacketBody(STRING, "mode", executionModeString[_executor->getMode(_requestPacket.command.id)]) == 0) {
-      if (_setPacketBody(STRING, "mode", "TODO FIXME", 0) == 0) {
+      if (_setPacketBody(STRING, "mode", 
+            executionModes[(int)_executor->getMode(_requestPacket.command.id)].executionModeString, 0) == 0) {
         _createResponsePacket(six::SIX_OK);
         _sendResponsePacket();
       }
