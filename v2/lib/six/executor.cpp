@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <QueueList.h>
-#include <avr/interrupt.h>
 
 #include "adafruit.h"
 #include "actuator.h"
@@ -66,37 +65,38 @@ namespace six {
 
 // -------------------------------------------------------------------------------------
 
-  int Executor::list(char** body, size_t* bodyLength){
+  int Executor::list(char* body, size_t& bodyLength){
 
-    for (uint8_t id = 0; id < _actuator->getNumberActuators(); id++){
-      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+    //for (uint8_t id = 0; id < _actuator->getNumberActuators(); id++){
+      //Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
 
-      //TODO FIXME
-      /*
-      *bodyLength += snprintf(*body+strlen(*body), 
-        REQUEST_RESPONSE_PACKET_LENGTH-*bodyLength, 
+    uint8_t id = 0;
+    Actuator::actuator_t* anActuator;
+
+    bodyLength=0;
+
+    while ( (anActuator = _actuator->getActuatorById(id)) != NULL ) {
+      bodyLength += snprintf(body+bodyLength, REQUEST_RESPONSE_PACKET_LENGTH-bodyLength, 
         "id: %d\r\n"
         "description: %s\r\n"
         "number elements: %d\r\n"
-        "actuator type: %s\r\n"
+        //"actuator type: %s\r\n"
         "\r\n",
-
         id,
         anActuator->description,
-        anActuator->numberUsedChannels,
-        actuatorTypeClassString[ anActuator->type ]
+        anActuator->numberUsedChannels
+        //actuatorTypeClassString[ anActuator->type ]
         );
-      */
+
+      id++;
     }
 
-    *bodyLength = 0;
-    *body = "";
-
-    if (*bodyLength < 0){
+    if (bodyLength < 0){
       return -1;
     }
-  
-    return 0;
+    else { 
+      return 0;
+    }
   }
 
 // -------------------------------------------------------------------------------------

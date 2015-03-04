@@ -2,15 +2,22 @@
 #include "actuator.h"
 #include "executor.h"
 #include "parser.h"
+#include <avr/interrupt.h>
 
 namespace six {
+  Six* _six;
+
+  SIGNAL ( TIMER3_COMPA_vect ) {
+    noInterrupts();
+    _six->timerIsr();
+    interrupts();
+  }
+
   Six::Six() {
   }
 
   void Six::begin() {
-    //SIGNAL(TIMER3_COMPA_vect){
-    //  Executor::timerIsr();
-    //}
+    _six = this;
     _adafruit = new Adafruit();
     _adafruit->begin();
     _actuator = new Actuator(_adafruit);
@@ -34,6 +41,7 @@ namespace six {
     interrupts();             // enable all interrupts
 
     Serial.println("six initialized.\r\n");
+
   }
 
   void Six::timerIsr() {

@@ -88,12 +88,6 @@ void setup() {
 
 }
 
-ISR ( TIMER3_COMPA_vect ) {
-  noInterrupts();
-  sixthsense.timerIsr();
-  interrupts();
-}
-
 void loop() {
   while(BLEMini.available()) {
     char c = (char)BLEMini.read();

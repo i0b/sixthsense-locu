@@ -16,7 +16,7 @@ namespace six {
       Executor(Actuator* actuator, Adafruit* adafruit);
 
       int runExecutor();
-      int list(char** body, size_t* bodyLength);
+      int list(char* body, size_t& bodyLength);
       int ping();
       int demonstrateDisconnect();
 

@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "actuator.h"
 #include "adafruit.h"
 #include "type.h"
@@ -28,8 +29,26 @@ namespace six {
     actuator->parameter = parameter;
     actuator->attribute = attribute;
 
-    _adafruit->resetPwm(baseAddress);
-    _adafruit->setPwmFrequency(baseAddress, frequency);
+    _actuatorNode_t* node = new _actuatorNode();
+    node->actuator = actuator;
+    node->nextActuator = NULL;
+
+    if ( _actuatorList == NULL ) {
+      _actuatorList = node;
+    }
+
+    else {
+      _actuatorNode_t* tail = _actuatorList;
+
+      while ( tail->nextActuator != NULL ) {
+        tail = tail->nextActuator;
+      }
+
+      tail->nextActuator = node;
+    }
+
+    _adafruit->resetPwm(actuator->baseAddress);
+    _adafruit->setPwmFrequency(actuator->baseAddress, frequency);
 
     for (int channel = 0; channel < actuator->numberUsedChannels; channel++){
       switch (actuator->type) {
@@ -40,25 +59,6 @@ namespace six {
           _adafruit->setPercent(actuator->baseAddress, channel, _OFF);
           break;
       }
-    }
-
-    _actuatorNode_t* node = new _actuatorNode();
-    node->actuator = actuator;
-    node->nextActuator = NULL;
-
-    
-    if ( _numberActuators == 0 ) {
-      _actuatorList = node;
-    }
-
-    else {
-      _actuatorNode_t* tail = _actuatorList;
-
-      for ( uint8_t id=0; id<_numberActuators; id++ ) {
-        tail = tail->nextActuator;
-      }
-
-      tail->nextActuator = node;
     }
 
     _numberActuators++;

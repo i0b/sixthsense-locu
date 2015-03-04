@@ -16,6 +16,7 @@ namespace six {
     _actuator = actuator;
     _executor = executor;
     _packetLength = 0;
+    _responsePacket.body = (char*)malloc(REQUEST_RESPONSE_PACKET_LENGTH);
   }
 
   void Parser::reset() {
@@ -34,6 +35,11 @@ namespace six {
   }
 
   int Parser::parseCommand(char* rawPacket, size_t* packetLength) {
+    //TODO FIXME -- REMOVE
+    _requestPacket.command.id = 0;
+    _requestPacket.command.value = "";
+    _requestPacket.versionMajor = 0,
+    _requestPacket.versionMinor = 0;
 
     // parse command - example GETV
     char* command = rawPacket;
@@ -49,8 +55,6 @@ namespace six {
       return -1;
     }
      
-    *packetLength -= commandLength;
-
     // evaluate command string
 
     if (strncasecmp ("LIST", command, commandLength) == 0) {
@@ -81,8 +85,6 @@ namespace six {
         return -1;
       }
     
-      *packetLength -= idLength;
-
       int idIntegerValue = atoi (id);
 
       if (idIntegerValue < 0 || idIntegerValue > 255) {
@@ -141,8 +143,6 @@ namespace six {
           return -1;
         }
       
-        *packetLength -= valueLength;
-
         _requestPacket.command.value = value;
         _requestPacket.command.valueLength = valueLength;
 
@@ -164,10 +164,18 @@ namespace six {
         }
       }
     }
-    /*
-
     // compare version - example: SIX/0.1
-    char* protocolName = "SIX/";
+    char protocolName[16];
+
+    if ( snprintf (protocolName, sizeof protocolName, "SIX/%d.%d", VERSION_MAJOR, VERSION_MINOR) < 0 ) {
+      _setPacketBody(EMPTY, NULL, NULL , 0);
+      _createResponsePacket(six::SIX_SERVER_ERROR);
+      _sendResponsePacket();
+
+      return -1;
+    }
+
+    *packetLength -= strlen(protocolName);
 
     if (strncasecmp (protocolName, rawPacket, strlen (protocolName)) == 0) {
       rawPacket += strlen (protocolName);
@@ -179,60 +187,13 @@ namespace six {
 
       return -1;
     }
-    
-    *packetLength -= strlen (protocolName);
 
-    char* dot = (char*) memchr ((void*)rawPacket, '.', *packetLength);
-
-    if (dot == NULL) {
-      _setPacketBody(EMPTY, NULL, NULL , 0);
-      _createResponsePacket(six::SIX_ERROR_PARSING);
-      _sendResponsePacket();
-
-      return -1;
-    }
-
-    *dot = '\0';
-    
-    char* major = rawPacket;
-    size_t majorLength = strlen (major);
-
-    // TODO this still allows: LIST SIX/0.1somethingelse
-    // USE SSCANF (%d) and check if string is empty afterwards!
-    char* minor = dot + 1;
-    size_t minorLength = strlen (minor);
-    
-
-    *packetLength -= majorLength + minorLength + 1; // 1 = '.'
-
-    int majorInt = atoi (major);
-
-    if (majorInt < 0 || majorInt > 255) {
-      _setPacketBody(EMPTY, NULL, NULL , 0);
-      _createResponsePacket(six::SIX_WRONG_VERSION);
-      _sendResponsePacket();
-
-      return -1;
-    }
-
-    // TODO if minor no correct number, return -1
-    int minorInt = atoi (minor);
-
-    if (minorInt < 0 || minorInt > 255) {
-      _setPacketBody(EMPTY, NULL, NULL , 0);
-      _createResponsePacket(six::SIX_WRONG_VERSION);
-      _sendResponsePacket();
-
-      return -1;
-    }
-    */
-
-    _requestPacket.versionMajor = VERSION_MAJOR;//(uint8_t) majorInt;
-    _requestPacket.versionMinor = VERSION_MINOR;//(uint8_t) minorInt;
+    _requestPacket.versionMajor = VERSION_MAJOR;
+    _requestPacket.versionMinor = VERSION_MINOR;
 
     char outputBuffer[256];
 
-    snprintf (outputBuffer, sizeof outputBuffer, "DEBUG: parsedRequest = { command = '', "
+    snprintf (outputBuffer, sizeof outputBuffer, "DEBUG: parsedRequest = { command = 'TODO FIXME', "
         "id = '%d', value = '%s', packetVersion = '%d.%d' }\r\n",
         //TODO FIXME
         //instructionsString [ (int)_requestPacket.command.instruction ],
@@ -242,17 +203,13 @@ namespace six {
         _requestPacket.versionMinor);
     Serial.print (outputBuffer);
    
-/*
     if (*packetLength != 0) {
-      // TODO sscanf - SEE ABOVE
-      // actually it should always be zero - the last string (minor) might be corrupt though
       _setPacketBody(EMPTY, NULL, NULL , 0);
       _createResponsePacket(six::SIX_SERVER_ERROR);
       _sendResponsePacket();
 
       return -1;
     }
-*/
 
     return 0;
   }
@@ -270,23 +227,9 @@ namespace six {
     // ---------------- LIST ACTUATORS --------------------------
     //
     if (_requestPacket.command.instruction == instructionClass::LIST) {
-      strcpy (_responsePacket.body, "");
-      _responsePacket.bodyLength = 0;
 
-      _executor->list(&_responsePacket.body, &_responsePacket.bodyLength);
-
-      _responsePacket.bodyLength += snprintf (_responsePacket.body + strlen (_responsePacket.body), 
-          REQUEST_RESPONSE_PACKET_LENGTH - _responsePacket.bodyLength, 
-          "\r\n");
-
-      _responsePacket.bodyLength = strlen (_responsePacket.body);
-
-
-      // TODO find the right place for this
-      if (_createResponsePacket(six::SIX_OK) != 0)
-        return -1;
-
-      // TODO find the right place for this
+      _executor->list(_responsePacket.body, _responsePacket.bodyLength);
+      _createResponsePacket(six::SIX_OK);
       _sendResponsePacket();
 
       return 0;
@@ -319,14 +262,15 @@ namespace six {
     // ------------------ GET MODE ------------------------------
     //
     else if (_requestPacket.command.instruction == instructionClass::GET_MODE) {
-      
       //TODO FIXME
-      /*
-      if (_setPacketBody(STRING, "mode", executionModeString[_executor->getMode(_requestPacket.command.id)]) == 0) {
+      //if (_setPacketBody(STRING, "mode", executionModeString[_executor->getMode(_requestPacket.command.id)]) == 0) {
+      if (_setPacketBody(STRING, "mode", "TODO FIXME", 0) == 0) {
         _createResponsePacket(six::SIX_OK);
         _sendResponsePacket();
       }
-      */
+      else {
+        return -1;
+      }
 
       return 0;
     }
@@ -343,7 +287,6 @@ namespace six {
       return 0;
     }
 
-    // TODO NOT COPY-PASTE!!
     // ---------------- GET PARAMETER ---------------------------
     //
     else if (_requestPacket.command.instruction == instructionClass::GET_PARAMETER) {
@@ -355,7 +298,6 @@ namespace six {
 
       return 0;
     }
-
 
     // -------------------- SET MODE ----------------------------
     //
@@ -435,8 +377,6 @@ namespace six {
 //
 //
   int Parser::_sendResponsePacket() {
-
-    //Serial.println ("sending response...");
     char responseBuf [ REQUEST_RESPONSE_PACKET_LENGTH ];
 
     snprintf (responseBuf, REQUEST_RESPONSE_PACKET_LENGTH,
@@ -444,26 +384,6 @@ namespace six {
         "%s\r\n\r\n",
         _responsePacket.status.code, _responsePacket.status.description, _responsePacket.versionMajor, _responsePacket.versionMinor,
         _responsePacket.body);
-
-    /*
-    Serial.print (packet->status.CODE);
-    Serial.print (" ");
-    Serial.print (packet->status.DESCRIPTION);
-    Serial.print (" ");
-    Serial.print ("SIX/");
-    Serial.print (packet->versionMajor);
-    Serial.print (".");
-    Serial.print (packet->versionMinor);
-    Serial.print ("\r\n");
-    Serial.print ("\r\n");
-
-    Serial.print (packet->body);
-    Serial.print ("\r\n");
-
-
-    Serial.print ("\r\n");
-    Serial.print ("\r\n");
-    */
 
     Serial.println (responseBuf);
     BLEMini.println (responseBuf);
@@ -479,16 +399,24 @@ namespace six {
   // returns new position of inside the packet after the space
   char* Parser::_parseNext(char* packetSegment, size_t* packetLength, size_t* segmentLength, char* segmentType) {
 
-    //TODO use memchr instead!
+    uint16_t whitespace = 0;
+
+    //TODO FIXME
+    // ignore whitespace
+    while ( *packetLength > 0 && *packetSegment == ' ' ) {
+      whitespace++;
+      packetSegment++;
+      *packetLength--;
+    }
+
     char* space = (char*) memchr ((void*) packetSegment, ' ', *packetLength);
-    //char* space = strchr (packetSegment, ' ');
    
     if (space == NULL) {
       return NULL;
     }
 
     else {
-     *segmentLength = space - packetSegment + 1;
+      *segmentLength = space-packetSegment+whitespace+1;
     }
 
     if (*segmentLength < 1) {
@@ -496,9 +424,7 @@ namespace six {
     }
 
     *space = '\0';
-    //Serial.println(packetSegment);
-    //char tmp [100];
-    //snprintf (tmp, strlen(packetSegment)+10, "%s: %d --\r\n", packetSegment, *segmentLength);
+    *packetLength -= *segmentLength;
 
     return space + 1;
   }
@@ -510,11 +436,6 @@ namespace six {
     _responsePacket.versionMinor = VERSION_MINOR;
 
     _responsePacket.status = six::statusDescription [ status ];
-
-    // TODO find the right place for this
-    //if (packet->status.status != six::SIX_OK) {
-    //  return -1;
-    //}
 
     return 0;
   }
