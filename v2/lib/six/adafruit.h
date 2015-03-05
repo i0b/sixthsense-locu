@@ -29,14 +29,15 @@ namespace six {
 
     public:
       void begin(void);
-      void setPercent(uint8_t i2c_address, uint8_t channel, uint8_t percent);
-      void setPwm(uint8_t i2c_address, uint8_t num, uint16_t on, uint16_t off);
-      void setPwmFrequency(uint8_t i2c_address, float frequency);
-      void resetPwm(uint8_t i2c_address);
+      int checkActuatorActive(uint8_t i2cAddress);
+      void setPercent(uint8_t i2cAddress, uint8_t channel, uint8_t percent);
+      void setPwm(uint8_t i2cAddress, uint8_t num, uint16_t on, uint16_t off);
+      void setPwmFrequency(uint8_t i2cAddress, float frequency);
+      void resetPwm(uint8_t i2cAddress);
 
     private:
-      uint8_t _read8(uint8_t i2c_address, uint8_t addr);
-      void _write8(uint8_t i2c_address, uint8_t addr, uint8_t d);
+      uint8_t _read8(uint8_t i2cAddress, uint8_t channel);
+      void _write8(uint8_t i2cAddress, uint8_t channel, uint8_t d);
 
   };
 

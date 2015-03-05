@@ -52,6 +52,9 @@ namespace six {
 
     switch (actuator->type) {
       case (actuatorTypeClass::ELECTRIC):
+        Serial.print("DEBUG: setting all pins of '");
+        Serial.print(actuator->baseAddress);
+        Serial.println("' to high");
         for (int channel = 0; channel < actuator->numberElements; channel++){
           _adafruit->setPercent(actuator->baseAddress, channel, _ON);
         }

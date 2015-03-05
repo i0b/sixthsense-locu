@@ -40,8 +40,9 @@ namespace six {
 
     interrupts();             // enable all interrupts
 
-    Serial.println("six initialized.\r\n");
+    BLEMini.begin(57600);
 
+    Serial.println("six initialized.\r\n");
   }
 
   void Six::timerIsr() {

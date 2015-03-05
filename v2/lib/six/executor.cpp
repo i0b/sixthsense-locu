@@ -15,7 +15,7 @@ namespace six {
 
     // initiallize heartbeat
     _connected = false;
-    _keepAliveTimeout = 2000; // 200 * 10 ms = 2 sec
+    _keepAliveTimeout = 500; // 200 * 10 ms = 2 sec
     _keepAliveTimer = _keepAliveTimeout;
   }
 
@@ -53,6 +53,11 @@ namespace six {
 // -------------------------------------------------------------------------------------
 
   int Executor::ping(){
+
+    _keepAliveTimer = _keepAliveTimeout;
+    _connected = true;
+    return 0;
+    /*
     if (_keepAliveTimer > 0){
       _keepAliveTimer = _keepAliveTimeout;
       _connected = true;
@@ -61,6 +66,7 @@ namespace six {
     else {
       return -1;
     }
+    */
   }
 
 // -------------------------------------------------------------------------------------
@@ -76,16 +82,26 @@ namespace six {
     bodyLength=0;
 
     while ( (anActuator = _actuator->getActuatorById(id)) != NULL ) {
+
+      if ((_adafruit->checkActuatorActive(anActuator->baseAddress)) == 0) {
+        anActuator->active = true;
+      }
+      else {
+        anActuator->active = false;
+      }
+
       bodyLength += snprintf(body+bodyLength, REQUEST_RESPONSE_PACKET_LENGTH-bodyLength, 
         "id: %d\r\n"
         "bus address: %x\r\n"
         "description: %s\r\n"
+        "active: %s\r\n"
         "number elements: %d\r\n"
         "actuator type: %s\r\n"
         "\r\n",
         id,
         anActuator->baseAddress,
         anActuator->description,
+        anActuator->active ? "true" : "false",
         anActuator->numberElements,
         actuatorTypes[ (int)anActuator->type ].actuatorTypeString
         );
@@ -104,9 +120,14 @@ namespace six {
 // -------------------------------------------------------------------------------------
 
   int Executor::demonstrateDisconnect(){
-    // TODO which id?? -- not hard coded!!
-    _execution_t executionElement = {this, 0, 0, 0, &six::Executor::_executeDisconnect };
-    _executionQueue->push(executionElement);
+    for (uint8_t id = 0; id < _actuator->getNumberActuators(); id++){
+      Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+
+      if (anActuator->mode == executionModeClass::VIBRATION) {
+        _execution_t executionElement = {this, 0, 50, 0, &six::Executor::_executeDisconnect };
+        _executionQueue->push(executionElement);
+      }
+    }
 
     return 0;
   }
@@ -245,7 +266,9 @@ namespace six {
 
     switch (anActuator->type){
       case (actuatorTypeClass::PRESSURE):
-        uint16_t pulselen = map(anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX);
+        //uint16_t pulselen = map(anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX);
+        // value of 0 - 100 equals to 0 - 90 degree
+        uint16_t pulselen = map(anActuator->intensity, 0, 100, SERVOMIN, SERVOMAX/2);
 
         for (int channel = 0; channel < anActuator->numberElements; channel++){
           _adafruit->setPwm(anActuator->baseAddress, channel, 0, pulselen);
@@ -263,7 +286,7 @@ namespace six {
     switch (anActuator->type){
       case (actuatorTypeClass::VIBRATION):
         for (int channel = 0; channel < anActuator->numberElements; channel++){
-          if ((parameter >> channel)& 1 ){
+          if ((parameter >> channel)&1){
             _adafruit->setPercent(anActuator->baseAddress, channel, intensity);
           }
           else {
@@ -281,12 +304,16 @@ namespace six {
 
     switch (anActuator->type){
       case (actuatorTypeClass::VIBRATION):
+        for (int channel = 0; channel < anActuator->numberElements; channel++){
+          _adafruit->setPercent(anActuator->baseAddress, channel, _OFF);
+        }
+
         for (int channel = 0; channel < anActuator->numberElements+1; channel++){
           if (channel > 0){
             _adafruit->setPercent(anActuator->baseAddress, channel-1, _OFF);
           }
           if (channel != anActuator->numberElements){
-            _adafruit->setPercent(anActuator->baseAddress, channel,  _ON);
+            _adafruit->setPercent(anActuator->baseAddress, channel, intensity);
           }
           // CAREFUL!! USE OF DELAY
           delay(200);
@@ -303,20 +330,18 @@ namespace six {
     switch (anActuator->type){
       case (actuatorTypeClass::TEMPERATURE):
         for (uint8_t peltier = 0; peltier < anActuator->numberElements; peltier++){
-          // parameter [ 0 ]: DIRECTION bitmap
-          // parameter [ 1 ]: ON / OFF  bitmap
-          // example: only peltier element 1 should be hot - parameter = { 0x0, 0x1 }
+          // intensity: ON / OFF  bitmap
+          // parameter: DIRECTION bitmap
+          // example: only peltier element 1 should be hot - intensity = 0x1, parameter = 0x0
           if ((anActuator->intensity >> peltier)& 1 ){
             // hot 
             if ((anActuator->parameter >> peltier)& 1 ){
-                Serial.println("DEBUG: executeTemperature(hot)");
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+0,  _ON);
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+1, _OFF);
                 _adafruit->setPercent(anActuator->baseAddress, 3*peltier+2,  _ON);
             }
             // cold
             else {
-                Serial.println("DEBUG: executeTemperature(cold)");
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 0, _OFF);
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 1,  _ON);
                 _adafruit->setPercent(anActuator->baseAddress, 3 * peltier + 2,  _ON);
@@ -389,15 +414,24 @@ namespace six {
   void Executor::timerIsr(){
     _executionTimer++;
 
-    if (_connected && --_keepAliveTimer == 0){
-    // TODO do disconnect pattern ;
-    // TODO don't hardcode vibration element(s)
-      _connected = false;
+    if (_connected) {
+      if (_keepAliveTimer == 0) {
+        Serial.println("DEBUG: disconnected");
 
-      //execution_t executionElementLeftVibration  = { 0, 0, 0, executeDisconnect };
-      //executionQueue.push(executionElementLeftVibration);
-      //executionT executionElementRightVibration = { 1, { 0 }, executeDisconnect };
-      //executionQueue.push(executionElementRightVibration);
+        _connected = false;
+
+        for (uint8_t id = 0; id < _actuator->getNumberActuators(); id++){
+          Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
+
+          if (anActuator->mode == executionModeClass::VIBRATION) {
+            _execution_t executionElement = {this, 0, 50, 0, &six::Executor::_executeDisconnect };
+            _executionQueue->push(executionElement);
+          }
+        }
+      }
+      else {
+        _keepAliveTimer--;
+      }
     }
 
     // DECISSION LOGIC
