@@ -379,7 +379,8 @@ namespace six {
 
     snprintf (responseBuf, REQUEST_RESPONSE_PACKET_LENGTH,
         "%d %s SIX/%d.%d\r\n"
-        "%s\r\n\r\n",
+        //"%s\r\n\r\n",
+        "%s\r\n",
         _responsePacket.status.code, _responsePacket.status.description, _responsePacket.versionMajor, _responsePacket.versionMinor,
         _responsePacket.body);
 

@@ -5,6 +5,10 @@
 namespace six {
 
   void Adafruit::begin() {
+    _gain = GAIN_TWOTHIRDS;
+    _conversionDelay = ADS1115_CONVERSIONDELAY;
+    _bitShift = 0;
+
     Wire.begin();
   }
 
@@ -89,6 +93,61 @@ namespace six {
     Wire.write(channel);
     Wire.write(d);
     Wire.endTransmission();
+  }
+
+  // ------------------------------------------------------------------------------------
+  // -------------------------       AD - Methods       ---------------------------------
+  // ------------------------------------------------------------------------------------
+
+
+  void Adafruit::_writeRegister(uint8_t i2cAddress, uint8_t reg, uint16_t value) {
+    Wire.beginTransmission(i2cAddress);
+    Wire.write((uint8_t)reg);
+    Wire.write((uint8_t)(value>>8));
+    Wire.write((uint8_t)(value & 0xFF));
+    Wire.endTransmission();
+  }
+
+  uint16_t Adafruit::_readRegister(uint8_t i2cAddress, uint8_t reg) {
+    Wire.beginTransmission(i2cAddress);
+    Wire.write(ADS1015_REG_POINTER_CONVERT);
+    Wire.endTransmission();
+    Wire.requestFrom(i2cAddress, (uint8_t)2);
+    return ((Wire.read() << 8) | Wire.read());  
+  }
+
+  uint16_t Adafruit::readAdValue(uint8_t i2cAddress, uint8_t channel) {
+    if (channel > 3) {
+      return 0;
+    }
+    
+    uint16_t config = ADS1015_REG_CONFIG_CQUE_NONE    | // Disable the comparator (default val)
+                      ADS1015_REG_CONFIG_CLAT_NONLAT  | // Non-latching (default val)
+                      ADS1015_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
+                      ADS1015_REG_CONFIG_CMODE_TRAD   | // Traditional comparator (default val)
+                      ADS1015_REG_CONFIG_DR_1600SPS   | // 1600 samples per second (default)
+                      ADS1015_REG_CONFIG_MODE_SINGLE;   // Single-shot mode (default)
+
+    config |= _gain;
+    switch (channel) {
+      case (0):
+        config |= ADS1015_REG_CONFIG_MUX_SINGLE_0;
+        break;
+      case (1):
+        config |= ADS1015_REG_CONFIG_MUX_SINGLE_1;
+        break;
+      case (2):
+        config |= ADS1015_REG_CONFIG_MUX_SINGLE_2;
+        break;
+      case (3):
+        config |= ADS1015_REG_CONFIG_MUX_SINGLE_3;
+        break;
+    }
+
+    config |= ADS1015_REG_CONFIG_OS_SINGLE;
+    _writeRegister(i2cAddress, ADS1015_REG_POINTER_CONFIG, config);
+    delay(_conversionDelay);
+    return _readRegister(i2cAddress, ADS1015_REG_POINTER_CONVERT) >> _bitShift;  
   }
 
 }

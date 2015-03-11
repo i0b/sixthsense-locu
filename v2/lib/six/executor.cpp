@@ -26,9 +26,8 @@ namespace six {
       _execution_t executionElement = _executionQueue->pop();
      ((executionElement.object)->*(executionElement.function))(executionElement.id, executionElement.intensity, executionElement.parameter);
 
-     Serial.println("_executionQueue->pop()");
-
       /*
+      Serial.println("_executionQueue->pop()");
       Serial.print("executionQueue.count(): ");
       Serial.println(executionQueue.count()+1);
 
@@ -105,6 +104,21 @@ namespace six {
         anActuator->numberElements,
         actuatorTypes[ (int)anActuator->type ].actuatorTypeString
         );
+
+
+        if (anActuator->type == actuatorTypeClass::TEMPERATURE && anActuator->active) {
+          for (uint8_t peltier = 0; peltier < anActuator->numberElements; peltier++){
+            bodyLength += snprintf(body+bodyLength, REQUEST_RESPONSE_PACKET_LENGTH-bodyLength, 
+              "peltier value %d: %d\r\n",
+              peltier,
+              //TODO FIXME -- hard coded address of peltier sensors
+              _adafruit->readAdValue(0x48, peltier)
+              //_adafruit->readAdValue(anActuator->sensorAddress, peltier)
+              );
+          }
+
+          bodyLength += snprintf(body+bodyLength, REQUEST_RESPONSE_PACKET_LENGTH-bodyLength, "\r\n");
+        }
 
       id++;
     }
@@ -249,9 +263,10 @@ namespace six {
         _executeTemperature(id, 0, 0);
         break;
       case (actuatorTypeClass::PRESSURE):
-        setIntensity(id, 90);
+        setIntensity(id, 30);
+        setParameter(id, 255);
+        _executeServo(id, 30, 0);
         setParameter(id, 0);
-        _executeServo(id, 90, 0);
         break;
     }
 
@@ -268,7 +283,7 @@ namespace six {
       case (actuatorTypeClass::PRESSURE):
         //uint16_t pulselen = map(anActuator->intensity, 0, 180, SERVOMIN, SERVOMAX);
         // value of 0 - 100 equals to 0 - 90 degree
-        uint16_t pulselen = map(anActuator->intensity, 0, 100, SERVOMIN, SERVOMAX/2);
+        uint16_t pulselen = map(anActuator->intensity, 0, 100, SERVOMIN, SERVOMAX);
 
         for (int channel = 0; channel < anActuator->numberElements; channel++){
           _adafruit->setPwm(anActuator->baseAddress, channel, 0, pulselen);
@@ -362,45 +377,50 @@ namespace six {
 
   void Executor::_electroStimulation(uint8_t id, int intensity, int parameter){
     Actuator::actuator_t* anActuator = _actuator->getActuatorById(id);
-    // parameter [ 0 ]: value of stimulation
-    // parameter [ 1 ]: mode
-    // FOR NOW: parameter [ 0 ]: 1 = LEFT, 2 = RIGHT, 3 = UP, 4 = DOWN, 5 = MODE
+    #define    UP 0
+    #define  DOWN 3
     #define  LEFT 2
     #define RIGHT 1
-    #define    UP 0
-    #define  DOWN 5
     #define  MODE 4
 
     switch (anActuator->type){
-
       case (actuatorTypeClass::ELECTRIC):
+        for (uint8_t channel=0; channel < anActuator->numberElements; channel++){
+          _adafruit->setPercent(anActuator->baseAddress, channel, _ON);
+        }
+
         switch (intensity){
-          case (1):
-            _adafruit->setPercent(anActuator->baseAddress,  LEFT, _OFF);
-             delay(80);
-            _adafruit->setPercent(anActuator->baseAddress,  LEFT,  _ON);
-            break;
-          case (2):
-            _adafruit->setPercent(anActuator->baseAddress, RIGHT, _OFF);
-             delay(80);
-            _adafruit->setPercent(anActuator->baseAddress, RIGHT,  _ON);
-            break;
-          case (3):
+          case (0):
             _adafruit->setPercent(anActuator->baseAddress,    UP, _OFF);
-             delay(80);
+             delay(100);
             _adafruit->setPercent(anActuator->baseAddress,    UP,  _ON);
             break;
-          case (4):
+          case (1):
             _adafruit->setPercent(anActuator->baseAddress,  DOWN, _OFF);
-             delay(80);
+             delay(100);
             _adafruit->setPercent(anActuator->baseAddress,  DOWN,  _ON);
             break;
-          case (5):
+          case (2):
+            _adafruit->setPercent(anActuator->baseAddress,  LEFT, _OFF);
+             delay(100);
+            _adafruit->setPercent(anActuator->baseAddress,  LEFT,  _ON);
+            break;
+          case (3):
+            _adafruit->setPercent(anActuator->baseAddress, RIGHT, _OFF);
+             delay(100);
+            _adafruit->setPercent(anActuator->baseAddress, RIGHT,  _ON);
+            break;
+          case (4):
             _adafruit->setPercent(anActuator->baseAddress,  MODE, _OFF);
-             delay(80);
+             delay(100);
             _adafruit->setPercent(anActuator->baseAddress,  MODE,  _ON);
             break;
         }
+
+        for (uint8_t channel=0; channel < anActuator->numberElements; channel++){
+          _adafruit->setPercent(anActuator->baseAddress, channel, _OFF);
+        }
+
         break;
     }
 
