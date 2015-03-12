@@ -1,0 +1,22 @@
+source template
+
+INTENSITY="0"
+
+function setIntensity {
+  INTENSITY="0"
+  for i in $(seq 1 $1); do
+    let "INTENSITY<<=1"
+    let "INTENSITY+=1"
+  done
+}
+
+function applyValues {
+  setIntensity $INTENSITY1
+  echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
+  sleep "$INTERVAL1"
+
+  setIntensity $INTENSITY2
+  echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
+  sleep "$INTERVAL2"
+  echo "si $ACTUATOR 0 six/0.1" > $PORT
+}

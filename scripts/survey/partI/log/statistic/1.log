@@ -1,0 +1,68 @@
+
+temperature hot
+-------------------------------------
+min: 3s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+max: 6s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+
+
+vibration
+-------------------------------------
+temperature hot
+-------------------------------------
+min: 8s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+max: 17s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+
+
+
+vibration
+-------------------------------------
+min: 20
+max: 30
+
+
+
+electric
+-------------------------------------
+min: 1
+max: 2
+
+
+
+temperature cold
+-------------------------------------
+min: 2s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+max: 4s
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+
+
+
+pressure
+-------------------------------------
+min: 40
+max: 50
+
+
+

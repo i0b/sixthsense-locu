@@ -1,0 +1,933 @@
+six initialized.
+
+newActuator = { 'id': 0, 'baseAddress': 0x41, 'numberElements': 8, 'description': "vibration armband - left arm" }
+newActuator = { 'id': 1, 'baseAddress': 0x42, 'numberElements': 8, 'description': "vibration armband - right arm" }
+newActuator = { 'id': 2, 'baseAddress': 0x43, 'numberElements': 4, 'description': "peltier sleeve - left arm" }
+newActuator = { 'id': 3, 'baseAddress': 0x44, 'numberElements': 4, 'description': "peltier sleeve - right arm" }
+newActuator = { 'id': 4, 'baseAddress': 0x45, 'numberElements': 4, 'description': "pressure armband - left arm" }
+newActuator = { 'id': 5, 'baseAddress': 0x46, 'numberElements': 4, 'description': "pressure armband - right arm" }
+newActuator = { 'id': 6, 'baseAddress': 0x47, 'numberElements': 5, 'description': "electro stimuation pads" }
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+sm 3 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '3', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 10 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '10', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 20 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '20', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 30 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '30', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 40 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '40', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 6 elec sixsi 6 0 six/0.1
+503 ERROR command not recognized SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 6 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '6', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+peltier value 1: 424242
+
+
+peltier value 1: 123
+peltier value 2: 234
+peltier value 3: 345
+peltier value 4: 456
+ 255 six/0.1
+DEBUG:nd = 'set intensity', id cketVersion = '0.1' }
+200 OK SIX/0.1
+
+
+DEBUG: parsedRequest =Version = '0.1' }
+ OK SIX/0.1
+id: 0
+bus  vibration armband - lefmber elements: 8
+actuat
+
+id: 1
+bus address: 4n armband - right arm
+aments: 8
+actuator type:
+bus address: 43
+descrileft arm
+active: falseuator type: temperature ress: 44
+description: pm
+active: false
+numberpe: temperature sleeve
+
+description: pressure ve: false
+number elemenessure band
+
+id: 5
+buon: pressure armband - rnumber elements: 4
+actu
+
+id: 6
+bus address:  stimuation pads
+active: 5
+actuator type: elec
+
+
+i 3 255 six/0.1
+DEommand = 'set intensity', packetVersion = '0.1' LparsedRequest = { commanue = '', packetVersion =200 OK SIX/041
+description: vibratiotive: false
+number elemvibration band
+
+id: 1ption: vibration armbandlse
+number elements: 8n band
+
+id: 2
+bus addrltier sleeve - left armlements: 4
+actuator typ
+id: 3
+bus address: 44eeve - right arm
+active: 4
+actuator type: tempebus address: 45
+descrip left arm
+active: falsetuator type: pressure ba: 46
+description: press
+active: false
+number el: pressure band
+
+id: 6iption: electro stimuatinumber elements: 5
+actuulation pads
+
+
+
+DEBUG: parsedRequest', id = '3', value = 'OFFsix initialized.
+
+newActuator = { 'id': 0, 'baseAddress': 0x41, 'numberElements': 8, 'description': "vibration armband - left arm" }
+newActuator = { 'id': 1, 'baseAddress': 0x42, 'numberElements': 8, 'description': "vibration armband - right arm" }
+newActuator = { 'id': 2, 'baseAddress': 0x43, 'numberElements': 4, 'description': "peltier sleeve - left arm" }
+newActuator = { 'id': 3, 'baseAddress': 0x44, 'numberElements': 4, 'description': "peltier sleeve - right arm" }
+newActuator = { 'id': 4, 'baseAddress': 0x45, 'numberElements': 4, 'description': "pressure armband - left arm" }
+newActuator = { 'id': 5, 'baseAddress': 0x46, 'numberElements': 4, 'description': "pressure armband - right arm" }
+newActuator = { 'id': 6, 'baseAddress': 0x47, 'numberElements': 5, 'description': "electro stimuation pads" }
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+sm 3 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '3', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+six initialized.
+
+newActuator = { 'id': 0, 'baseAddress': 0x41, 'numberElements': 8, 'description': "vibration armband - left arm" }
+newActuator = { 'id': 1, 'baseAddress': 0x42, 'numberElements': 8, 'description': "vibration armband - right arm" }
+newActuator = { 'id': 2, 'baseAddress': 0x43, 'numberElements': 4, 'description': "peltier sleeve - left arm" }
+newActuator = { 'id': 3, 'baseAddress': 0x44, 'numberElements': 4, 'description': "peltier sleeve - right arm" }
+newActuator = { 'id': 4, 'baseAddress': 0x45, 'numberElements': 4, 'description': "pressure armband - left arm" }
+newActuator = { 'id': 5, 'baseAddress': 0x46, 'numberElements': 4, 'description': "pressure armband - right arm" }
+newActuator = { 'id': 6, 'baseAddress': 0x47, 'numberElements': 5, 'description': "electro stimuation pads" }
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+sm 3 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '3', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 10 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '10', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 20 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '20', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 vib six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'vib', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 1 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '1', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 1 30 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '1', value = '30', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 1 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '1', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 6 elec six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '6', value = 'elec', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 3 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '3', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 0 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '0', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 6 1 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '6', value = '1', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 6 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '6', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+si 3 255 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '3', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+LIST six/0.1
+DEBUG: parsedRequest = { command = 'list', id = '0', value = '', packetVersion = '0.1' }
+200 OK SIX/0.1
+id: 0
+bus address: 41
+description: vibration armband - left arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 1
+bus address: 42
+description: vibration armband - right arm
+active: false
+number elements: 8
+actuator type: vibration band
+
+id: 2
+bus address: 43
+description: peltier sleeve - left arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 3
+bus address: 44
+description: peltier sleeve - right arm
+active: false
+number elements: 4
+actuator type: temperature sleeve
+
+id: 4
+bus address: 45
+description: pressure armband - left arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 5
+bus address: 46
+description: pressure armband - right arm
+active: false
+number elements: 4
+actuator type: pressure band
+
+id: 6
+bus address: 47
+description: electro stimuation pads
+active: false
+number elements: 5
+actuator type: electric stimulation pads
+
+
+
+sm 3 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '3', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 5 press six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '5', value = 'press', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 5 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '5', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 5 40 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '5', value = '40', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 5 OFF six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '5', value = 'OFF', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sm 5 press six/0.1
+DEBUG: parsedRequest = { command = 'set mode', id = '5', value = 'press', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+sp 5 255 six/0.1
+DEBUG: parsedRequest = { command = 'set parameter', id = '5', value = '255', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+
+si 5 50 six/0.1
+DEBUG: parsedRequest = { command = 'set intensity', id = '5', value = '50', packetVersion = '0.1' }
+200 OK SIX/0.1
+
+

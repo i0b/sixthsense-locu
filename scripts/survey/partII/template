@@ -1,9 +1,5 @@
-#!/bin/bash
-
 PARTICIPANT_NUMBER="$1"
-PORT="$2"
-
-TTY="$(tty)"
+source config
 
 PARAMETER="255"
 
@@ -11,8 +7,6 @@ INTENSITY1="0"
 INTERVAL1="0"
 INTENSITY2="0"
 INTERVAL2="0"
-
-STATISTIC_LOG="statistic."$PARTICIPANT_NUMBER".log"
 
 function loadIntensity {
   declare -a 'values=('"$1"')'
@@ -24,10 +18,15 @@ function loadIntensity {
 }
 
 function applyValues {
+  echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
+  echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
+
   echo "si $ACTUATOR $INTENSITY1 six/0.1" > $PORT
   sleep "$INTERVAL1"
   echo "si $ACTUATOR $INTENSITY2 six/0.1" > $PORT
   sleep "$INTERVAL2"
+
+  echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }
 
 function runBatchFile {
@@ -54,10 +53,8 @@ function runBatchFile {
 }
 
 function runStatistic {
-  echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
-  echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
-
   date >> $STATISTIC_LOG
+  echo $ACTYATOR_TYPE >> $STATISTIC_LOG
 
   echo "calibration phase: you will feel different values of the actuator and be given the set number"
   read -n1 -p "press a key to begin" start

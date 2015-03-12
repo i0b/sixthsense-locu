@@ -1,0 +1,23 @@
+source template
+
+START_TIME="$(date +%s)"
+
+function intensityStep {
+  INTENSITY=255
+#  let "INTENSITY<<=1"
+#  let "INTENSITY+=1"
+}
+
+function intensityKeypress {
+  intensityStep
+
+  echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
+  read -n1 enough
+}
+
+function logStatistic {
+  echo "$1 $(($(date +%s) - $START_TIME))s" >> $STATISTIC_LOG
+  echo "LIST six/0.1" > $PORT
+  sleep $LIST_TIMEOUT
+  grep "peltier value" $COMMAND_LOG | tail -n4 >> $STATISTIC_LOG
+}

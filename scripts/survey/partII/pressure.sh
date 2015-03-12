@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source template.sh
+source template
 
 ACTYATOR_TYPE="pressure"
 ACTUATOR_MODE="press"

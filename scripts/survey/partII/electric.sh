@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source template.sh
+source template
 
 ACTYATOR_TYPE="electric"
 ACTUATOR_MODE="elec"

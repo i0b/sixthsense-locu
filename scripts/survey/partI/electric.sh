@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source template.sh
+source template
 
 ACTYATOR_TYPE="electric"
 ACTUATOR_MODE="elec"
@@ -46,6 +46,7 @@ function intensityKeypress {
 
 }
 
+#init the actuator - set to right value blinking cursor, ready to press $UP
 echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
 echo "si $ACTUATOR $UP six/0.1" > $PORT
 echo "si $ACTUATOR $RIGHT six/0.1" > $PORT

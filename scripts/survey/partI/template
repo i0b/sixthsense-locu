@@ -1,17 +1,9 @@
-#!/bin/bash
-
 PARTICIPANT_NUMBER="$1"
-PORT="$2"
+source config
 
 TIMEOUT="3"
-
 INTENSITY="0"
-
 PARAMETER="255"
-
-COMMAND_LOG="command."$PARTICIPANT_NUMBER".log"
-STATISTIC_LOG="statistic."$PARTICIPANT_NUMBER".log"
-
 
 function intensityStep {
   let "INTENSITY+=10"
@@ -23,12 +15,15 @@ function intensityKeypress {
   while [ "$readChar" -ne "0" ] && [ "$INTENSITY" -lt "$ACTUATOR_MAX" ]; do
     intensityStep
 
+    echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
+    echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
+
     echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
     #read -n1 -t $TIMEOUT -p "$INTENSITY >> " enough
     read -n1 -t $TIMEOUT enough
     readChar=$?
 
-    echo "si $ACTUATOR 0 six/0.1" > $PORT
+    echo "sm $ACTUATOR OFF six/0.1" > $PORT
 
     if [ "$readChar" -eq "0" ]; then
       break
@@ -39,28 +34,28 @@ function intensityKeypress {
 }
 
 function logStatistic {
-  echo "$ACTYATOR_TYPE $1 $INTENSITY" >> $STATISTIC_LOG
+  echo "$1 $INTENSITY" >> $STATISTIC_LOG
 }
 
-#function logCommands {
-#}
-
 function runStatistic {
-  #logCommands
+  echo -e "$ACTYATOR_TYPE" >> $STATISTIC_LOG
+  echo "-------------------------------------" >> $STATISTIC_LOG
 
-  echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
-  echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
-
-  date >> $STATISTIC_LOG
-  read -n1 -p "press a key if actuator value was noticable" start
+  read -n1 -p "press any key to start" start
+  echo -e "\npress any key as soon as you start feeling the actuator"
 
   intensityKeypress
   logStatistic "min:"
 
-  read -n1 -p "press a key if actuator value was unpleasant" cont
+  echo "okay, thank you!"
+  read -n1 -p "press any key to continue" cont
+  echo -e "\npress any key as  soon  as you consider the sensation of"
+  echo "the actuator unpleasant"
 
   intensityKeypress
   logStatistic "max:"
+
+  echo -e "\n\n" >> $STATISTIC_LOG
 
   echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }

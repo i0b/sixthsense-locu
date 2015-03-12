@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source template.sh
+source temperature
 
 ACTYATOR_TYPE="temperature.hot"
 ACTUATOR_MODE="temp"
