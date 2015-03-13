@@ -13,8 +13,14 @@ LEFT="2"
 RIGHT="3"
 
 function applyValues {
+  echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
+
   intensity="0"
 
+  if [ "$1" == "showValues" ]; then
+    echo "Intensity: $INTENSITY1" > $TTY
+  fi
+              
   while [ $intensity -lt $INTENSITY1 ]; do
     echo "si $ACTUATOR $UP six/0.1" > $PORT
     sleep "$SLEEP_TIME"
@@ -25,6 +31,10 @@ function applyValues {
 
   difference=$(($INTENSITY2-$INTENSITY1))
 
+  if [ "$1" == "showValues" ]; then
+    echo "Intensity: $INTENSITY2" > $TTY
+  fi
+              
   if [ "$difference" -gt "0" ]; then
     while [ $intensity -lt $INTENSITY2 ]; do
       echo "si $ACTUATOR $UP six/0.1" > $PORT
@@ -46,6 +56,8 @@ function applyValues {
     sleep "$SLEEP_TIME"
     let intensity-=1
   done
+
+  echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }
 
 runStatistic

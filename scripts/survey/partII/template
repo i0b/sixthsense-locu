@@ -1,4 +1,6 @@
+PART="partII"
 PARTICIPANT_NUMBER="$1"
+
 source config
 
 PARAMETER="255"
@@ -7,6 +9,8 @@ INTENSITY1="0"
 INTERVAL1="0"
 INTENSITY2="0"
 INTERVAL2="0"
+
+SHOW_VALUES="yes"
 
 function loadIntensity {
   declare -a 'values=('"$1"')'
@@ -21,8 +25,18 @@ function applyValues {
   echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
   echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
 
+  if [ "$1" == "showValues" ]; then
+    echo "Intensity: $INTENSITY1" > $TTY
+  fi
+
   echo "si $ACTUATOR $INTENSITY1 six/0.1" > $PORT
   sleep "$INTERVAL1"
+
+
+  if [ "$1" == "showValues" ]; then
+    echo "Intensity: $INTENSITY2" > $TTY
+  fi
+
   echo "si $ACTUATOR $INTENSITY2 six/0.1" > $PORT
   sleep "$INTERVAL2"
 
@@ -33,19 +47,15 @@ function runBatchFile {
   while read line; do
     loadIntensity "$line"
 
-    applyValues
-
-    if [ "$1" == "showValues" ]; then
-      echo "Interval changed from" $INTENSITY1 "to" $INTENSITY2
-    fi
+    applyValues $1
 
     if [ "$1" == "test" ]; then
       echo "please enter the intensity levels you felt"
       read -p "first value: " firstValue  < $TTY
       read -p "second value: " secondValue < $TTY
 
-      echo "actual  values:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
-      echo "guessed values:" $firstValue "to" $secondValue >> $STATISTIC_LOG
+      echo "correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
+      echo -e "guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
     fi
 
     read -n1 -p "press a key to continue" start < $TTY
@@ -53,20 +63,24 @@ function runBatchFile {
 }
 
 function runStatistic {
-  date >> $STATISTIC_LOG
-  echo $ACTYATOR_TYPE >> $STATISTIC_LOG
+  echo -e "$ACTYATOR_TYPE" >> $STATISTIC_LOG
+  echo "-------------------------------------" >> $STATISTIC_LOG
 
-  echo "calibration phase: you will feel different values of the actuator and be given the set number"
-  read -n1 -p "press a key to begin" start
+  echo -e "\ncalibration phase: you will feel two stimulation  levels"
+  echo -e "    of the actuator. The values will appear accordingly.\n"
+  read -n1 -p "press any key to start" start
+
   for CALIBRATE_FLE in execution/$ACTYATOR_TYPE/calibrate*.txt; do
+    echo "Ask the supervisors what $CALIBRATE_FLE means ;)"
     runBatchFile "showValues" $CALIBRATE_FLE
   done
 
-  echo "test phase: please first try to feel start and end value, then enter what value you have felt"
-  read -n1 -p "press a key to begin" start
+  echo -e "\ntest phase: please first try to  feel the start  and end"
+  echo "        level of stimmulation, then enter the values you"
+  echo -e "        think you have felt.\n"
+  read -n1 -p "press any key to start" start
+
   for TEST_FLIE in execution/$ACTYATOR_TYPE/test*.txt; do
     runBatchFile "test" $TEST_FLIE
   done
-
-  echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }

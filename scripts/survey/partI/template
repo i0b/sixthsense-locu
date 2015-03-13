@@ -1,4 +1,6 @@
+PART="partI"
 PARTICIPANT_NUMBER="$1"
+
 source config
 
 TIMEOUT="3"

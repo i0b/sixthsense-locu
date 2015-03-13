@@ -3,16 +3,19 @@ source template
 START_TIME="$(date +%s)"
 
 function intensityStep {
-  INTENSITY=255
-#  let "INTENSITY<<=1"
-#  let "INTENSITY+=1"
+  echo ""
 }
 
 function intensityKeypress {
   intensityStep
 
+  echo "sm $ACTUATOR $ACTUATOR_MODE six/0.1" > $PORT
+  echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
   echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
+
   read -n1 enough
+
+  echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }
 
 function logStatistic {

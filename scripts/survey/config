@@ -1,5 +1,6 @@
 PORT="/dev/ttyACM0"
 SPEED="57600"
-COMMAND_LOG="log/command/"$PARTICIPANT_NUMBER".log"
-STATISTIC_LOG="log/statistic/"$PARTICIPANT_NUMBER".log"
+
+COMMAND_LOG="../log/"$PART"/command/"$PARTICIPANT_NUMBER".log"
+STATISTIC_LOG="../log/"$PART"/statistic/"$PARTICIPANT_NUMBER".log"
 TTY="$(tty)"
