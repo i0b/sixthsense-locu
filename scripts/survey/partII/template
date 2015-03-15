@@ -27,7 +27,7 @@ function applyValues {
   echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
 
   if [ "$1" == "showValues" ]; then
-    echo "Intensity: $INTENSITY1" > $TTY
+    echo "Intensitaet: $INTENSITY1" > $TTY
   fi
 
   echo "si $ACTUATOR $INTENSITY1 six/0.1" > $PORT
@@ -35,7 +35,7 @@ function applyValues {
 
 
   if [ "$1" == "showValues" ]; then
-    echo "Intensity: $INTENSITY2" > $TTY
+    echo "Intensitaet: $INTENSITY2" > $TTY
   fi
 
   echo "si $ACTUATOR $INTENSITY2 six/0.1" > $PORT
@@ -47,7 +47,7 @@ function applyValues {
 function printResolution {
   RESOLUTION=$(echo $1 | sed -e 's/.*_\([0-9]*\).txt/\1/g')
   if [ -n $RESOLUTION ]; then
-    echo "you will feel a resolution of $RESOLUTION now"
+    echo "Sie werden nun eine Aufloesung von $RESOLUTION spueren"
   fi
 }
 
@@ -58,16 +58,16 @@ function runBatchFile {
     applyValues $1
 
     if [ "$1" == "test" ]; then
-      echo "please enter the intensity levels you felt"
-      read -p "first value: " firstValue  < $TTY
-      read -p "second value: " secondValue < $TTY
+      echo "Bitte geben Sie das Intensitaets-Level ein, das Sie gefuehlt haben."
+      read -p "Erster Wert: " firstValue  < $TTY
+      read -p "Zweiter Wert: " secondValue < $TTY
 
       let SEQUENCE_NUMBER+=1
       echo "$#SEQUENCE_NUMBER correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
       echo -e "#SEQUENCE_NUMBER guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
     fi
 
-    read -n1 -p "press a key to continue" start < $TTY
+    read -n1 -p "Druecken Sie eine beliebige Taste, um fortzufahren" start < $TTY
   done <$2
 }
 
@@ -75,9 +75,10 @@ function runStatistic {
   echo -e "$ACTYATOR_TYPE" >> $STATISTIC_LOG
   echo "-------------------------------------" >> $STATISTIC_LOG
 
-  echo -e "\ncalibration phase: you will feel two stimulation  levels"
-  echo -e "    of the actuator. The values will appear accordingly.\n"
-  read -n1 -p "press any key to start" start
+  echo -e "\nKalibrierungs-Phase: Sie werden zwei verschiedene Level"
+  echo -e "    an Stimulation auf dem Aktuator fuehlen. Die Werte werden"
+  echo -e "    Ihnen dabei jeweils angezeigt.\n"
+  read -n1 -p "Druecken Sie einen beliebige Taste, um zu beginnen" start
 
   for CALIBRATE_FILE in execution/$ACTYATOR_TYPE/calibrate*.txt; do
     printResolution $CALIBRATE_FILE
@@ -85,10 +86,10 @@ function runStatistic {
     runBatchFile "showValues" $CALIBRATE_FILE
   done
 
-  echo -e "\ntest phase: please first try to  feel the start  and end"
-  echo "        level of stimmulation, then enter the values you"
-  echo -e "        think you have felt.\n"
-  read -n1 -p "press any key to start" start
+  echo -e "\nTest-Phase: Bitte versuchen Sie, den Start und End-Wert"
+  echo "        der Stimulation zu fuehlen. Geben Sie dann die Werte"
+  echo -e "        ein, die Sie denken gefuehlt zu haben.\n"
+  read -n1 -p "Druecken Sie eine beliebige Taste, um zu beginnen" start
 
   for TEST_FILE in execution/$ACTYATOR_TYPE/test*.txt; do
     printResolution $TEST_FILE

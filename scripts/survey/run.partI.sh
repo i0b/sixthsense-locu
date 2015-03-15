@@ -20,47 +20,46 @@ function stopLog {
 
 clear
 
-echo "Welcome to the sixthsense survey"
+echo "Herzlich willkommen bei der sixthsense Studie!"
 echo "--------------------------------------------------------"
-read -p "please enter your participant number: " PARTICIPANT_NUMBER
+read -p "Bitte geben Sie Ihre Probanden-Nummer ein: " PARTICIPANT_NUMBER
 source config
 
 #---------------------------------------------------
 #----------------    PART I    ---------------------
 #---------------------------------------------------
 
-echo -e "\nPART I"
-echo "Welcome to PART I of our survey. We will test  different"
-echo "actuators on you.  On this first test,  you only need to"
-echo "tell us,if and when you can feel an actuator and whether"
-echo "it ever feels  unpleasent.  For that  the actuators will"
-echo "increase the level of stimulation over time. In case you"
-echo "have any questions, pease do  not  hesitate to ask them."
+echo -e "\nTEIL 1"
+echo "Willkommen beim TEIL 1 unserer Studie. Wir werden verschiedene"
+echo "Akuatoren mit Ihnen testen. In diesem ersten Test muessen Sie uns"
+echo "lediglich mitteilen, ob und wann Sie etwas fuehlen und ob es sich"
+echo "unangenehm anfuehlt.  Wir werden dazu das Intensitaets-Level der"
+echo "Aktuatoren nach und nach erhoehen."
 
 cd partI
 startLog "partI"
 
-echo -e "\nactuator: temperature hot"
+echo -e "\nAktuator: Temperatur (warm)"
 ./temperature.hot.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: vibration"
+echo -e "\nAktuator: Vibration"
 ./vibration.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: electric"
+echo -e "\nAktuator: Elektrisch"
 ./electric.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: temperature cold"
+echo -e "\nAktuator: Temperatur (kalt)"
 ./temperature.cold.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: pressure"
+echo -e "\nAktuator: Druck"
 ./pressure.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
 stopLog
 cd ..
-echo -e "\n\nGreat, you finished PART I.\n\n"
+echo -e "\n\nVielen Dank! Sie haben TEIL 1 beendet.\n\n"
 

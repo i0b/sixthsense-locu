@@ -20,9 +20,9 @@ function stopLog {
 
 clear
 
-echo "Welcome to the sixthsense survey"
+echo "Herzlich willkommen bei der sixthsense Studie!"
 echo "--------------------------------------------------------"
-read -p "please enter your participant number: " PARTICIPANT_NUMBER
+read -p "Bitte geben Sie Ihre Probanden-Nummer ein: " PARTICIPANT_NUMBER
 source config
 
 #---------------------------------------------------
@@ -30,47 +30,51 @@ source config
 #---------------------------------------------------
 
 echo "--------------------------------------------------------"
-echo -e "PART II\n"
+echo -e "TEIL 2\n"
 echo "--------------------------------------------------------"
-echo "Now, we  want  to  test  how good you can  differentiate"
-echo "different levels  of  stimulation. The actuators are all"
-echo "going to be tested. Each test consists of two steps:"
-echo "1) calibration: You will  feel  the actuator change from"
-echo "                one   level  of  stimulation  to another"
-echo "                while the  values  will be  presented on"
-echo "                the screen at the same time.  Please try"
-echo "                to remember the feeling of each level."
-echo "2) test: You will feel the actuators' stimmulation level"
-echo "         change from one to another,  but you  will  NOT"
-echo "         see any values. Instead you need to type in the"
-echo "         start and end value you think you felt."
+echo "Jetzt wollen wir testen, wie gut Sie verschiedene Stufen"
+echo "an Stimulationen unterscheiden koennen.  Dazu werden wir"
+echo "die Aktuatoren der Reihe nach testen. Jeder Test besteht"
+ehco "aus zwei Schritten:"
+echo "1) Kalibrierung: Sie werden fuehlen, wie der Aktuator von"
+echo "                 einem Intensitaets-Level zu einem anderen"
+echo "                 wechselt."
+echo "                 Die Intensitaets-Level werden Ihnen dazu"
+echo "                 jeweils auf dem Bildschirm angezeigt."
+echo " "
+echo "2) Test: Sie werden fuehlen, wie der Aktuator von einem"
+echo "         Intensitaets-Level zu einem anderen wechselt."
+echo "         Dieses Mal werden Ihnen die Werte aber nicht"
+echo "         angezeigt, stattdessen muessen Sie raten und"
+echo "         dazu den ersten und zweiten Wert, den Sie gefuehlt 
+echo "         haben, eingeben."
 
-echo -e "\nIf you have any questions, ask them right away."
+echo -e "\nFalls Sie Fragen haben, koennen Sie diese nun gerne stellen."
 
 echo "--------------------------------------------------------"
 
 cd partII
 startLog "partII"
 
-echo -e "\nactuator: temperature hot"
+echo -e "\nAktuator: Temperatur (warm)"
 ./temperature.hot.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: vibration"
+echo -e "\nAktuator: Vibration"
 ./vibration.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: electric"
-read -p "what was your maximum electro stimulation value?" maxElectro
-echo -e "okay, we will not go over this limit!\n"
+echo -e "\nAktuator: Elektrisch"
+read -p "Was war ihr maximaler Elektrische-Stimulation Wert?" maxElectro
+echo -e "Okay, wir werden keine Werte ueber diesem Limit testen!\n"
 ./electric.sh "$PARTICIPANT_NUMBER" "$maxElectro"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: temperature cold"
+echo -e "\nAktuator: Temperatur (kalt)"
 ./temperature.cold.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
-echo -e "\nactuator: pressure"
+echo -e "\nAktuator: Druck"
 ./pressure.sh "$PARTICIPANT_NUMBER"
 echo "--------------------------------------------------------"
 
