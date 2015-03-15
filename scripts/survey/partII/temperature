@@ -18,7 +18,10 @@ function applyValues {
 
   if [ "$1" == "showValues" ]; then
     echo "Intensity: $INTENSITY1" > $TTY
+  else
+    echo "#$SEQUENCE_NUMBER" > $TTY
   fi
+
   echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
   sleep "$INTERVAL1"
 

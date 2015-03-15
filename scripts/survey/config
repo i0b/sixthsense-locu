@@ -3,4 +3,31 @@ SPEED="57600"
 
 COMMAND_LOG="../log/"$PART"/command/"$PARTICIPANT_NUMBER".log"
 STATISTIC_LOG="../log/"$PART"/statistic/"$PARTICIPANT_NUMBER".log"
+SEQUENCE_FILE="../log/"$PART"/"$PARTICIPANT_NUMBER".seq.log"
+
 TTY="$(tty)"
+
+function startLog {
+  PART=$1
+  source config
+
+  stty -F $PORT -brkint -icrnl -imaxbel -opost -isig -icanon -iexten -echo $SPEED
+
+  for pid in $(ps u | grep "cat $PORT" | awk '{ print $2 }'); do
+    kill $pid &> /dev/null
+  done
+
+  cat $PORT >> $COMMAND_LOG&
+  LOG_PID=$!
+}
+
+function stopLog {
+  kill $LOG_PID &> /dev/null
+}
+
+function executeScript {
+  ACTUATOR=${1/\./ }
+  echo -e "\nactuator: $ACTUATOR"
+  eval "./$1\.sh" "$PARTICIPANT_NUMBER" $2 $3
+  echo "--------------------------------------------------------"
+}

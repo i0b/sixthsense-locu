@@ -1,5 +1,6 @@
 PART="partII"
 PARTICIPANT_NUMBER="$1"
+START_SEQUENCE_NUMBER="$3"
 SEQUENCE_NUMBER="0"
 
 source config
@@ -12,6 +13,19 @@ INTENSITY2="0"
 INTERVAL2="0"
 
 SHOW_VALUES="yes"
+
+function readSequenceNumber {
+  if [ -e $SEQUENCE_FILE ]; then
+    SEQUENCE_NUMBER=$(cat $SEQUENCE_FILE)
+  else
+    SEQUENCE_NUMBER="0"
+  fi
+}
+
+function incSequenceNumber {
+  let SEQUENCE_NUMBER+=1
+  echo $SEQUENCE_NUMBER > $SEQUENCE_FILE
+}
 
 function loadIntensity {
   declare -a 'values=('"$1"')'
@@ -28,6 +42,8 @@ function applyValues {
 
   if [ "$1" == "showValues" ]; then
     echo "Intensity: $INTENSITY1" > $TTY
+  else
+    echo "#$SEQUENCE_NUMBER" > $TTY
   fi
 
   echo "si $ACTUATOR $INTENSITY1 six/0.1" > $PORT
@@ -45,43 +61,53 @@ function applyValues {
 }
 
 function printResolution {
-  RESOLUTION=$(echo $1 | sed -e 's/.*_\([0-9]*\).txt/\1/g')
-  if [ -n $RESOLUTION ]; then
+  RESOLUTION=$(sed -ne 's/.*_\([0-9]*\).txt/\1/p' <<< $1)
+
+  if [ -n "$RESOLUTION" ]; then
     echo "you will feel a resolution of $RESOLUTION now"
   fi
 }
 
 function runBatchFile {
-  while read line; do
+  while read -u 6 line; do
     loadIntensity "$line"
 
-    applyValues $1
+    readSequenceNumber
 
-    if [ "$1" == "test" ]; then
-      echo "please enter the intensity levels you felt"
-      read -p "first value: " firstValue  < $TTY
-      read -p "second value: " secondValue < $TTY
+    if [ -z $START_SEQUENCE_NUMBER ] || [ "$START_SEQUENCE_NUMBER" -le "$SEQUENCE_NUMBER" ]; then
+      applyValues $1
 
-      let SEQUENCE_NUMBER+=1
-      echo "$#SEQUENCE_NUMBER correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
-      echo -e "#SEQUENCE_NUMBER guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
+      if [ "$1" == "test" ]; then
+        echo "please enter the intensity levels you felt"
+        read -p "first value: " firstValue  < $TTY
+        read -p "second value: " secondValue < $TTY
+
+        echo "$SEQUENCE_NUMBER correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
+        echo -e "$SEQUENCE_NUMBER guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
+      fi
+
+      echo -e "\n"
+      read -n1 -p "press a key to continue" start < $TTY
+      echo -e "\n"
     fi
 
-    read -n1 -p "press a key to continue" start < $TTY
-  done <$2
+    if [ "$1" == "test" ]; then
+      incSequenceNumber
+    fi
+  done 6<$2
 }
 
 function runStatistic {
-  echo -e "$ACTYATOR_TYPE" >> $STATISTIC_LOG
+  echo -e "$ACTUATOR_TYPE" >> $STATISTIC_LOG
   echo "-------------------------------------" >> $STATISTIC_LOG
 
   echo -e "\ncalibration phase: you will feel two stimulation  levels"
   echo -e "    of the actuator. The values will appear accordingly.\n"
   read -n1 -p "press any key to start" start
+  echo -e "\n"
 
-  for CALIBRATE_FILE in execution/$ACTYATOR_TYPE/calibrate*.txt; do
+  for CALIBRATE_FILE in execution/$ACTUATOR_TYPE/calibrate*.txt; do
     printResolution $CALIBRATE_FILE
-    echo "Ask the supervisors what $CALIBRATE_FILE means ;)"
     runBatchFile "showValues" $CALIBRATE_FILE
   done
 
@@ -89,8 +115,9 @@ function runStatistic {
   echo "        level of stimmulation, then enter the values you"
   echo -e "        think you have felt.\n"
   read -n1 -p "press any key to start" start
+  echo -e "\n"
 
-  for TEST_FILE in execution/$ACTYATOR_TYPE/test*.txt; do
+  for TEST_FILE in execution/$ACTUATOR_TYPE/test*.txt; do
     printResolution $TEST_FILE
     runBatchFile "test" $TEST_FILE
   done
