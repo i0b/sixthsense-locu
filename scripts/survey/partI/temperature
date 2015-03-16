@@ -13,7 +13,7 @@ function intensityKeypress {
   echo "sp $ACTUATOR $PARAMETER six/0.1" > $PORT
   echo "si $ACTUATOR $INTENSITY six/0.1" > $PORT
 
-  read -n1 enough
+  read -n1 -t $CONTINUE_TIMEOUT enough
 
   echo "sm $ACTUATOR OFF six/0.1" > $PORT
 }

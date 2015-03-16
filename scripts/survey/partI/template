@@ -44,14 +44,14 @@ function runStatistic {
   echo -e "$ACTYATOR_TYPE" >> $STATISTIC_LOG
   echo "-------------------------------------" >> $STATISTIC_LOG
 
-  read -n1 -t $CONTINUE_TIMEOUT -p "press any key to start" start
+  read -n1 -p "press any key to start" start
   echo -e "\npress any key as soon as you start feeling the actuator"
 
   intensityKeypress
   logStatistic "min:"
 
   echo "okay, thank you!"
-  read -n1 -t $CONTINUE_TIMEOUT -p "press any key to continue" cont
+  read -n1 -p "press any key to continue" cont
   echo -e "\npress any key as  soon  as you consider the sensation of"
   echo "the actuator unpleasant"
 
