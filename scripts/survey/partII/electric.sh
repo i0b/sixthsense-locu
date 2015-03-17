@@ -20,6 +20,8 @@ function applyValues {
 
   if [ "$1" == "showValues" ]; then
     echo "Intensity: $INTENSITY1" > $TTY
+  else
+    echo "#$SEQUENCE_NUMBER" > $TTY
   fi
               
   while [ $intensity -lt $INTENSITY1 ]; do
@@ -68,8 +70,6 @@ function runBatchFile {
     readSequenceNumber
 
     if [ -z $START_SEQUENCE_NUMBER ] || [ "$START_SEQUENCE_NUMBER" -le "$SEQUENCE_NUMBER" ]; then
-      applyValues $1
-
       echo $line | grep "[0-$MAX_STIMULATION] .* [0-$MAX_STIMULATION] .*" &> /dev/null
 
       if [ "$?" -eq "0" ]; then
@@ -80,15 +80,17 @@ function runBatchFile {
           read -p "first value: " firstValue  < $TTY
           read -p "second value: " secondValue < $TTY
 
-          echo "$#SEQUENCE_NUMBER correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
-          echo -e "#SEQUENCE_NUMBER guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
+          echo "#$SEQUENCE_NUMBER { correct:" $INTENSITY1 "to" $INTENSITY2 "}" >> $STATISTIC_LOG
+          echo -e "#$SEQUENCE_NUMBER { guessed:" $firstValue "to" $secondValue "}\n" >> $STATISTIC_LOG
         fi
 
         read -n1 -p "press a key to continue" start < $TTY
       fi
     fi
 
-    incSequenceNumber
+    if [ "$1" == "test" ]; then
+      incSequenceNumber
+    fi
 
   done 7<$2
 }

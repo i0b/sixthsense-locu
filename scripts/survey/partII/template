@@ -82,8 +82,8 @@ function runBatchFile {
         read -p "first value: " firstValue  < $TTY
         read -p "second value: " secondValue < $TTY
 
-        echo "$SEQUENCE_NUMBER correct:" $INTENSITY1 "to" $INTENSITY2 >> $STATISTIC_LOG
-        echo -e "$SEQUENCE_NUMBER guessed:" $firstValue "to" $secondValue "\n" >> $STATISTIC_LOG
+        echo "#$SEQUENCE_NUMBER { correct :" $INTENSITY1 "to" $INTENSITY2 "}" >> $STATISTIC_LOG
+        echo -e "#$SEQUENCE_NUMBER { guessed:" $firstValue "to" $secondValue "}\n" >> $STATISTIC_LOG
       fi
 
       echo -e "\n"
