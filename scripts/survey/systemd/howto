@@ -1,0 +1,5 @@
+put files "backup.path" and "backup.service" in "~/.config/systemd/user/"
+
+call:
+systemctl --user start backup.path
+systemctl --user enable backup.path

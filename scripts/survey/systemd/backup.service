@@ -1,0 +1,5 @@
+[Unit]
+Description=Backs up log files
+
+[Service]
+ExecStart=/usr/bin/rsync -e ssh -Crt --delete %h/./log/partI/statistic/ leo@i0b.de:~/log/statistic/partI

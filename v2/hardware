@@ -1,0 +1,93 @@
+Controlling Unit
+-------------------------
+Function:       Controlling Microcontroller Board
+Element:        Arduino Mega 2560
+Product Link:   http://arduino.cc/en/Main/arduinoBoardMega2560)
+
+
+Function:       Controlling Unit Shield - connect controller with armband modules
+Element:        self designed PCB with connectors to connect armband modules and 
+                Bluetooth interface for connection to the smartphone 
+                (Higher Order Controll Unit) device
+  Shield PCB
+  Details:        see pcb file
+
+  Bluetooth Interface
+  Element:        Red Bear Lab BLE Mini (Bluetooth Low Energy)
+  Product Link:   http://redbearlab.com/blemini/
+  Chip Datasheet: https://redbearlab.com/s/RBT01BLEModulev10.pdf
+
+
+Vibration
+-------------------------
+Name:           Module Controller[1]
+
+Function:       Vibration Motor Controller
+Element:        ULN2803 Darlington Array
+Chip Datasheet: ToDo
+Details:        see the pcb file for board layout
+
+Function:       Vibration Element
+Element:        Pololu Shaftless Vibration Motor 10x2.0mm
+Product Link:   https://www.pololu.com/product/1638
+Details:        see website
+
+
+
+Pressure
+-------------------------
+Name:           Module Controller[1]
+
+Function:       Pressure Element
+Element:        Vktech MG90S Servo
+Shop Link:      http://www.amazon.de/gp/product/B001IQ0L2M
+Datasheet:      http://www.electronicoscaldas.com/datasheet/MG90S_Tower-Pro.pdf
+
+
+Temperature
+-------------------------
+Name:           Module Controller[1]
+
+Function:       Temperature Stimulation Element
+Element:        Vktech TEC1-12706 Peltier
+Shop Link:      http://www.amazon.de/gp/product/B00J5BKU0A
+Datasheet:      www.hebeiltd.com.cn/peltier.datasheet/TEC1-12706.pdf
+
+Function:       Peltier Controller
+Element:        DC Dual Motor Driver 30V 4A v2
+Product Link:   http://www.microbot.it/en/product/73/DC-Dual-Motor-Driver-30V-4A-V2.html
+H-Bridge Chip:  L298
+Chip Datasheet: http://www.st.com/web/en/resource/technical/document/datasheet/CD00000240.pdf
+
+Function:       Temperature Sensore
+Element:        InLine Temperature Sensor / NTC 10kOhm
+Shop Link:      http://www.amazon.de/gp/product/B001IQ0L2M
+
+Function:       Temperature Digitalzation
+Element:        Adafruit ADS1115 16-Bit ADC
+Product Link:   https://www.adafruit.com/products/1085
+I2C ADC Chip:   ADS1115
+Chip Datasheet: http://www.adafruit.com/datasheets/ads1115.pdf
+
+
+
+Electro
+-------------------------
+Name:           Module Controller[1]
+
+Function:       Electric Stimulation Controller
+Element:        prorelax TENS+EMO DUO
+Product Link:   http://www.prorelax.com/produkte/tens_ems_duo.html
+User Manual:    http://www.prorelax.com/Neue_Dateien/manuale/tens_ems_duo/EUM_PRORELAX_TENS_EMS_DUO_Manual_EN.pdf
+
+Function:       Electric Stimulation Pads
+Element:        Axion TENS/EMS Elektroden
+Product Link:   https://tens-ems.com/tens-elektroden/elektroden-5x5-cm-20-stueck
+
+
+(1) Module Controller
+-------------------------
+Name:           Adafruit 16-Channel 12-bit PWM/Servo Driver
+Product Link:   http://www.adafruit.com/products/815
+I2C PWM Chip:   PCA9685
+Chip Datasheet: http://www.adafruit.com/datasheets/PCA9685.pdf
